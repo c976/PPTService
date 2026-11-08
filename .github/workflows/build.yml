@@ -3,8 +3,7 @@ name: Build and Release PPTService
 on:
   push:
     branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build-and-release:
@@ -17,31 +16,61 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # 编译解决方案中的所有项目 (Release)，目标框架 .NET Framework 4.5
+    # 修复 .NET Framework 4.5 引用程序集缺失 (解决 MSB3644 错误)
+    - name: Inject .NET Framework 4.5 Reference Assemblies
+      shell: pwsh
+      run: |
+        $net45SdkUrl = 'https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3'
+        $sdkSystemPath = 'C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework'
+        $tempZip = Join-Path $env:TEMP 'net45sdk.zip'
+        $tempExtract = Join-Path $env:TEMP 'net45sdk'
+        
+        Write-Host "Downloading .NET 4.5 Reference Assemblies..."
+        Invoke-WebRequest -Uri $net45SdkUrl -OutFile $tempZip
+        
+        Write-Host "Extracting..."
+        Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+        
+        Write-Host "Moving to system directory..."
+        $v45Path = Join-Path $sdkSystemPath 'v4.5'
+        if (Test-Path $v45Path) {
+            Remove-Item -Path $v45Path -Recurse -Force
+        }
+        
+        $sourcePath = Join-Path $tempExtract 'build\.NETFramework\v4.5'
+        Move-Item -Path $sourcePath -Destination $sdkSystemPath -Force
+        Write-Host "Successfully injected .NET 4.5 Reference Assemblies."
+
+    # 编译解决方案
     - name: Build solution (Release)
       run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
 
-    # 下载 NSIS 并解压，将 makensis.exe 所在目录添加到 PATH
-    - name: Download and setup NSIS
-      shell: powershell
+    # 下载 NSIS 并将其添加到 PATH
+    - name: Download and Setup NSIS
+      shell: pwsh
       run: |
-        $url = "https://prdownloads.sourceforge.net/nsis/nsis-3.13.zip"
-        $zip = "$env:RUNNER_TEMP\nsis.zip"
-        $dest = "$env:RUNNER_TEMP\nsis"
-        Invoke-WebRequest -Uri $url -OutFile $zip
-        Expand-Archive -Path $zip -DestinationPath $dest -Force
-        # NSIS 压缩包内包含 makensis.exe 的目录（通常根目录或 Bin 子目录）需加入 PATH
-        echo "$dest" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        echo "$dest\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        $nsisUrl = "https://prdownloads.sourceforge.net/nsis/nsis-3.10.zip"
+        $zipPath = "$env:RUNNER_TEMP\nsis.zip"
+        $extractPath = "$env:RUNNER_TEMP\nsis"
+        
+        Write-Host "Downloading NSIS..."
+        Invoke-WebRequest -Uri $nsisUrl -OutFile $zipPath
+        
+        Write-Host "Extracting NSIS..."
+        Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+        
+        Write-Host "Adding NSIS to PATH..."
+        echo "$extractPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "$extractPath\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    # 运行 setup 目录下的 build.cmd，内部调用 makensis.exe 编译 NSIS 脚本
+    # 运行打包脚本
     - name: Run build.cmd (NSIS)
       shell: cmd
       run: |
         cd setup
         call build.cmd
 
-    # 将生成的安装包发布到 GitHub Release，标签为 latest
+    # 仅发布指定的安装包到 Release
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       with:
@@ -50,9 +79,6 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          setup/PPTService.exe
-          setup/PPTService_Setup.exe
-          setup/*.exe
-          setup/Output/*.exe
+          ./setup/PPTServiceSetup.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
