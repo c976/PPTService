@@ -61,15 +61,14 @@ jobs:
         cd setup
         call build.cmd
 
-    # 仅将指定的安装包发布到 GitHub Release (latest)
-    - name: Upload Release Asset
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: latest
-        name: Latest Release
-        draft: false
-        prerelease: false
-        files: |
-          ./setup/PPTServiceSetup.exe
+    - name: Publish to latest release via gh CLI
+      if: github.ref == 'refs/heads/master'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
+      shell: pwsh
+      run: |
+        gh release delete latest --yes --cleanup-tag 2>$null
+        gh release create latest "./setup/PPTServiceSetup.exe" `
+          --title "Latest Build" `
+          --notes "Auto-generated build from master branch." `
+          --latest
