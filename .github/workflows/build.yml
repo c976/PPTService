@@ -1,0 +1,58 @@
+name: Build and Release PPTService
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    # 编译解决方案中的所有项目 (Release)，目标框架 .NET Framework 4.5
+    - name: Build solution (Release)
+      run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
+
+    # 下载 NSIS 并解压，将 makensis.exe 所在目录添加到 PATH
+    - name: Download and setup NSIS
+      shell: powershell
+      run: |
+        $url = "https://prdownloads.sourceforge.net/nsis/nsis-3.13.zip"
+        $zip = "$env:RUNNER_TEMP\nsis.zip"
+        $dest = "$env:RUNNER_TEMP\nsis"
+        Invoke-WebRequest -Uri $url -OutFile $zip
+        Expand-Archive -Path $zip -DestinationPath $dest -Force
+        # NSIS 压缩包内包含 makensis.exe 的目录（通常根目录或 Bin 子目录）需加入 PATH
+        echo "$dest" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "$dest\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    # 运行 setup 目录下的 build.cmd，内部调用 makensis.exe 编译 NSIS 脚本
+    - name: Run build.cmd (NSIS)
+      shell: cmd
+      run: |
+        cd setup
+        call build.cmd
+
+    # 将生成的安装包发布到 GitHub Release，标签为 latest
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: latest
+        name: Latest Release
+        draft: false
+        prerelease: false
+        files: |
+          setup/PPTService.exe
+          setup/PPTService_Setup.exe
+          setup/*.exe
+          setup/Output/*.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
