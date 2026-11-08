@@ -46,10 +46,8 @@ jobs:
       run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
 
     # 下载 NSIS 并将其添加到 PATH
-    - name: Install NSIS
-      uses: repolevedavaj/install-nsis@v1.0.3
-      with:
-        nsis-version: '3.10'
+    - name: Install NSIS via Chocolatey
+      run: choco install nsis -y --no-progress
 
     # 运行打包脚本
     - name: Run build.cmd (NSIS)
