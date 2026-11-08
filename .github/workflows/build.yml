@@ -2,7 +2,7 @@ name: Build and Release PPTService
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "master" ]
   workflow_dispatch: # 允许手动触发
 
 jobs:
@@ -46,22 +46,10 @@ jobs:
       run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
 
     # 下载 NSIS 并将其添加到 PATH
-    - name: Download and Setup NSIS
-      shell: pwsh
-      run: |
-        $nsisUrl = "https://prdownloads.sourceforge.net/nsis/nsis-3.10.zip"
-        $zipPath = "$env:RUNNER_TEMP\nsis.zip"
-        $extractPath = "$env:RUNNER_TEMP\nsis"
-        
-        Write-Host "Downloading NSIS..."
-        Invoke-WebRequest -Uri $nsisUrl -OutFile $zipPath
-        
-        Write-Host "Extracting NSIS..."
-        Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
-        
-        Write-Host "Adding NSIS to PATH..."
-        echo "$extractPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        echo "$extractPath\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Install NSIS
+      uses: repolevedavaj/install-nsis@v1.0.3
+      with:
+        nsis-version: '3.10'
 
     # 运行打包脚本
     - name: Run build.cmd (NSIS)
