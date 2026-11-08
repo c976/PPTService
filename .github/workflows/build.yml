@@ -3,7 +3,11 @@ name: Build and Release PPTService
 on:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch:
+  workflow_dispatch: # 允许手动触发工作流
+
+# 授予工作流写权限，解决 403 无法创建 Release 的问题
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
@@ -16,6 +20,7 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    # 修复 .NET Framework 4.5 引用程序集缺失 (解决 MSB3644 错误)
     - name: Inject .NET Framework 4.5 Reference Assemblies
       shell: pwsh
       run: |
@@ -23,19 +28,32 @@ jobs:
         $sdkSystemPath = 'C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework'
         $tempZip = Join-Path $env:TEMP 'net45sdk.zip'
         $tempExtract = Join-Path $env:TEMP 'net45sdk'
+        
+        Write-Host "Downloading .NET 4.5 Reference Assemblies..."
         Invoke-WebRequest -Uri $net45SdkUrl -OutFile $tempZip
+        
+        Write-Host "Extracting..."
         Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+        
+        Write-Host "Moving to system directory..."
         $v45Path = Join-Path $sdkSystemPath 'v4.5'
-        if (Test-Path $v45Path) { Remove-Item -Path $v45Path -Recurse -Force }
+        if (Test-Path $v45Path) {
+            Remove-Item -Path $v45Path -Recurse -Force
+        }
+        
         $sourcePath = Join-Path $tempExtract 'build\.NETFramework\v4.5'
         Move-Item -Path $sourcePath -Destination $sdkSystemPath -Force
+        Write-Host "Successfully injected .NET 4.5 Reference Assemblies."
 
+    # 编译解决方案 (Release)
     - name: Build solution (Release)
       run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
 
+    # 使用 Chocolatey 安装 NSIS
     - name: Install NSIS
       run: choco install nsis -y --no-progress
 
+    # 执行打包脚本，在命令前直接将 NSIS 路径并入当前环境的 PATH
     - name: Run build.cmd (NSIS)
       shell: cmd
       run: |
@@ -43,6 +61,7 @@ jobs:
         cd setup
         call build.cmd
 
+    # 仅将指定的安装包发布到 GitHub Release (latest)
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       with:
