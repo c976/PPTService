@@ -612,11 +612,16 @@ Section "Uninstall"
 SectionEnd
 
 Function un.onInit
+  ; 升级流程以 /S 调用卸载器：跳过确认框，静默完成卸载
+  IfSilent SilentUninstall 0
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_UninstallConfirm)" IDYES +2
   Abort
+  SilentUninstall:
 FunctionEnd
 
 Function un.onUninstSuccess
+  IfSilent SilentDone 0
   HideWindow
   MessageBox MB_ICONINFORMATION|MB_OK "$(STR_UninstallDone)"
+  SilentDone:
 FunctionEnd
