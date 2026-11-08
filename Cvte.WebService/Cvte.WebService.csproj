@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0386A414-CED0-54CD-A54A-96580CBD065D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cvte.WebService</RootNamespace>
+    <AssemblyName>Cvte.WebService</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <LangVersion>6</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <WarningLevel>4</WarningLevel>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="SA_Compat.cs" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions">
+      <HintPath>..\lib\Microsoft.Expression.Interactions.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\lib\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>..\lib\System.Windows.Interactivity.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="linq2db">
+      <HintPath>..\lib\linq2db.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cvte.Pipe.Http\Cvte.Pipe.Http.csproj">
+      <Project>{C2822F88-C548-5A49-80B5-495125927465}</Project>
+      <Name>Cvte.Pipe.Http</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="--.cs" />
+    <Compile Include="-.cs" />
+    <Compile Include="-\-.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountCache.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountException.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountGetRequestBase.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountRequestBase.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountResponseCode.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountResponseException.cs" />
+    <Compile Include="Cvte.WebService.Account\AccountService.cs" />
+    <Compile Include="Cvte.WebService.Account\BindPhoneOrEmailBody.cs" />
+    <Compile Include="Cvte.WebService.Account\BindPhoneOrEmailRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\BindPhoneOrEmailResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckUserRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckUserRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckUserResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckValidateCodeRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckValidateCodeRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\CheckValidateCodeResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\DBCache.cs" />
+    <Compile Include="Cvte.WebService.Account\GetSubjectsBody.cs" />
+    <Compile Include="Cvte.WebService.Account\GetSubjectsRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\GetSubjectsResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\GetUserSettingBody.cs" />
+    <Compile Include="Cvte.WebService.Account\GetUserSettingRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\GetUserSettingResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\IAccountCache.cs" />
+    <Compile Include="Cvte.WebService.Account\IAccountService.cs" />
+    <Compile Include="Cvte.WebService.Account\LoginReqeust.cs" />
+    <Compile Include="Cvte.WebService.Account\LoginReqeustBody.cs" />
+    <Compile Include="Cvte.WebService.Account\LoginResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\RegisterRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\RegisterRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\RegisterResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\ResetPasswordRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\ResetPasswordRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\ResetPasswordResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\SendValidateCodeRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\SendValidateCodeRequestBody.cs" />
+    <Compile Include="Cvte.WebService.Account\SendValidateCodeResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\Stage.cs" />
+    <Compile Include="Cvte.WebService.Account\Subject.cs" />
+    <Compile Include="Cvte.WebService.Account\UpdateUserSettingBody.cs" />
+    <Compile Include="Cvte.WebService.Account\UpdateUserSettingRequest.cs" />
+    <Compile Include="Cvte.WebService.Account\UpdateUserSettingResponse.cs" />
+    <Compile Include="Cvte.WebService.Account\UserDB.cs" />
+    <Compile Include="Cvte.WebService.Account\UserInfo.cs" />
+    <Compile Include="Cvte.WebService.Account\UserSettingInfo.cs" />
+    <Compile Include="Cvte.WebService.Feedback\CommitFeedbackRequest.cs" />
+    <Compile Include="Cvte.WebService.Feedback\CommitResponseBody.cs" />
+    <Compile Include="Cvte.WebService.Feedback\CustomInfo.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FeedbackChannel.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FeedbackReqeustBase.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FeedbackResponse.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FeedbackService.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FeedbackType.cs" />
+    <Compile Include="Cvte.WebService.Feedback\FileInfo.cs" />
+    <Compile Include="Cvte.WebService.Feedback\ResponseBody.cs" />
+    <Compile Include="Cvte.WebService.Feedback\UploadFileResponseBody.cs" />
+    <Compile Include="Cvte.WebService.Feedback\UserInfo.cs" />
+    <Compile Include="Cvte.WebService.Lychee\ApplyTokenContent.cs" />
+    <Compile Include="Cvte.WebService.Lychee\ApplyTokenRequest.cs" />
+    <Compile Include="Cvte.WebService.Lychee\ApplyTokenResponse.cs" />
+    <Compile Include="Cvte.WebService.Lychee\BasicContent.cs" />
+    <Compile Include="Cvte.WebService.Lychee\CompleteRequest.cs" />
+    <Compile Include="Cvte.WebService.Lychee\CompleteResponse.cs" />
+    <Compile Include="Cvte.WebService.Lychee\LycheeRequestBase.cs" />
+    <Compile Include="Cvte.WebService.Lychee\LycheeResponseBase.cs" />
+    <Compile Include="Cvte.WebService.Lychee\LycheeService.cs" />
+    <Compile Include="Cvte.WebService.Lychee\PublicInfo.cs" />
+    <Compile Include="Cvte.WebService.Lychee\StartRequest.cs" />
+    <Compile Include="Cvte.WebService.Lychee\StartResponse.cs" />
+    <Compile Include="Cvte.WebService.Lychee\UpdatePasswordRequest.cs" />
+    <Compile Include="Cvte.WebService.Lychee\UpdatePasswordResponse.cs" />
+    <Compile Include="Cvte.WebService.Lychee\UploadFileLycheeRequest.cs" />
+    <Compile Include="Cvte.WebService.Lychee\UploadFileLycheeResponse.cs" />
+    <Compile Include="Cvte.WebService.Utils\DesSecurityUtility.cs" />
+    <Compile Include="Cvte.WebService.Utils\IniSetting.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SmartAssembly.Delegates\GetString.cs" />
+    <Compile Include="SmartAssembly.HouseOfCards\MemberRefsProxy.cs" />
+    <Compile Include="SmartAssembly.HouseOfCards\Strings.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

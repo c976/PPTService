@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window size="536,356" caption="28,28,28,250" bktrans="true">
+  <Font name="微软雅黑" size="14" bold="false" italic="false"/>
+  <Font name="微软雅黑" size="16" bold="false" italic="false"/>
+  <Font name="微软雅黑" size="12" bold="false" italic="false"/>
+  <Font name="微软雅黑" size="24" bold="true" italic="false"/>
+  <VerticalLayout bkimage="Installer_Shadow.png">
+    <VerticalLayout float="true" pos="28,28,0,0" width="480" height="300" bkimage="file='Installer_Background.png'">
+      <AnimationTabLayout name="tab_Page" float="true" pos="0,222,0,0" width="480" height="78"> 
+        <VerticalLayout name="Container_Install">
+          <VerticalLayout name="pnl_Default" visible="true" width="480" height="78">
+            <Button name="btn_QuickInstall" float="true" pos="160,21,0,0" width="150" height="36" normalimage="btn_QuickInstall.png" hotimage="btn_QuickInstall_hover.png" pushedimage="btn_QuickInstall_click.png"/>
+            <Button name="btn_Setting" float="true" pos="364,33,0,0" width="75" height="13" normalimage="btn_Setting.png" hotimage="btn_Setting_hover.png" pushedimage="btn_Setting_click.png"/>
+          </VerticalLayout>
+          <VerticalLayout name="pnl_Setting" visible="false" width="480" height="78">
+            <Button name="btn_Back" float="true" pos="20,51,0,0" width="36" height="14" normalimage="btn_Back.png" hotimage="btn_Back_hover.png" pushedimage="btn_Back_click.png"/>
+            <VerticalLayout float="true" pos="16,18,0,0" width="55" height="13" bkimage="lbl_Path.png"/>
+            <Edit name="edt_Dir" float="true" pos="76,12,0,0" width="339" height="24" font="2" bordersize="1" textpadding="6,3,6,3" bkcolor="#FFFFFF" textcolor="#666666" bordercolor="#DDDDDD"/>
+            <Button name="btn_ChangePath" float="true" pos="414,12,0,0" width="48" height="24" normalimage="btn_ChangePath.png" hotimage="btn_ChangePath_hover.png" pushedimage="btn_ChangePath_click.png"/>
+            <Button name="btn_StartInstall" float="true" pos="382,42,0,0" width="80" height="26" normalimage="btn_StartInstall.png" hotimage="btn_StartInstall_hover.png" pushedimage="btn_StartInstall_click.png"/>
+          </VerticalLayout>
+        </VerticalLayout>
+        <VerticalLayout name="Container_Progress">
+          <Progress name="progress_Install" float="true" pos="30,27,0,0" width="320" height="10" min="0" max="100" bkimage="file='progress_Null.png' corner='5,0,5,0'" foreimage="file='progress_Fill.png' corner='5,0,5,0'" value="0" hor="true" borderround="5,5"/>
+          <Label name="lbl_Detail" float="true" pos="30,45,0,0" width="320" height="15" font="2" textcolor="#AAAAAA" text=""/>
+          <Label name="lbl_ProgressPercent" float="true" pos="390,12,0,0" width="52" height="38" textcolor="#E05831" text="0%" font="3" align="center"/>
+
+          <VerticalLayout pos="391,47,0,0" float="true" width="48" height="13" bkimage="lbl_InstallStatus.png"/>
+
+        </VerticalLayout>
+        <VerticalLayout name="Container_Finish" height="300" width="588">
+          <CheckBox name="checkbox_RunNow" float="true" pos="362,32,0,0" width="69" height="15" normalimage="file='checkbox_RunNow.png'" selectedimage="file='checkbox_RunNow_selected.png'" text="" selected="true" visible="false"/>
+          <Button name="btn_Finish" float="true" pos="160,21,0,0" width="150" height="36" normalimage="btn_Finish.png" hotimage="btn_Finish_hover.png" pushedimage="btn_Finish_click.png"/>
+        </VerticalLayout>
+      </AnimationTabLayout>
+
+      <!--<VerticalLayout name="pnl_Animation" float="true" pos="0,210,0,0" width="480" height="10" bkimage="Banner\0.png"/>-->
+
+      <VerticalLayout name="pnl_Banner" float="true" pos="0,0,0,0" width="480" height="222" bkimage="Banner\0.png"/>
+      <VerticalLayout float="true" pos="12,8,0,0" width="102" height="24" bkimage="Title.png"/>
+      <Button name="btn_Min" visible="false" float="true" pos="408,0,0,0" width="36" height="30" normalimage="btn_Min.png" hotimage="btn_Min_hover.png" pushedimage="btn_Min_click.png"/>
+      <Button name="btn_Close" float="true" pos="444,0,0,0" width="36" height="30" normalimage="btn_Close.png" hotimage="btn_Close_hover.png" pushedimage="btn_Close_click.png" disabledimage="btn_Close_disable.png"/>
+    </VerticalLayout>
+  </VerticalLayout>
+</Window>

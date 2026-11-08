@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{008F2DB7-E20B-5E93-BC6F-C4338BBD9010}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cvte.Windows.cc</RootNamespace>
+    <AssemblyName>Cvte.Windows.cc</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <LangVersion>6</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <WarningLevel>4</WarningLevel>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions">
+      <HintPath>..\lib\Microsoft.Expression.Interactions.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\lib\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>..\lib\System.Windows.Interactivity.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="linq2db">
+      <HintPath>..\lib\linq2db.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cvte.Core.cc\Cvte.Core.cc.csproj">
+      <Project>{49C46853-3E2C-5BA9-843C-77C0C54A327C}</Project>
+      <Name>Cvte.Core.cc</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cvte.Windows.Controls\AnimatedGifImage.cs" />
+    <Compile Include="Cvte.Windows.Controls\VisibilityConverter.cs" />
+    <Compile Include="Cvte.Windows.Controls\VisibilityReverseConverter.cs" />
+    <Compile Include="Cvte.Windows.Data\BooleanReverseConverter.cs" />
+    <Compile Include="Cvte.Windows.Data\MathConverter.cs" />
+    <Compile Include="Cvte.Windows.Data\ValueConverters.cs" />
+    <Compile Include="Cvte.Windows.Localization.Markup\LangBinding.cs" />
+    <Compile Include="Cvte.Windows.Localization.Markup\LangConverterFunc.cs" />
+    <Compile Include="Cvte.Windows.Localization.Markup\LangConverters.cs" />
+    <Compile Include="Cvte.Windows.Localization.Markup\LangExtension.cs" />
+    <Compile Include="Cvte.Windows.Localization\CurrentLanguageChangedEventArgs.cs" />
+    <Compile Include="Cvte.Windows.Localization\DesignTimeXamlLang.cs" />
+    <Compile Include="Cvte.Windows.Localization\ILanguageReader.cs" />
+    <Compile Include="Cvte.Windows.Localization\ILanguageSource.cs" />
+    <Compile Include="Cvte.Windows.Localization\Lang.cs" />
+    <Compile Include="Cvte.Windows.Localization\LangBindingSource.cs" />
+    <Compile Include="Cvte.Windows.Localization\Language.cs" />
+    <Compile Include="Cvte.Windows.Localization\LanguageCollection.cs" />
+    <Compile Include="Cvte.Windows.Localization\LanguageKeyNotFoundEventArgs.cs" />
+    <Compile Include="Cvte.Windows.Localization\LanguageKeyNotFoundEventHandler.cs" />
+    <Compile Include="Cvte.Windows.Localization\LanguageSourceCollection.cs" />
+    <Compile Include="Cvte.Windows.Localization\ReferencedLang.cs" />
+    <Compile Include="Cvte.Windows.Localization\ReferencedLangConverter.cs" />
+    <Compile Include="Cvte.Windows.Localization\XamlLanguageReader.cs" />
+    <Compile Include="Cvte.Windows.Localization\XamlLanguageSource.cs" />
+    <Compile Include="Cvte.Windows.Properties\Resources.cs" />
+    <Compile Include="Cvte.Windows.Properties\Settings.cs" />
+    <Compile Include="Cvte.Windows.Threading\BackgroundTaskQueue.cs" />
+    <Compile Include="Cvte.Windows.Threading\DispatcherExtensions.cs" />
+    <Compile Include="Cvte.Windows.Threading\DispatcherTask.cs" />
+    <Compile Include="Cvte.Windows.Threading\TaskExcecutedEventArgs.cs" />
+    <Compile Include="Cvte.Windows.Win32\MonitorDefaultTo.cs" />
+    <Compile Include="Cvte.Windows.Win32\MonitorDpiType.cs" />
+    <Compile Include="Cvte.Windows.Win32\NativeExtensions.cs" />
+    <Compile Include="Cvte.Windows.Win32\NativeMethods.cs" />
+    <Compile Include="Cvte.Windows.Win32\WM.cs" />
+    <Compile Include="Cvte.Windows\DesignTimeExtensions.cs" />
+    <Compile Include="Cvte.Windows\Dpi.cs" />
+    <Compile Include="Cvte.Windows\DpiAwareness.cs" />
+    <Compile Include="Cvte.Windows\DpiChangedEventArgs.cs" />
+    <Compile Include="Cvte.Windows\DpiChangedEventHandler.cs" />
+    <Compile Include="Cvte.Windows\DpiExtensions.cs" />
+    <Compile Include="Cvte.Windows\GeometryExtensions.cs" />
+    <Compile Include="Cvte.Windows\LoadingScreen.cs" />
+    <Compile Include="Cvte.Windows\Monitor.cs" />
+    <Compile Include="Cvte.Windows\MonitorCollection.cs" />
+    <Compile Include="Cvte.Windows\MonitorDevice.cs" />
+    <Compile Include="Cvte.Windows\OtherInstanceStartedUpEventArgs.cs" />
+    <Compile Include="Cvte.Windows\ResourceKeyBindingExtension.cs" />
+    <Compile Include="Cvte.Windows\ResourceKeyToResourceConverter.cs" />
+    <Compile Include="Cvte.Windows\ScreenInterrogatory.cs" />
+    <Compile Include="Cvte.Windows\ServiceProviderExtensions.cs" />
+    <Compile Include="Cvte.Windows\SingleInstanceApp.cs" />
+    <Compile Include="Cvte.Windows\WindowDpiAwareness.cs" />
+    <Compile Include="Cvte.Windows\WindowLocationWatcher.cs" />
+    <Compile Include="Cvte.Windows\WindowMonitorExtensions.cs" />
+    <Compile Include="Cvte.Windows\WindowMonitorHelper.cs" />
+    <Compile Include="Cvte.Windows\XamlDomExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
