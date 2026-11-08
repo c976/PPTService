@@ -7,7 +7,7 @@
 ## 目录结构
 
 ```
-PPTService.Decompiled\
+\
 ├── PPTService.sln
 ├── ReadMe.md
 ├── lib\                        
@@ -23,7 +23,7 @@ PPTService.Decompiled\
 
 ## 特殊修改
 
-### 为让反编译输出能在 C# 6 下编译，做了以下处理：
+### C# 6 编译支持处理
 
 - **COM Interop**：4 个事件接口（`EApplication_Event`、`MasterEvents_Event`、`PresEvents_Event`、`SldEvents_Event`）补上源接口 IID 的 `[Guid]`，与 `[ComImport]` 一同使用，解决 `CS0596`。
 - **ILSpy 元数据特性**：删除 610 处无法用 C# 表达的 `[NullableContext]` / `[Nullable]` / `[TupleElementNames]` / `[Embedded]`。
