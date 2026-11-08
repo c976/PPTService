@@ -89,13 +89,22 @@ Function SkinGUIInit
   SendMessage $0 ${WM_SETTEXT} 0 "STR:${PRODUCT_PUBLISHER} "
 FunctionEnd
 
-; 卸载进度窗口：隐藏 MUI 头部条中的标题与副标题文字
+; 卸载进度窗口：隐藏 MUI 头部条（标题/副标题文字与白色背景条）
 !define MUI_CUSTOMFUNCTION_UNGUIINIT un.HideUnHeader
 
 Function un.HideUnHeader
+  ; 1037/1038：头部条标题与副标题文字
   GetDlgItem $0 $HWNDPARENT 1037
   ShowWindow $0 0
   GetDlgItem $0 $HWNDPARENT 1038
+  ShowWindow $0 0
+  ; 1034：头部条白色背景，隐藏后露出窗口底色
+  GetDlgItem $0 $HWNDPARENT 1034
+  ShowWindow $0 0
+  ; 1035/1045：底部 Seewo 品牌文字下方的灰色刻蚀线（两条重叠，需同时隐藏）
+  GetDlgItem $0 $HWNDPARENT 1035
+  ShowWindow $0 0
+  GetDlgItem $0 $HWNDPARENT 1045
   ShowWindow $0 0
 FunctionEnd
 
