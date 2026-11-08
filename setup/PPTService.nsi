@@ -186,13 +186,14 @@ Function .onInit
   InitPluginsDir
 
   ; 释放皮肤资源到 $TEMP\Seewo\PPTService\2052 与 \Icons
+  ; SetOutPath 使用字面路径，安装程序内记录的目标目录才是完整路径
   StrCpy $SkinDir "$TEMP\Seewo\PPTService"
   StrCpy $SkinPage "$SkinDir\2052"
-  SetOutPath "$SkinPage"
+  SetOutPath "$TEMP\Seewo\PPTService\2052"
   SetOverwrite on
   AllowSkipFiles off
   File "${__FILEDIR__}\Skin\2052\*.*"
-  SetOutPath "$SkinDir\Icons"
+  SetOutPath "$TEMP\Seewo\PPTService\Icons"
   File "${__FILEDIR__}\Skin\Icons\*.*"
   AllowSkipFiles on
 FunctionEnd
