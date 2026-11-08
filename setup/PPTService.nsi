@@ -5,7 +5,8 @@
 ;  卸载界面：MUI 现代界面（1.67 以上兼容）
 ;
 ;  默认不启用、但以注释形式完整保留的功能：
-;    - 更新组件与静默更新服务的安装（\Addion目录下文件需要手动获取）
+;    - Addon 目录内附加文件的打包与写入
+;    - 更新组件与静默更新服务的安装（资源需自行放入 Addon 目录）
 ;    - Microsoft .NET Framework 4.5 检测 / 安装 / 重启
 ;    - 安装目录体积统计（EstimatedSize）
 ;    - 防火墙白名单规则
@@ -41,6 +42,7 @@ SetCompressorDictSize 32
 !define SUPPORT_DIR           "Main\SupportFiles"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
+UninstallCaption "${PRODUCT_NAME} 卸载"
 BrandingText "${PRODUCT_PUBLISHER}"
 OutFile "${__FILEDIR__}\PPTServiceSetup.exe"
 Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
@@ -114,8 +116,8 @@ LangString STR_Win7Required     2052 "抱歉，本程序只对 Windows7 或者�
 LangString STR_NeedAdmin        2052 "请使用管理员权限执行本程序。"
 LangString STR_RootPath         2052 "不能将软件安装在驱动器根路径。"
 LangString STR_ProcessBusy      2052 "检测到安装路径下有进程尚未退出，忽略此问题可能导致安装异常。$\n是否重试关闭这些进程？"
-LangString STR_UninstallConfirm 2052 "您确实要完全移除 $(^Name) ，及其所有的组件？"
-LangString STR_UninstallDone    2052 "$(^Name) 已成功地从您的计算机移除。"
+LangString STR_UninstallConfirm 2052 "你确定要卸载本产品吗？"
+LangString STR_UninstallDone    2052 "${PRODUCT_NAME} 已成功地从你的计算机移除。"
 LangString STR_InstallingOld    2052 "正在卸载旧版本……"
 LangString STR_FrameworkBusy    2052 "正在安装 Microsoft .Net Framework，预计需要五分钟..."
 LangString STR_FrameworkOK      2052 "Microsoft .NET Framework 安装成功..."
@@ -135,9 +137,18 @@ Var RunOnFinish      ; 完成页「立即运行」勾选状态
 Var ProcessDir       ; 进程检查的目标目录
 Var OldUninstaller   ; 上一版本的卸载程序路径
 Var OldInstallDir    ; 上一版本的安装目录
+Var LogHandle        ; install.log 文件句柄
 ; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
 ; Var FrameworkVersion ; .NET 版本
 ; Var NeedReboot       ; 是否需要重启
+
+; -----------------------------------------------------------------------------
+;  安装日志：$INSTDIR\install.log（与卸载程序同一目录）
+;  官方 NSIS 构建未启用 NSIS_CONFIG_LOG，LogSet 不可用；用单一文件句柄逐行写入。
+; -----------------------------------------------------------------------------
+!macro InstallLog TEXT
+  FileWrite $LogHandle "${TEXT}$\r$\n"
+!macroend
 
 ; -----------------------------------------------------------------------------
 ;  页面：安装使用自定义皮肤，卸载使用 MUI 页面
@@ -361,7 +372,6 @@ FunctionEnd
 
 Function PrepareInstall
   DetailPrint "正在进行安装前的准备工作……"
-  Delete "$INSTDIR\install.txt"
 
   ; 读取上一版本的卸载信息，若存在则先静默卸载旧版本
   ReadRegStr $OldUninstaller ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
@@ -389,7 +399,13 @@ FunctionEnd
 ;  安装主体
 ; =============================================================================
 Section "MainSection" SEC01
+  CreateDirectory "$INSTDIR"
+  Delete "$INSTDIR\install.log"
+  FileOpen $LogHandle "$INSTDIR\install.log" w
+  !insertmacro InstallLog "EasiSetup: BeforeInstall Entered..."
   Call PrepareInstall
+  !insertmacro InstallLog "EasiSetup: BeforeInstall Left..."
+  !insertmacro InstallLog "EasiSetup: Files Entered..."
 
   DetailPrint "正在解压文件……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在解压文件……" "text"
@@ -398,29 +414,41 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "${__FILEDIR__}\Config.ini"
+  !insertmacro InstallLog "File: wrote $INSTDIR\Config.ini"
+
+  ; ---------------------------------------------------------------------------
+  ;  附加文件（默认不启用）
+  ;  把 Addon 目录内的全部文件与子目录按原有结构打包进安装程序，
+  ;  安装时写入 $INSTDIR，不包含 Addon 这一层目录名。
+  ;  需要启用时，取消下面两行注释（.keep 只是目录占位符，不写入）。
+  ; ---------------------------------------------------------------------------
+  ; SetOutPath "$INSTDIR"
+  ; File /r /x ".keep" "${__FILEDIR__}\Addon\*.*"
+  !insertmacro InstallLog "EasiSetup: 安装程序文件..."
 
   ; ---------------------------------------------------------------------------
   ;  更新组件（默认不安装；需要时取消注释）
-  ;  资源位于 Addion\ 目录，默认不提供，需要时自行放入。
+  ;  资源位于 Addon\ 目录，默认不提供，需要时自行放入。
   ; ---------------------------------------------------------------------------
-  ; File "${__FILEDIR__}\Addion\LibEasiUpdate.dll"
-  ; File "${__FILEDIR__}\Addion\Myou.dll"
-  ; File "${__FILEDIR__}\Addion\Update.config"
-  ; File "${__FILEDIR__}\Addion\Updater.exe"
-  ; File "${__FILEDIR__}\Addion\app-package.json"
-  ; File "${__FILEDIR__}\Addion\msvcp120.dll"
-  ; File "${__FILEDIR__}\Addion\msvcr120.dll"
+  ; File "${__FILEDIR__}\Addon\LibEasiUpdate.dll"
+  ; File "${__FILEDIR__}\Addon\Myou.dll"
+  ; File "${__FILEDIR__}\Addon\Update.config"
+  ; File "${__FILEDIR__}\Addon\Updater.exe"
+  ; File "${__FILEDIR__}\Addon\app-package.json"
+  ; File "${__FILEDIR__}\Addon\msvcp120.dll"
+  ; File "${__FILEDIR__}\Addon\msvcr120.dll"
 
   ; --- Main：解决方案 Release 编译产物（排除 pdb） ---
   SetOutPath "$INSTDIR\Main"
   File /x "*.pdb" "${__FILEDIR__}\..\PPTService\bin\Release\*.*"
+  !insertmacro InstallLog "File: wrote Release 编译产物到 $INSTDIR\Main"
 
   ; ---------------------------------------------------------------------------
   ;  随包分发的支持文件（默认不安装；需要时取消注释）
   ; ---------------------------------------------------------------------------
   ; SetOutPath "$INSTDIR\${SUPPORT_DIR}"
-  ; File "${__FILEDIR__}\Addion\Main\SupportFiles\EasiUpdateSetup.exe"
-  ; File "${__FILEDIR__}\Addion\Main\SupportFiles\dotnetfx45_full_x86_x64.exe"
+  ; File "${__FILEDIR__}\Addon\Main\SupportFiles\EasiUpdateSetup.exe"
+  ; File "${__FILEDIR__}\Addon\Main\SupportFiles\dotnetfx45_full_x86_x64.exe"
 
   ; ---------------------------------------------------------------------------
   ;  Microsoft .NET Framework 4.5 检测 / 安装 / 重启（默认不启用）
@@ -508,19 +536,31 @@ Section "MainSection" SEC01
   ;   MessageBox MB_OK "$(STR_InternalError)"
   ; ${EndIf}
 
+  !insertmacro InstallLog "EasiSetup: Files Left..."
+
   ; --- 注册表 / 快捷方式 ---
+  !insertmacro InstallLog "EasiSetup: Registry Entered..."
   Call WriteRegistry
+  !insertmacro InstallLog "EasiSetup: Registry Left..."
+  !insertmacro InstallLog "EasiSetup: ShortCuts Entered..."
   Call CreateShortcuts
+  !insertmacro InstallLog "EasiSetup: ShortCuts Left..."
 
   ; --- 卸载程序 ---
+  !insertmacro InstallLog "EasiSetup: AfterInstall Entered..."
   DetailPrint "正在生成卸载程序……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成卸载程序……" "text"
   CreateDirectory "$INSTDIR"
+  !insertmacro InstallLog "EasiSetup: 发布卸载程序..."
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+  !insertmacro InstallLog "created uninstaller: $INSTDIR\Uninstall.exe"
   System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)"
 
   DetailPrint "正在进行最后的安装步骤……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在进行最后的安装步骤……" "text"
+  !insertmacro InstallLog "EasiSetup: AfterInstall Left..."
+  !insertmacro InstallLog "settings logging to 0"
+  FileClose $LogHandle
 SectionEnd
 
 ; -----------------------------------------------------------------------------
@@ -588,6 +628,12 @@ FunctionEnd
 Section "Uninstall"
   SetShellVarContext all
 
+  ; 卸载前结束安装目录内仍在运行的程序
+  DetailPrint "正在结束运行中的程序……"
+  Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$INSTDIR"
+  Pop $0
+  Sleep 500
+
   ; ---------------------------------------------------------------------------
   ;  删除防火墙白名单规则（安装时启用白名单后，取消此注释）
   ; ---------------------------------------------------------------------------
@@ -604,11 +650,13 @@ Section "Uninstall"
 
   Delete "$INSTDIR\Uninstall.exe"
   Delete "$INSTDIR\Config.ini"
+  Delete "$INSTDIR\install.log"
   RMDir /r "$INSTDIR\Main"
   RMDir /r "$INSTDIR\${SUPPORT_DIR}"
   RMDir /r "$INSTDIR"
 
-  SetAutoClose true
+  ; 停留在卸载窗口，用户点「关闭」后才弹出完成提示
+  SetAutoClose false
 SectionEnd
 
 Function un.onInit
