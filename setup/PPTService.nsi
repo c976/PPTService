@@ -89,6 +89,16 @@ Function SkinGUIInit
   SendMessage $0 ${WM_SETTEXT} 0 "STR:${PRODUCT_PUBLISHER} "
 FunctionEnd
 
+; 卸载进度窗口：隐藏 MUI 头部条中的标题与副标题文字
+!define MUI_CUSTOMFUNCTION_UNGUIINIT un.HideUnHeader
+
+Function un.HideUnHeader
+  GetDlgItem $0 $HWNDPARENT 1037
+  ShowWindow $0 0
+  GetDlgItem $0 $HWNDPARENT 1038
+  ShowWindow $0 0
+FunctionEnd
+
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
@@ -137,17 +147,17 @@ Var RunOnFinish      ; 完成页「立即运行」勾选状态
 Var ProcessDir       ; 进程检查的目标目录
 Var OldUninstaller   ; 上一版本的卸载程序路径
 Var OldInstallDir    ; 上一版本的安装目录
-Var LogHandle        ; install.log 文件句柄
 ; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
 ; Var FrameworkVersion ; .NET 版本
 ; Var NeedReboot       ; 是否需要重启
 
 ; -----------------------------------------------------------------------------
 ;  安装日志：$INSTDIR\install.log（与卸载程序同一目录）
-;  官方 NSIS 构建未启用 NSIS_CONFIG_LOG，LogSet 不可用；用单一文件句柄逐行写入。
+;  LogSet / LogText 需要 NSIS_CONFIG_LOG 日志构建的 NSIS（编译器与 Stubs 配套），
+;  日志由引擎自动逐指令写入（File / CreateDirectory / Exec / WriteRegStr 等）。
 ; -----------------------------------------------------------------------------
-!macro InstallLog TEXT
-  FileWrite $LogHandle "${TEXT}$\r$\n"
+!macro EasiLog TEXT
+  LogText '${TEXT}'
 !macroend
 
 ; -----------------------------------------------------------------------------
@@ -401,20 +411,20 @@ FunctionEnd
 Section "MainSection" SEC01
   CreateDirectory "$INSTDIR"
   Delete "$INSTDIR\install.log"
-  FileOpen $LogHandle "$INSTDIR\install.log" w
-  !insertmacro InstallLog "EasiSetup: BeforeInstall Entered..."
+  LogSet on
+  !insertmacro EasiLog 'EasiSetup: "BeforeInstall" Entered...'
   Call PrepareInstall
-  !insertmacro InstallLog "EasiSetup: BeforeInstall Left..."
-  !insertmacro InstallLog "EasiSetup: Files Entered..."
+  !insertmacro EasiLog 'EasiSetup: "BeforeInstall" Left...'
+  !insertmacro EasiLog 'EasiSetup: Files Entered...'
 
   DetailPrint "正在解压文件……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在解压文件……" "text"
 
   ; --- 根目录：配置文件 ---
+  !insertmacro EasiLog 'EasiSetup: 安装程序文件...'
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "${__FILEDIR__}\Config.ini"
-  !insertmacro InstallLog "File: wrote $INSTDIR\Config.ini"
 
   ; ---------------------------------------------------------------------------
   ;  附加文件（默认不启用）
@@ -424,7 +434,6 @@ Section "MainSection" SEC01
   ; ---------------------------------------------------------------------------
   ; SetOutPath "$INSTDIR"
   ; File /r /x ".keep" "${__FILEDIR__}\Addon\*.*"
-  !insertmacro InstallLog "EasiSetup: 安装程序文件..."
 
   ; ---------------------------------------------------------------------------
   ;  更新组件（默认不安装；需要时取消注释）
@@ -441,7 +450,6 @@ Section "MainSection" SEC01
   ; --- Main：解决方案 Release 编译产物（排除 pdb） ---
   SetOutPath "$INSTDIR\Main"
   File /x "*.pdb" "${__FILEDIR__}\..\PPTService\bin\Release\*.*"
-  !insertmacro InstallLog "File: wrote Release 编译产物到 $INSTDIR\Main"
 
   ; ---------------------------------------------------------------------------
   ;  随包分发的支持文件（默认不安装；需要时取消注释）
@@ -455,6 +463,9 @@ Section "MainSection" SEC01
   ;  启用时还需：取消上方 SupportFiles 的 File 注释，以及变量区
   ;  FrameworkVersion / NeedReboot 两行 Var 声明的注释。
   ; ---------------------------------------------------------------------------
+  ; !insertmacro EasiLog 'EasiSetup: ThirdPackages Entered...'
+  ; !insertmacro EasiLog 'EasiSetup: 安装 Microsoft .Net 4.5 ...'
+  ;
   ;
   ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在安装 .Net Framework 4.5，预计需要五分钟..." "text"
   ; StrCpy $NeedReboot "false"
@@ -529,44 +540,47 @@ Section "MainSection" SEC01
   ; ---------------------------------------------------------------------------
   ;  静默更新服务（默认不安装；需要时取消注释）
   ; ---------------------------------------------------------------------------
-  ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在安装软件更新服务..." "text"
+  ; !insertmacro EasiLog 'EasiSetup: 安装静默更新服务...'
   ; SetOutPath "$INSTDIR\${SUPPORT_DIR}"
   ; ExecWait '"$INSTDIR\${SUPPORT_DIR}\EasiUpdateSetup.exe" /S' $0
   ; ${If} $0 == 2
   ;   MessageBox MB_OK "$(STR_InternalError)"
   ; ${EndIf}
+  ; !insertmacro EasiLog 'EasiSetup: ThirdPackages Left...'
 
-  !insertmacro InstallLog "EasiSetup: Files Left..."
+  !insertmacro EasiLog 'EasiSetup: Files Left...'
 
-  ; --- 注册表 / 快捷方式 ---
-  !insertmacro InstallLog "EasiSetup: Registry Entered..."
-  Call WriteRegistry
-  !insertmacro InstallLog "EasiSetup: Registry Left..."
-  !insertmacro InstallLog "EasiSetup: ShortCuts Entered..."
+  ; --- 快捷方式 / 注册表 ---
+  !insertmacro EasiLog 'EasiSetup: "ShortCuts" Entered...'
   Call CreateShortcuts
-  !insertmacro InstallLog "EasiSetup: ShortCuts Left..."
+  !insertmacro EasiLog 'EasiSetup: "ShortCuts" Left...'
+  !insertmacro EasiLog 'EasiSetup: "Registry" Entered...'
+  Call WriteRegistry
+  !insertmacro EasiLog 'EasiSetup: "Registry" Left...'
 
   ; --- 卸载程序 ---
-  !insertmacro InstallLog "EasiSetup: AfterInstall Entered..."
+  !insertmacro EasiLog 'EasiSetup: "AfterInstall" Entered...'
   DetailPrint "正在生成卸载程序……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成卸载程序……" "text"
   CreateDirectory "$INSTDIR"
-  !insertmacro InstallLog "EasiSetup: 发布卸载程序..."
+  !insertmacro EasiLog 'EasiSetup: 发布卸载程序...'
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  !insertmacro InstallLog "created uninstaller: $INSTDIR\Uninstall.exe"
   System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)"
 
   DetailPrint "正在进行最后的安装步骤……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在进行最后的安装步骤……" "text"
-  !insertmacro InstallLog "EasiSetup: AfterInstall Left..."
-  !insertmacro InstallLog "settings logging to 0"
-  FileClose $LogHandle
+  !insertmacro EasiLog 'EasiSetup: "AfterInstall" Left...'
+  LogSet off
 SectionEnd
 
 ; -----------------------------------------------------------------------------
-;  -Post：写入 App Paths 与卸载信息
+;  注册表
 ; -----------------------------------------------------------------------------
-Section -Post
+Function WriteRegistry
+  DetailPrint "正在写注册表……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在写注册表……" "text"
+
+  ; 卸载信息（App Paths 与控制面板）
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_DIR_REGKEY}" "" \
       "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName"     "$(STR_AppName)"
@@ -575,14 +589,6 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher"       "${PRODUCT_PUBLISHER}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout"    "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon"     "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
-SectionEnd
-
-; -----------------------------------------------------------------------------
-;  产品注册表项
-; -----------------------------------------------------------------------------
-Function WriteRegistry
-  DetailPrint "正在写注册表……"
-  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在写注册表……" "text"
 
   ; ---------------------------------------------------------------------------
   ;  安装目录体积统计（EstimatedSize，单位 KB）——默认不写入；需要时取消注释
@@ -604,9 +610,11 @@ Function WriteRegistry
   ; ---------------------------------------------------------------------------
   ;  防火墙白名单（默认不启用；同时取消卸载段中的对应注释）
   ; ---------------------------------------------------------------------------
+  ; !insertmacro EasiLog 'EasiSetup: "FireWall" Entered...'
   ; DetailPrint "正在添加防火墙规则……"
   ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在添加防火墙规则……" "text"
   ; Cvte.FireWall::AddFireWallWhiteListByDirectory "$INSTDIR"
+  ; !insertmacro EasiLog 'EasiSetup: "FireWall" Left...'
 FunctionEnd
 
 ; -----------------------------------------------------------------------------
@@ -627,10 +635,12 @@ FunctionEnd
 ; =============================================================================
 Section "Uninstall"
   SetShellVarContext all
+  ; 详细日志：引擎逐指令写入窗口详情区与 $INSTDIR\install.log
+  LogSet on
 
-  ; 卸载前结束安装目录内仍在运行的程序
-  DetailPrint "正在结束运行中的程序……"
-  Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$INSTDIR"
+  ; 卸载前结束主程序进程（不在界面与日志中输出）。
+  ; 按进程名结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
   Pop $0
   Sleep 500
 
@@ -650,10 +660,14 @@ Section "Uninstall"
 
   Delete "$INSTDIR\Uninstall.exe"
   Delete "$INSTDIR\Config.ini"
-  Delete "$INSTDIR\install.log"
   RMDir /r "$INSTDIR\Main"
   RMDir /r "$INSTDIR\${SUPPORT_DIR}"
   RMDir /r "$INSTDIR"
+
+  ; 结束日志并删除 install.log，最后移除安装目录
+  LogSet off
+  Delete "$INSTDIR\install.log"
+  RMDir "$INSTDIR"
 
   ; 停留在卸载窗口，用户点「关闭」后才弹出完成提示
   SetAutoClose false

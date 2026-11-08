@@ -49,15 +49,29 @@ jobs:
     - name: Build solution (Release)
       run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
 
-    # 使用 Chocolatey 安装 NSIS
-    - name: Install NSIS
-      run: choco install nsis -y --no-progress
+    # 安装 NSIS 3.11 完整版，并覆盖 log 补丁包（makensis.exe / zlib1.dll / Stubs 均为 log 构建）
+    # 注意：SourceForge 下载必须用 curl.exe（Invoke-WebRequest 会拿到 HTML 而非 zip）
+    - name: Install NSIS 3.11 (log build)
+      shell: pwsh
+      run: |
+        $nsisRoot = Join-Path $env:RUNNER_TEMP 'nsis-3.11'
+        $fullZip   = Join-Path $env:RUNNER_TEMP 'nsis-3.11.zip'
+        $logZip    = Join-Path $env:RUNNER_TEMP 'nsis-3.11-log.zip'
 
-    # 执行打包脚本，在命令前直接将 NSIS 路径并入当前环境的 PATH
+        curl.exe -L --retry 3 -o $fullZip "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11.zip"
+        curl.exe -L --retry 3 -o $logZip  "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11-log.zip"
+
+        Expand-Archive -Path $fullZip -DestinationPath $env:RUNNER_TEMP -Force
+        # log 补丁包没有顶层目录，直接解压覆盖到 nsis-3.11 内
+        Expand-Archive -Path $logZip -DestinationPath $nsisRoot -Force
+
+        Add-Content $env:GITHUB_PATH "$nsisRoot\Bin"
+        Write-Host "NSIS installed at $nsisRoot\Bin"
+
+    # 执行打包脚本（makensis 已通过 GITHUB_PATH 加入 PATH）
     - name: Run build.cmd (NSIS)
       shell: cmd
       run: |
-        set "PATH=%PATH%;C:\Program Files (x86)\NSIS"
         cd setup
         call build.cmd
 

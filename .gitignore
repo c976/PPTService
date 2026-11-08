@@ -1,0 +1,8 @@
+# bin / obj 编译中间目录
+*/[Bb]in/
+*/[Oo]bj/
+!lib/**
+!setup/**
+
+# NSIS 编译产物（setup 下的安装包）
+setup/*.exe
