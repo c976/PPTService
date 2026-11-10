@@ -68,7 +68,7 @@ namespace PPTService
 				_timer.Stop();
 				Progress = 0;
 				ClearData();
-				(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
+				(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
 				DispatcherTask.Start(30.0, () =>
 				{
 					_frame.Continue = false;
@@ -89,7 +89,7 @@ namespace PPTService
 
 		public void Continue()
 		{
-			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
+			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
 		}
 
 		private void CancelButton_OnClick(object sender, RoutedEventArgs e)
@@ -103,7 +103,7 @@ namespace PPTService
 		{
 			Opacity = 0.0;
 			ClearData();
-			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
+			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
 			DispatcherTask.Start(500.0, () =>
 			{
 				_frame.Continue = false;
