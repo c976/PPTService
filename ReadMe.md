@@ -24,8 +24,6 @@
 
 ## 特殊修改
 
-> 除本节列出的处理外，源码尽量保持反编译 / 去混淆输出原样，不改写业务逻辑。
-
 ### 反混淆与源码重建
 
 原版 8 个程序集中有 4 个被 **SmartAssembly 7.5.1.4370** 混淆：`Cvte.Core.cc.dll`、`Cvte.Pipe.Http.dll`、`Cvte.WebService.dll`、`Cvte.Windows.cc.dll`。直接反编译会产出依赖元数据 token 的 `MemberRefsProxy` 空壳、被合并进同一个 `dynamic` 字段的多个属性，以及不可打印的类型名与命名空间。这样编译虽能通过，运行行为却不正确（二维码分享等路径会失败）。
@@ -53,14 +51,7 @@
 ### 运行行为修正
 
 - LinqToDB 表名：`UserEntity` 是没有 `TableAttribute` 的实体，`GetTable<T>()` 默认以类名作表名。重命名后显式加 `[Table("Class26")]` 锁定原映射，避免 `User.db` 查表失败。
-- 进度环 100% 归零：`LoadingView.xaml.cs` 的资源键原写作 `StoryBoard.HiddenRootGridImmediatly`，而 XAML 真实键是 `...Immediately`（0 秒动画，`Completed` 回调结束 `PushFrame`）。键不匹配导致动画从不触发，只剩 `DispatcherTask.Start(30.0, …)` 的 30ms 兜底；期间 `ClearData()` 已把界面写成 `0%`，WPF 抢到一帧就看到「100%→0% 再关闭」，因此表现为概率性问题。这是原版代码问题，这是额外修复。
-
-### 已知差异与构建注意
-
-- 这 4 个类库是重新编译产物，与原版 DLL 二进制不同；`smethod_N` / `method_N` 等方法名仍是反编译残留，未做重命名。
-- `Cvte.Pipe.Http\Internal\Md5Helper.cs` 当前无引用，但属业务工具类，保留。
-- 主项目 `PPTService` 是老式 WPF 工程，请**用 Visual Studio 的 MSBuild 构建**；`dotnet build` 不生成 XAML 的 `.g.cs`，会报 52 个 `IComponentConnector` 相关 `CS0535`（工具差异，非源码错误）。
-- 曾怀疑重编译的 `Cvte.Core.cc.dll` 导致进度环归零，实测该现象是概率性竞态，与 DLL 版本无关，无需替换 DLL 或修改工程引用。
+- PPT 打开时进度环 100% 归零：`LoadingView.xaml.cs` 的资源键原写作 `StoryBoard.HiddenRootGridImmediatly`，而 XAML 真实键是 `...Immediately`（0 秒动画，`Completed` 回调结束 `PushFrame`）。键不匹配导致动画从不触发，只剩 `DispatcherTask.Start(30.0, …)` 的 30ms 兜底；期间 `ClearData()` 已把界面写成 `0%`，WPF 抢到一帧就看到「100%→0% 再关闭」，因此表现为概率性问题。这是原版代码问题，这是额外修复。
 
 ## 许可协议
 
