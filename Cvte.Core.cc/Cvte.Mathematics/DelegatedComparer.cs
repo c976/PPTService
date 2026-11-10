@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Cvte.Mathematics
 {
-	public class DelegatedComparer<SA_T0> : IComparer<SA_T0>
+	public class DelegatedComparer<T> : IComparer<T>
 	{
-		private readonly Func<SA_T0, SA_T0, int> _compare;
+		private readonly Func<T, T, int> _compare;
 
-		public DelegatedComparer(Func<SA_T0, SA_T0, int> comparingMethod)
+		public DelegatedComparer(Func<T, T, int> comparingMethod)
 		{
 			if (comparingMethod == null)
 			{
@@ -16,7 +16,7 @@ namespace Cvte.Mathematics
 			_compare = comparingMethod;
 		}
 
-		public int Compare(SA_T0 x, SA_T0 y)
+		public int Compare(T x, T y)
 		{
 			return _compare(x, y);
 		}

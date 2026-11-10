@@ -70,39 +70,23 @@ namespace Cvte.Mathematics
 			{
 				throw new ArgumentException("innerRect 包含无效的宽高值");
 			}
-			double width = innerRect.Width;
-			while (true)
+			if (innerRect.Width.Equals(0.0) && innerRect.Height.Equals(0.0))
 			{
-				if (width.Equals(0.0))
-				{
-					if (false)
-					{
-						break;
-					}
-					if (innerRect.Height.Equals(0.0))
-					{
-						throw new ArgumentException("innerRect 宽高不能都为0");
-					}
-				}
-				if (!Finite.IsFinite(outerRect))
-				{
-					throw new ArgumentException("outerRect 包含无效值");
-				}
-				if (0 == 0)
-				{
-					switch (stretch)
-					{
-					case RectStretch.Uniform:
-						return innerRect.FillIntoByUniform(outerRect);
-					case RectStretch.UniformToFill:
-						break;
-					default:
-						throw new NotImplementedException();
-					}
-					break;
-				}
+				throw new ArgumentException("innerRect 宽高不能都为0");
 			}
-			return innerRect.FillIntoByUniformToFill(outerRect);
+			if (!Finite.IsFinite(outerRect))
+			{
+				throw new ArgumentException("outerRect 包含无效值");
+			}
+			switch (stretch)
+			{
+			default:
+				throw new NotImplementedException();
+			case RectStretch.UniformToFill:
+				return innerRect.FillIntoByUniformToFill(outerRect);
+			case RectStretch.Uniform:
+				return innerRect.FillIntoByUniform(outerRect);
+			}
 		}
 
 		public static Rect AlignTo(this Rect rect, Rect alignedRect, RectHorizontalAlignment horizontalAlignment)
@@ -117,17 +101,17 @@ namespace Cvte.Mathematics
 			}
 			switch (horizontalAlignment)
 			{
+			default:
+				throw new NotImplementedException();
 			case RectHorizontalAlignment.Left:
 				rect.X = alignedRect.X;
-				return rect;
-			case RectHorizontalAlignment.Center:
-				rect.X = alignedRect.X + (alignedRect.Width - rect.Width) / 2.0;
 				return rect;
 			case RectHorizontalAlignment.Right:
 				rect.X = alignedRect.X + (alignedRect.Width - rect.Width);
 				return rect;
-			default:
-				throw new NotImplementedException();
+			case RectHorizontalAlignment.Center:
+				rect.X = alignedRect.X + (alignedRect.Width - rect.Width) / 2.0;
+				return rect;
 			}
 		}
 
@@ -143,50 +127,28 @@ namespace Cvte.Mathematics
 			}
 			switch (verticalAlignment)
 			{
+			default:
+				throw new NotImplementedException();
 			case RectVerticalAlignment.Top:
 				rect.Y = alignedRect.Y;
-				return rect;
-			case RectVerticalAlignment.Center:
-				rect.Y = alignedRect.Y + (alignedRect.Height - rect.Height) / 2.0;
 				return rect;
 			case RectVerticalAlignment.Bottom:
 				rect.Y = alignedRect.Y + (alignedRect.Height - rect.Height);
 				return rect;
-			default:
-				throw new NotImplementedException();
+			case RectVerticalAlignment.Center:
+				rect.Y = alignedRect.Y + (alignedRect.Height - rect.Height) / 2.0;
+				return rect;
 			}
 		}
 
 		public static Rect AlignTo(this Rect rect, Rect alignedRect, AlignmentSettings alignment)
 		{
-			bool flag = Finite.IsFinite(rect.Size);
-			while (true)
+			if (!Finite.IsFinite(rect.Size))
 			{
-				if (!flag)
-				{
-					if (6 != 0)
-					{
-						throw new ArgumentException("innerRect 包含无效值");
-					}
-				}
-				else
-				{
-					flag = Finite.IsFinite(alignedRect);
-					if (false ? true : false)
-					{
-						continue;
-					}
-					if (!flag)
-					{
-						goto IL_001f;
-					}
-				}
-				if (0 == 0)
-				{
-					break;
-				}
-				goto IL_001f;
-				IL_001f:
+				throw new ArgumentException("innerRect 包含无效值");
+			}
+			if (!Finite.IsFinite(alignedRect))
+			{
 				throw new ArgumentException("outerRect 包含无效值");
 			}
 			return rect.AlignTo(alignedRect, alignment.HorizontalAlignment).AlignTo(alignedRect, alignment.VerticalAlignment);
@@ -194,32 +156,15 @@ namespace Cvte.Mathematics
 
 		public static Size UniformSetWidth(this Size size, double width)
 		{
-			do
+			if (!Finite.IsFinite(size))
 			{
-				if (!Finite.IsFinite(size))
-				{
-					throw new ArgumentException("size值无效。", "size");
-				}
+				throw new ArgumentException("size值无效。", "size");
 			}
-			while (6 == 0);
-			if (!Finite.IsFinite(width) && 3 != 0)
+			if (!Finite.IsFinite(width))
 			{
 				throw new ArgumentException("width值无效。", "width");
 			}
-			double height;
-			if (0 == 0)
-			{
-				double num = width;
-				if (6 != 0)
-				{
-					num /= size.Width;
-				}
-				if (6 != 0)
-				{
-					num *= size.Height;
-				}
-				height = num;
-			}
+			double height = width / size.Width * size.Height;
 			size.Width = width;
 			size.Height = height;
 			return size;
@@ -243,32 +188,15 @@ namespace Cvte.Mathematics
 
 		public static Size UniformSetHeight(this Size size, double height)
 		{
-			do
+			if (!Finite.IsFinite(size))
 			{
-				if (!Finite.IsFinite(size))
-				{
-					throw new ArgumentException("size值无效。", "size");
-				}
+				throw new ArgumentException("size值无效。", "size");
 			}
-			while (6 == 0);
-			if (!Finite.IsFinite(height) && 3 != 0)
+			if (!Finite.IsFinite(height))
 			{
 				throw new ArgumentException("height值无效。", "height");
 			}
-			double width;
-			if (0 == 0)
-			{
-				double num = height;
-				if (6 != 0)
-				{
-					num /= size.Height;
-				}
-				if (6 != 0)
-				{
-					num *= size.Width;
-				}
-				width = num;
-			}
+			double width = height / size.Height * size.Width;
 			size.Width = width;
 			size.Height = height;
 			return size;

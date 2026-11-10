@@ -39,59 +39,37 @@ namespace Cvte.Mathematics
 
 		private unsafe void Solve()
 		{
-			int num = 32;
-			while (true)
+			void* ptr = stackalloc byte[32];
+			if (Nearly.Equals(A, 0.0))
 			{
-				byte* uIntPtr = stackalloc byte[num];
-				void* ptr;
-				if (8u != 0)
-				{
-					ptr = uIntPtr;
-				}
-				if (Nearly.Equals(A, 0.0))
-				{
-					break;
-				}
-				*(double*)ptr = B * B - 4.0 * A * C;
-				if (Nearly.Equals(*(double*)ptr, 0.0))
-				{
-					((double*)ptr)[1] = (0.0 - B) / (2.0 * A);
-					Roots = new ReadOnlyCollection<double>(new double[1] { ((double*)ptr)[1] });
-				}
-				else if (*(double*)ptr > 0.0)
-				{
-					((double*)ptr)[2] = (0.0 - B + Math.Sqrt(*(double*)ptr)) / (2.0 * A);
-					((double*)ptr)[3] = (0.0 - B - Math.Sqrt(*(double*)ptr)) / (2.0 * A);
-					double[] array;
-					if (!(((double*)ptr)[2] < ((double*)ptr)[3]))
-					{
-						array = new double[2]
-						{
-							((double*)ptr)[3],
-							((double*)ptr)[2]
-						};
-					}
-					else
-					{
-						num = 2;
-						if (num == 0)
-						{
-							continue;
-						}
-						array = new double[num];
-						array[0] = ((double*)ptr)[2];
-						array[1] = ((double*)ptr)[3];
-					}
-					double[] list = array;
-					Roots = new ReadOnlyCollection<double>(list);
-				}
-				else
-				{
-					Roots = new ReadOnlyCollection<double>(new double[0]);
-				}
+				Roots = new ReadOnlyCollection<double>(new double[1] { (0.0 - C) / B });
 				return;
 			}
-			Roots = new ReadOnlyCollection<double>(new double[1] { (0.0 - C) / B });
+			*(double*)ptr = B * B - 4.0 * A * C;
+			if (Nearly.Equals(*(double*)ptr, 0.0))
+			{
+				((double*)ptr)[1] = (0.0 - B) / (2.0 * A);
+				Roots = new ReadOnlyCollection<double>(new double[1] { ((double*)ptr)[1] });
+			}
+			else if (*(double*)ptr > 0.0)
+			{
+				((double*)ptr)[2] = (0.0 - B + Math.Sqrt(*(double*)ptr)) / (2.0 * A);
+				((double*)ptr)[3] = (0.0 - B - Math.Sqrt(*(double*)ptr)) / (2.0 * A);
+				double[] list = ((!(((double*)ptr)[2] < ((double*)ptr)[3])) ? new double[2]
+				{
+					((double*)ptr)[3],
+					((double*)ptr)[2]
+				} : new double[2]
+				{
+					((double*)ptr)[2],
+					((double*)ptr)[3]
+				});
+				Roots = new ReadOnlyCollection<double>(list);
+			}
+			else
+			{
+				Roots = new ReadOnlyCollection<double>(new double[0]);
+			}
 		}
 	}
 }

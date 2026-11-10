@@ -27,31 +27,14 @@ namespace Cvte.Windows.Threading
 
 		public static void Do(this Dispatcher dispatcher, Action action)
 		{
-			while (true)
+			if (dispatcher.CheckAccess())
 			{
-				if (8 == 0 || 5 == 0)
-				{
-					return;
-				}
-				if (dispatcher.CheckAccess())
-				{
-					if (0 == 0)
-					{
-						if (3u != 0)
-						{
-							action();
-						}
-						return;
-					}
-					continue;
-				}
-				if (2 == 0)
-				{
-					return;
-				}
-				break;
+				action();
 			}
-			dispatcher.BeginInvoke(action);
+			else
+			{
+				dispatcher.BeginInvoke(action);
+			}
 		}
 	}
 }

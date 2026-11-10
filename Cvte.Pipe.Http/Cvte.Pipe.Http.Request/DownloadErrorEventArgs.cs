@@ -5,17 +5,17 @@ namespace Cvte.Pipe.Http.Request
 {
 	public class DownloadErrorEventArgs : EventArgs
 	{
-		private Exception _0001;
+		private Exception exception_0;
 
 		public Exception Error
 		{
 			get
 			{
-				return _0001;
+				return exception_0;
 			}
 			set
 			{
-				_0001 = value;
+				exception_0 = value;
 			}
 		}
 	}

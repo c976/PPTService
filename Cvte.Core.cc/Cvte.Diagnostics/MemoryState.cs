@@ -16,137 +16,37 @@ namespace Cvte.Diagnostics
 
 		public static double GetWorkingSetInMb(string processName = null)
 		{
-			double num = GetPerformanceValue("Process", "Working Set", processName ?? CurrentProcessName);
-			if (0 == 0)
-			{
-				double num2 = 1024.0;
-				do
-				{
-					num /= num2;
-					num2 = 1024.0;
-				}
-				while (5 == 0 || 2 == 0);
-				num /= num2;
-			}
-			return num;
+			return GetPerformanceValue("Process", "Working Set", processName ?? CurrentProcessName) / 1024.0 / 1024.0;
 		}
 
 		public static double GetPrivateBytesInMb(string processName = null)
 		{
-			double num = GetPerformanceValue("Process", "Private Bytes", processName ?? CurrentProcessName);
-			if (0 == 0)
-			{
-				double num2 = 1024.0;
-				do
-				{
-					num /= num2;
-					num2 = 1024.0;
-				}
-				while (5 == 0 || 2 == 0);
-				num /= num2;
-			}
-			return num;
+			return GetPerformanceValue("Process", "Private Bytes", processName ?? CurrentProcessName) / 1024.0 / 1024.0;
 		}
 
 		public static double GetVirtualBytesInMb(string processName = null)
 		{
-			double num = GetPerformanceValue("Process", "Virtual Bytes", processName ?? CurrentProcessName);
-			if (0 == 0)
-			{
-				double num2 = 1024.0;
-				do
-				{
-					num /= num2;
-					num2 = 1024.0;
-				}
-				while (5 == 0 || 2 == 0);
-				num /= num2;
-			}
-			return num;
+			return GetPerformanceValue("Process", "Virtual Bytes", processName ?? CurrentProcessName) / 1024.0 / 1024.0;
 		}
 
 		public static double GetManagedHeapSizeInMb(string processName = null)
 		{
-			double num = GetPerformanceValue(".NET CLR Memory", "Gen 0 heap size", processName ?? CurrentProcessName);
-			while (true)
-			{
-				if (-1 == 0)
-				{
-					goto IL_0030;
-				}
-				double num2 = 1024.0;
-				double num3;
-				if (0 == 0)
-				{
-					num /= num2;
-					num3 = 1024.0;
-					goto IL_002f;
-				}
-				goto IL_0046;
-				IL_002f:
-				num /= num3;
-				goto IL_0030;
-				IL_0046:
-				num3 = num2 / 1024.0;
-				if (4 != 0)
-				{
-					num3 /= 1024.0;
-					if (4 != 0)
-					{
-						num += num3;
-						if (0 == 0)
-						{
-							break;
-						}
-						continue;
-					}
-				}
-				goto IL_002f;
-				IL_0030:
-				num2 = GetPerformanceValue(".NET CLR Memory", "# Bytes in all Heaps", processName ?? CurrentProcessName);
-				goto IL_0046;
-			}
-			return num;
+			return GetPerformanceValue(".NET CLR Memory", "Gen 0 heap size", processName ?? CurrentProcessName) / 1024.0 / 1024.0 + GetPerformanceValue(".NET CLR Memory", "# Bytes in all Heaps", processName ?? CurrentProcessName) / 1024.0 / 1024.0;
 		}
 
 		private static double GetPerformanceValue(string categoryName, string counterName, string instanceName)
 		{
-			if (PerformanceCounterCategory.Exists(categoryName) && 0 == 0)
+			if (PerformanceCounterCategory.Exists(categoryName) && PerformanceCounterCategory.CounterExists(counterName, categoryName) && PerformanceCounterCategory.InstanceExists(instanceName, categoryName))
 			{
-				bool flag = PerformanceCounterCategory.CounterExists(counterName, categoryName);
-				while (flag)
+				string key = categoryName + counterName + instanceName;
+				PerformanceCounter value;
+				if (!PerformanceCounters.TryGetValue(key, out value))
 				{
-					flag = PerformanceCounterCategory.InstanceExists(instanceName, categoryName);
-					if (false)
-					{
-						continue;
-					}
-					if (!flag)
-					{
-						break;
-					}
-					string key = categoryName + counterName + instanceName;
-					while (true)
-					{
-						PerformanceCounter value;
-						if (!PerformanceCounters.TryGetValue(key, out value))
-						{
-							value = new PerformanceCounter(categoryName, counterName, instanceName);
-							if (3 == 0)
-							{
-								break;
-							}
-							value.NextSample();
-							if (false ? true : false)
-							{
-								continue;
-							}
-							PerformanceCounters.Add(key, value);
-						}
-						return value.NextValue();
-					}
-					break;
+					value = new PerformanceCounter(categoryName, counterName, instanceName);
+					value.NextSample();
+					PerformanceCounters.Add(key, value);
 				}
+				return value.NextValue();
 			}
 			return double.NaN;
 		}

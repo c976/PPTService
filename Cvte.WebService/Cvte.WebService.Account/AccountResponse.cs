@@ -16,21 +16,11 @@ namespace Cvte.WebService.Account
 		{
 			get
 			{
-				while (true)
+				if (Html != null)
 				{
-					if (1 == 0 || ((SA_Proxy._0083___0018(this) != null) ? true : false))
-					{
-						if (0 == 0)
-						{
-							break;
-						}
-					}
-					else if (8 != 0)
-					{
-						return false;
-					}
+					return StatusCode == AccountResponseCode.OK;
 				}
-				return StatusCode == AccountResponseCode.OK;
+				return false;
 			}
 		}
 

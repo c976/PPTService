@@ -6,17 +6,17 @@ namespace Cvte.Pipe.Http
 {
 	public class BasicHttpPipe : HttpPipe
 	{
-		private readonly IList<Tuple<Func<RequestBase, bool>, Action<RequestBase>>> _0001 = new List<Tuple<Func<RequestBase, bool>, Action<RequestBase>>>();
+		private readonly IList<Tuple<Func<RequestBase, bool>, Action<RequestBase>>> ilist_0 = new List<Tuple<Func<RequestBase, bool>, Action<RequestBase>>>();
 
 		public void AddRequestFilter(Func<RequestBase, bool> func, Action<RequestBase> action)
 		{
-			_0001.Add(new Tuple<Func<RequestBase, bool>, Action<RequestBase>>(func, action));
+			ilist_0.Add(new Tuple<Func<RequestBase, bool>, Action<RequestBase>>(func, action));
 		}
 
 		protected sealed override void PreRequest(RequestBase request)
 		{
 			base.PreRequest(request);
-			foreach (Tuple<Func<RequestBase, bool>, Action<RequestBase>> item in _0001)
+			foreach (Tuple<Func<RequestBase, bool>, Action<RequestBase>> item in ilist_0)
 			{
 				if (item.Item1(request))
 				{

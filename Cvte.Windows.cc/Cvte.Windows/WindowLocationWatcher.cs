@@ -15,61 +15,22 @@ namespace Cvte.Windows
 		{
 			add
 			{
-				while (true)
+				if (_handlers == null)
 				{
-					if (_handlers == null)
-					{
-						_handlers = new List<WeakReference>();
-					}
-					_handlers.Add(new WeakReference(value));
-					if (3 != 0)
-					{
-						value(_window, EventArgs.Empty);
-						if (7 != 0)
-						{
-							break;
-						}
-					}
+					_handlers = new List<WeakReference>();
 				}
+				_handlers.Add(new WeakReference(value));
+				value(_window, EventArgs.Empty);
 			}
 			remove
 			{
-				WeakReference weakReference2 = default(WeakReference);
-				while (true)
+				if (_handlers != null)
 				{
-					if (0 == 0)
+					WeakReference weakReference = _handlers.FirstOrDefault((WeakReference x) => object.ReferenceEquals(x.Target, value));
+					if (weakReference != null)
 					{
-						if (false)
-						{
-							break;
-						}
-						EventHandler value2 = value;
-						if (_handlers == null)
-						{
-							return;
-						}
-						WeakReference weakReference = _handlers.FirstOrDefault((WeakReference x) => object.ReferenceEquals(x.Target, value2));
-						if (0 == 0)
-						{
-							weakReference2 = weakReference;
-						}
-						if (5 == 0)
-						{
-							continue;
-						}
-						if (weakReference2 == null)
-						{
-							break;
-						}
+						_handlers.Remove(weakReference);
 					}
-					if (7 != 0)
-					{
-						_handlers.Remove(weakReference2);
-						break;
-					}
-				}
-				if (1 == 0)
-				{
 				}
 			}
 		}
@@ -89,41 +50,10 @@ namespace Cvte.Windows
 
 		private void window_Closed(object sender, EventArgs e)
 		{
-			while (true)
-			{
-				_window.ContentRendered -= window_ContentRendered;
-				while (true)
-				{
-					if (0 == 0)
-					{
-						_window.StateChanged -= window_StateChanged;
-						if (1 == 0)
-						{
-							continue;
-						}
-						_window.LocationChanged -= window_LocationChanged;
-						goto IL_0051;
-					}
-					goto IL_0068;
-					IL_0068:
-					if (false)
-					{
-						break;
-					}
-					if (0 == 0)
-					{
-						if (1 == 0)
-						{
-							break;
-						}
-						return;
-					}
-					goto IL_0051;
-					IL_0051:
-					_window.Closed -= window_Closed;
-					goto IL_0068;
-				}
-			}
+			_window.ContentRendered -= window_ContentRendered;
+			_window.StateChanged -= window_StateChanged;
+			_window.LocationChanged -= window_LocationChanged;
+			_window.Closed -= window_Closed;
 		}
 
 		private void window_LocationChanged(object sender, EventArgs e)
@@ -143,7 +73,7 @@ namespace Cvte.Windows
 
 		private void RaiseWindowBoundsChanged()
 		{
-			if (_handlers == null || 4 == 0)
+			if (_handlers == null)
 			{
 				return;
 			}

@@ -24,36 +24,13 @@ namespace Cvte
 		public void Publish(object publisher, string key)
 		{
 			IList<EventHandler> value;
-			while (_keyCallbackMapping.TryGetValue(key, out value))
+			if (!_keyCallbackMapping.TryGetValue(key, out value))
 			{
-				if (false)
-				{
-					continue;
-				}
-				IEnumerator<EventHandler> enumerator = value.GetEnumerator();
-				try
-				{
-					while (enumerator.MoveNext())
-					{
-						enumerator.Current(publisher, EventArgs.Empty);
-					}
-				}
-				finally
-				{
-					while (enumerator != null)
-					{
-						if (4 != 0)
-						{
-							enumerator.Dispose();
-							break;
-						}
-					}
-				}
-				if (false)
-				{
-					continue;
-				}
-				break;
+				return;
+			}
+			foreach (EventHandler item in value)
+			{
+				item(publisher, EventArgs.Empty);
 			}
 		}
 
@@ -64,40 +41,20 @@ namespace Cvte
 
 		public void Publish<T>(object publisher, T args) where T : EventArgs
 		{
+			Type type = args.GetType();
 			IList<Delegate> value;
-			while (true)
+			if (!_typeCallbackMapping.TryGetValue(type, out value))
 			{
-				Type type = args.GetType();
-				if (!_typeCallbackMapping.TryGetValue(type, out value))
-				{
-					if (false)
-					{
-						continue;
-					}
-					return;
-				}
-				break;
+				return;
 			}
-			IEnumerator<Delegate> enumerator = value.GetEnumerator();
-			try
+			foreach (Delegate item in value)
 			{
-				while (6 != 0 && enumerator.MoveNext())
+				try
 				{
-					Delegate current = enumerator.Current;
-					try
-					{
-						current.DynamicInvoke(publisher, args);
-					}
-					catch (TargetInvocationException)
-					{
-					}
+					item.DynamicInvoke(publisher, args);
 				}
-			}
-			finally
-			{
-				if (false || 5 == 0 || false || enumerator != null)
+				catch (TargetInvocationException)
 				{
-					enumerator.Dispose();
 				}
 			}
 		}
@@ -109,18 +66,9 @@ namespace Cvte
 				throw new ArgumentNullException("handler can not be null");
 			}
 			IList<EventHandler> value;
-			if (!_keyCallbackMapping.TryGetValue(key, out value) || -1 == 0)
+			if (!_keyCallbackMapping.TryGetValue(key, out value))
 			{
-				if (0 == 0)
-				{
-					IDictionary<string, IList<EventHandler>> keyCallbackMapping = _keyCallbackMapping;
-					List<EventHandler> list = new List<EventHandler>();
-					if (0 == 0)
-					{
-						list.Add(handler);
-					}
-					keyCallbackMapping.Add(key, list);
-				}
+				_keyCallbackMapping.Add(key, new List<EventHandler> { handler });
 			}
 			else
 			{
@@ -135,84 +83,31 @@ namespace Cvte
 
 		public void Subscribe<T>(EventHandler<T> callback) where T : EventArgs
 		{
-			if (callback == null)
+			if (callback != null)
 			{
-				return;
-			}
-			Type parameterType = default(Type);
-			while (true)
-			{
-				IL_0005:
-				if (2 != 0)
+				Type parameterType = callback.Method.GetParameters()[1].ParameterType;
+				IList<Delegate> value;
+				if (!_typeCallbackMapping.TryGetValue(parameterType, out value))
 				{
-					parameterType = callback.Method.GetParameters()[1].ParameterType;
-					IList<Delegate> value;
-					while (_typeCallbackMapping.TryGetValue(parameterType, out value))
-					{
-						if (false)
-						{
-							goto IL_0005;
-						}
-						if (1 == 0)
-						{
-							return;
-						}
-						value.Add(callback);
-						if (5 == 0 || 6 == 0)
-						{
-							continue;
-						}
-						return;
-					}
+					_typeCallbackMapping.Add(parameterType, new List<Delegate> { callback });
 				}
-				_typeCallbackMapping.Add(parameterType, new List<Delegate> { callback });
-				break;
+				else
+				{
+					value.Add(callback);
+				}
 			}
 		}
 
 		public void Unsubscribe<T>(EventHandler<T> callback) where T : EventArgs
 		{
-			Type key = default(Type);
-			while (true)
+			if (callback != null)
 			{
-				bool flag;
+				Type parameterType = callback.Method.GetParameters()[1].ParameterType;
 				IList<Delegate> value;
-				if (0 == 0)
+				if (_typeCallbackMapping.TryGetValue(parameterType, out value))
 				{
-					if (callback == null || -1 == 0)
-					{
-						break;
-					}
-					Type parameterType = callback.Method.GetParameters()[1].ParameterType;
-					if (0 == 0)
-					{
-						key = parameterType;
-					}
-					flag = _typeCallbackMapping.TryGetValue(key, out value);
-					goto IL_0026;
+					value?.Remove(callback);
 				}
-				goto IL_002f;
-				IL_002f:
-				flag = value.Remove(callback);
-				if (true && 0 == 0)
-				{
-					break;
-				}
-				goto IL_0026;
-				IL_0026:
-				if (!flag)
-				{
-					if (5 != 0)
-					{
-						break;
-					}
-					continue;
-				}
-				if (value == null)
-				{
-					break;
-				}
-				goto IL_002f;
 			}
 		}
 	}

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace Cvte.Windows
@@ -12,10 +11,6 @@ namespace Cvte.Windows
 	public sealed class MonitorCollection : ICollection<MonitorDevice>, IEnumerable<MonitorDevice>, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
 	{
 		private readonly List<MonitorDevice> _devices;
-
-		private NotifyCollectionChangedEventHandler m_CollectionChanged;
-
-		private PropertyChangedEventHandler m_PropertyChanged;
 
 		public MonitorDevice Primary => _devices.First((MonitorDevice device) => object.Equals(device.Win32Screen, Screen.PrimaryScreen));
 
@@ -49,177 +44,9 @@ namespace Cvte.Windows
 			}
 		}
 
-		private event NotifyCollectionChangedEventHandler CollectionChanged
-		{
-			add
-			{
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						notifyCollectionChangedEventHandler = this.m_CollectionChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler2 = default(NotifyCollectionChangedEventHandler);
-				NotifyCollectionChangedEventHandler value2 = (NotifyCollectionChangedEventHandler)Delegate.Combine(notifyCollectionChangedEventHandler2, value);
-				notifyCollectionChangedEventHandler = Interlocked.CompareExchange(ref this.m_CollectionChanged, value2, notifyCollectionChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler3 = notifyCollectionChangedEventHandler;
-				if (6u != 0)
-				{
-					notifyCollectionChangedEventHandler2 = notifyCollectionChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)notifyCollectionChangedEventHandler != notifyCollectionChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						notifyCollectionChangedEventHandler = this.m_CollectionChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler2 = default(NotifyCollectionChangedEventHandler);
-				NotifyCollectionChangedEventHandler value2 = (NotifyCollectionChangedEventHandler)Delegate.Remove(notifyCollectionChangedEventHandler2, value);
-				notifyCollectionChangedEventHandler = Interlocked.CompareExchange(ref this.m_CollectionChanged, value2, notifyCollectionChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				NotifyCollectionChangedEventHandler notifyCollectionChangedEventHandler3 = notifyCollectionChangedEventHandler;
-				if (6u != 0)
-				{
-					notifyCollectionChangedEventHandler2 = notifyCollectionChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)notifyCollectionChangedEventHandler != notifyCollectionChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		private event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		private event PropertyChangedEventHandler PropertyChanged
-		{
-			add
-			{
-				PropertyChangedEventHandler propertyChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						propertyChangedEventHandler = this.m_PropertyChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				PropertyChangedEventHandler propertyChangedEventHandler2 = default(PropertyChangedEventHandler);
-				PropertyChangedEventHandler value2 = (PropertyChangedEventHandler)Delegate.Combine(propertyChangedEventHandler2, value);
-				propertyChangedEventHandler = Interlocked.CompareExchange(ref this.m_PropertyChanged, value2, propertyChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				PropertyChangedEventHandler propertyChangedEventHandler3 = propertyChangedEventHandler;
-				if (6u != 0)
-				{
-					propertyChangedEventHandler2 = propertyChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)propertyChangedEventHandler != propertyChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				PropertyChangedEventHandler propertyChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						propertyChangedEventHandler = this.m_PropertyChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				PropertyChangedEventHandler propertyChangedEventHandler2 = default(PropertyChangedEventHandler);
-				PropertyChangedEventHandler value2 = (PropertyChangedEventHandler)Delegate.Remove(propertyChangedEventHandler2, value);
-				propertyChangedEventHandler = Interlocked.CompareExchange(ref this.m_PropertyChanged, value2, propertyChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				PropertyChangedEventHandler propertyChangedEventHandler3 = propertyChangedEventHandler;
-				if (6u != 0)
-				{
-					propertyChangedEventHandler2 = propertyChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)propertyChangedEventHandler != propertyChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		private event PropertyChangedEventHandler PropertyChanged;
 
 		internal MonitorCollection(IEnumerable<MonitorDevice> devices)
 		{
@@ -277,38 +104,12 @@ namespace Cvte.Windows
 
 		private void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
 		{
-			this.m_CollectionChanged?.Invoke(this, e);
+			CollectionChanged?.Invoke(this, e);
 		}
 
 		private void OnPropertyChanged(string propertyName)
 		{
-			while (true)
-			{
-				PropertyChangedEventHandler propertyChanged;
-				if (0 == 0)
-				{
-					propertyChanged = this.m_PropertyChanged;
-				}
-				while (true)
-				{
-					if (propertyChanged != null)
-					{
-						if (false)
-						{
-							break;
-						}
-						if (5 != 0)
-						{
-							propertyChanged(this, new PropertyChangedEventArgs(propertyName));
-						}
-					}
-					if (false)
-					{
-						continue;
-					}
-					return;
-				}
-			}
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

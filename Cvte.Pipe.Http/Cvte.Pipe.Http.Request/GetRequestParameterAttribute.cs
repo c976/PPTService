@@ -1,22 +1,23 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Cvte.Pipe.Http.Request
 {
 	public class GetRequestParameterAttribute : Attribute
 	{
-		// 原版是 int / string 两个独立字段，反编译被合并为 dynamic，这里拆开。
-		private int _order;
-		private string _format;
+		private int int_0;
+
+		private string string_0;
 
 		public int Order
 		{
 			get
 			{
-				return _order;
+				return int_0;
 			}
 			set
 			{
-				_order = value;
+				int_0 = value;
 			}
 		}
 
@@ -24,11 +25,11 @@ namespace Cvte.Pipe.Http.Request
 		{
 			get
 			{
-				return _format;
+				return string_0;
 			}
 			set
 			{
-				_format = value;
+				string_0 = value;
 			}
 		}
 	}

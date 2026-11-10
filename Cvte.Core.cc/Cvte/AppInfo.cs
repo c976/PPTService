@@ -2,22 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Cvte
 {
 	public class AppInfo
 	{
-		private sealed class _003C_003Ec__DisplayClass10_0
-		{
-			public string key;
-
-			internal bool _003Cget_Item_003Eb__0(AssemblyInfoAttribute x)
-			{
-				return x.Key == key;
-			}
-		}
-
 		private readonly Assembly _assembly;
 
 		public string CopyRight => GetAttribute<AssemblyCopyrightAttribute>().Copyright;
@@ -28,20 +17,7 @@ namespace Cvte
 
 		public string Company => GetAttribute<AssemblyCompanyAttribute>().Company;
 
-		public string this[string key]
-		{
-			get
-			{
-				_003C_003Ec__DisplayClass10_0 obj = new _003C_003Ec__DisplayClass10_0();
-				_003C_003Ec__DisplayClass10_0 obj2 = default(_003C_003Ec__DisplayClass10_0);
-				if (0 == 0)
-				{
-					obj2 = obj;
-				}
-				obj2.key = key;
-				return GetAttributes<AssemblyInfoAttribute>().First(obj2._003Cget_Item_003Eb__0).Value;
-			}
-		}
+		public string this[string key] => GetAttributes<AssemblyInfoAttribute>().First((AssemblyInfoAttribute x) => x.Key == key).Value;
 
 		public AppInfo(Assembly assembly)
 		{

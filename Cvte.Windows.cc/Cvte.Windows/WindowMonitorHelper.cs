@@ -17,30 +17,12 @@ namespace Cvte.Windows
 			get
 			{
 				WindowInteropHelper windowInteropHelper = new WindowInteropHelper(_window);
-				while (true)
+				if (windowInteropHelper.Handle == IntPtr.Zero)
 				{
-					IntPtr handle = windowInteropHelper.Handle;
-					while (true)
-					{
-						if (0 == 0 && 7 != 0)
-						{
-							if (handle == IntPtr.Zero)
-							{
-								throw new InvalidOperationException("窗口呈现之前或关闭之后无法获取其所在的屏幕。");
-							}
-							if (false)
-							{
-								break;
-							}
-							handle = windowInteropHelper.Handle;
-						}
-						if (0 == 0)
-						{
-							Screen screen = Screen.FromHandle(handle);
-							return Cvte.Windows.Monitor.FromWin32Screen(screen);
-						}
-					}
+					throw new InvalidOperationException("窗口呈现之前或关闭之后无法获取其所在的屏幕。");
 				}
+				Screen screen = Screen.FromHandle(windowInteropHelper.Handle);
+				return Cvte.Windows.Monitor.FromWin32Screen(screen);
 			}
 		}
 
@@ -51,55 +33,28 @@ namespace Cvte.Windows
 
 		public bool MoveToNextMonitor()
 		{
-			while (true)
+			MonitorDevice current = Monitor;
+			MonitorDevice monitorDevice = Cvte.Windows.Monitor.Devices.FirstOrDefault((MonitorDevice x) => !object.Equals(x, current));
+			if (monitorDevice == null)
 			{
-				MonitorDevice current = Monitor;
-				MonitorDevice monitorDevice = Cvte.Windows.Monitor.Devices.FirstOrDefault((MonitorDevice x) => !object.Equals(x, current));
-				if (7 != 0)
-				{
-					if (monitorDevice != null)
-					{
-						MoveToMonitor(monitorDevice);
-						break;
-					}
-					if (false ? true : false)
-					{
-						break;
-					}
-					if (-1 != 0)
-					{
-						return false;
-					}
-				}
+				return false;
 			}
+			MoveToMonitor(monitorDevice);
 			return true;
 		}
 
 		public unsafe void MoveToMonitor(MonitorDevice monitor)
 		{
-			int num = 16;
-			void* ptr = stackalloc byte[num];
-			MonitorDevice monitor2;
-			do
-			{
-				monitor2 = Monitor;
-				num = (object.Equals(monitor2, monitor) ? 1 : 0);
-			}
-			while (false);
-			if (num == 0)
+			void* ptr = stackalloc byte[16];
+			MonitorDevice monitor2 = Monitor;
+			if (!object.Equals(monitor2, monitor))
 			{
 				Size size = _window.RestoreBounds.Size;
 				Rect pixelBounds = monitor2.PixelBounds;
-				Rect pixelBounds2;
-				Rect restoreBounds;
-				do
-				{
-					pixelBounds2 = monitor.PixelBounds;
-					restoreBounds = _window.RestoreBounds;
-					*(double*)ptr = (pixelBounds2.Width - size.Width) / (pixelBounds.Width - size.Width);
-					((double*)ptr)[1] = (pixelBounds2.Height - size.Height) / (pixelBounds.Height - size.Height);
-				}
-				while (7 == 0);
+				Rect pixelBounds2 = monitor.PixelBounds;
+				Rect restoreBounds = _window.RestoreBounds;
+				*(double*)ptr = (pixelBounds2.Width - size.Width) / (pixelBounds.Width - size.Width);
+				((double*)ptr)[1] = (pixelBounds2.Height - size.Height) / (pixelBounds.Height - size.Height);
 				Point point = CenterOf(restoreBounds);
 				Point point2 = new Point(point.X - pixelBounds.Left - size.Width / 2.0, point.Y - pixelBounds.Top - size.Height / 2.0);
 				Point point3 = new Point(point2.X * *(double*)ptr + size.Width / 2.0, point2.Y * ((double*)ptr)[1] + size.Height / 2.0);

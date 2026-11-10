@@ -1,14 +1,14 @@
 namespace Cvte.Documents
 {
-	public abstract class ModifiedOperation<SA_T0, SA_T1> : IOperation
+	public abstract class ModifiedOperation<TTarget, TValue> : IOperation
 	{
-		private readonly SA_T0 _target;
+		private readonly TTarget _target;
 
-		private readonly SA_T1 _oldValue;
+		private readonly TValue _oldValue;
 
-		private readonly SA_T1 _newValue;
+		private readonly TValue _newValue;
 
-		protected ModifiedOperation(SA_T0 target, SA_T1 oldValue, SA_T1 newValue)
+		protected ModifiedOperation(TTarget target, TValue oldValue, TValue newValue)
 		{
 			_target = target;
 			_oldValue = oldValue;
@@ -25,6 +25,6 @@ namespace Cvte.Documents
 			Apply(_target, _newValue);
 		}
 
-		protected abstract void Apply(SA_T0 target, SA_T1 value);
+		protected abstract void Apply(TTarget target, TValue value);
 	}
 }

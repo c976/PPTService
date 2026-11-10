@@ -7,35 +7,38 @@ namespace Cvte.WebService.Account
 {
 	public class DBCache<TDB> where TDB : DataConnection, new()
 	{
-		private string m__connectionString;
+		private readonly string string_0;
 
-		private Func<string> m__connectionStringFunc;
+		private readonly Func<string> func_0;
 
-		private string _0001()
+		[SpecialName]
+		private string method_0()
 		{
-			if (!string.IsNullOrEmpty(m__connectionString))
+			if (!string.IsNullOrEmpty(string_0))
 			{
-				return m__connectionString;
+				return string_0;
 			}
-			return (m__connectionStringFunc != null) ? m__connectionStringFunc() : null;
+			return func_0();
 		}
 
 		public DBCache(string connectionString)
 		{
-			m__connectionString = connectionString;
+			string_0 = connectionString;
 		}
 
 		public DBCache(Func<string> getConnectionStringFunc)
 		{
-			m__connectionStringFunc = getConnectionStringFunc;
+			func_0 = getConnectionStringFunc;
 		}
 
 		public void Execute(Action<TDB> execute)
 		{
-			TDB val = null;
+			//IL_001f: Unknown result type (might be due to invalid IL or missing references)
+			//IL_0025: Expected Obj, but got Unknown
+			TDB val = default(TDB);
 			try
 			{
-				val = (TDB)Activator.CreateInstance(typeof(TDB), new SQLiteDataProvider("SQLite.Classic"), _0001());
+				val = (TDB)Activator.CreateInstance(typeof(TDB), (object)new SQLiteDataProvider("SQLite.Classic"), method_0());
 				execute(val);
 			}
 			catch (Exception value)
@@ -44,24 +47,24 @@ namespace Cvte.WebService.Account
 			}
 			finally
 			{
-				val?.Dispose();
+				object obj = val;
+				if (obj != null)
+				{
+					((DataConnection)obj).Dispose();
+				}
 			}
 		}
 
 		public bool ExecuteTransaction(Action<TDB> execute)
 		{
-			TDB val = null;
+			//IL_001f: Unknown result type (might be due to invalid IL or missing references)
+			//IL_0025: Expected Obj, but got Unknown
+			TDB val = default(TDB);
 			try
 			{
-				do
-				{
-					if (0 == 0)
-					{
-						val = (TDB)Activator.CreateInstance(typeof(TDB), new SQLiteDataProvider("SQLite.Classic"), _0001());
-					}
-				}
-				while (1 == 0);
-				using (DataConnectionTransaction dataConnectionTransaction = val.BeginTransaction())
+				val = (TDB)Activator.CreateInstance(typeof(TDB), (object)new SQLiteDataProvider("SQLite.Classic"), method_0());
+				DataConnectionTransaction val2 = ((DataConnection)val).BeginTransaction();
+				try
 				{
 					try
 					{
@@ -69,63 +72,50 @@ namespace Cvte.WebService.Account
 					}
 					catch (Exception)
 					{
-						if (0 == 0)
-						{
-							dataConnectionTransaction.Rollback();
-							return false;
-						}
-						goto end_IL_004b;
+						val2.Rollback();
+						return false;
 					}
-					dataConnectionTransaction.Commit();
+					val2.Commit();
 					return true;
-					end_IL_004b:;
+				}
+				finally
+				{
+					((IDisposable)val2)?.Dispose();
 				}
 			}
 			finally
 			{
-				val?.Dispose();
+				object obj = val;
+				if (obj != null)
+				{
+					((DataConnection)obj).Dispose();
+				}
 			}
-			bool result;
-			return result;
 		}
 
 		public TReturn Execute<TReturn>(Func<TDB, TReturn> execute)
 		{
-			TReturn result = default(TReturn);
-			if (6 != 0)
+			//IL_001f: Unknown result type (might be due to invalid IL or missing references)
+			//IL_0025: Expected Obj, but got Unknown
+			TDB val = default(TDB);
+			try
 			{
-				TDB val = null;
-				try
+				val = (TDB)Activator.CreateInstance(typeof(TDB), (object)new SQLiteDataProvider("SQLite.Classic"), method_0());
+				return execute(val);
+			}
+			catch (Exception value)
+			{
+				Console.WriteLine(value);
+				return default(TReturn);
+			}
+			finally
+			{
+				object obj = val;
+				if (obj != null)
 				{
-					do
-					{
-						val = (TDB)Activator.CreateInstance(typeof(TDB), new SQLiteDataProvider("SQLite.Classic"), _0001());
-						result = execute(val);
-					}
-					while (8 == 0);
-				}
-				catch (Exception value)
-				{
-					Console.WriteLine(value);
-					do
-					{
-						result = default(TReturn);
-					}
-					while (false);
-				}
-				finally
-				{
-					do
-					{
-						if (2 != 0)
-						{
-							val?.Dispose();
-						}
-					}
-					while (6 == 0);
+					((DataConnection)obj).Dispose();
 				}
 			}
-			return result;
 		}
 	}
 }

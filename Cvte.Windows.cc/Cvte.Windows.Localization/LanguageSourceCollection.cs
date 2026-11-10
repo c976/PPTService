@@ -21,35 +21,11 @@ namespace Cvte.Windows.Localization
 
 		public void Add(ILanguageSource language)
 		{
-			while (true)
+			if (language == null)
 			{
-				if (4 != 0)
-				{
-					if (language == null)
-					{
-						goto IL_0007;
-					}
-					goto IL_0012;
-				}
-				return;
-				IL_0007:
-				if (3 != 0)
-				{
-					throw new ArgumentNullException("language");
-				}
-				goto IL_0012;
-				IL_0012:
-				if (7 != 0)
-				{
-					_sources.Add(language);
-					if (6 != 0)
-					{
-						break;
-					}
-					continue;
-				}
-				goto IL_0007;
+				throw new ArgumentNullException("language");
 			}
+			_sources.Add(language);
 			_addLanguage(language);
 		}
 

@@ -20,64 +20,36 @@ namespace Cvte.Aop
 
 		public object Intercept(object target, MethodInfo method, object[] args)
 		{
-			object result = default(object);
-			if (0 == 0)
+			try
 			{
-				object target2 = target;
-				MethodInfo method2 = method;
-				object[] args2 = args;
-				try
+				_advices.ForEach((AspectAdvice advice) =>
 				{
-					_advices.ForEach((AspectAdvice advice) =>
-					{
-						advice.Before(target2, method2, args2);
-					});
-					do
-					{
-						if (6 != 0 && 0 == 0)
-						{
-							object obj = method2.Invoke(target2, args2);
-							_advices.ForEach((AspectAdvice advice) =>
-							{
-								advice.After(target2, method2, args2);
-							});
-							result = obj;
-						}
-					}
-					while (4 == 0);
-				}
-				catch (Exception ex)
+					advice.Before(target, method, args);
+				});
+				object result = method.Invoke(target, args);
+				_advices.ForEach((AspectAdvice advice) =>
 				{
-					Exception ex2 = ex;
-					Exception ex3 = ex2;
-					do
-					{
-						IList<AspectAdvice> advices = _advices;
-						if (advices == null)
-						{
-							continue;
-						}
-						advices.ForEach((AspectAdvice advice) =>
-						{
-							if (4 != 0)
-							{
-								advice.Throw(target2, method2, ex3, args2);
-							}
-						});
-						break;
-					}
-					while (7 == 0);
-					result = null;
-				}
-				finally
-				{
-					_advices?.ForEach((AspectAdvice advice) =>
-					{
-						advice.AfterEnsure(target2, method2, args2);
-					});
-				}
+					advice.After(target, method, args);
+				});
+				return result;
 			}
-			return result;
+			catch (Exception ex)
+			{
+				Exception ex2 = ex;
+				Exception ex3 = ex2;
+				_advices?.ForEach((AspectAdvice advice) =>
+				{
+					advice.Throw(target, method, ex3, args);
+				});
+				return null;
+			}
+			finally
+			{
+				_advices?.ForEach((AspectAdvice advice) =>
+				{
+					advice.AfterEnsure(target, method, args);
+				});
+			}
 		}
 	}
 }

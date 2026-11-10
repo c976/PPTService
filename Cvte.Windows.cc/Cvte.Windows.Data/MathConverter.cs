@@ -28,20 +28,20 @@ namespace Cvte.Windows.Data
 				_right = right;
 				switch (operation)
 				{
+				case '*':
+					_operation = (decimal a, decimal b) => a * b;
+					break;
 				case '+':
 					_operation = (decimal a, decimal b) => a + b;
 					break;
 				case '-':
 					_operation = (decimal a, decimal b) => a - b;
 					break;
-				case '*':
-					_operation = (decimal a, decimal b) => a * b;
-					break;
+				default:
+					throw new ArgumentException("Invalid operation " + operation);
 				case '/':
 					_operation = (decimal a, decimal b) => a / b;
 					break;
-				default:
-					throw new ArgumentException("Invalid operation " + operation);
 				}
 			}
 
@@ -97,11 +97,7 @@ namespace Cvte.Windows.Data
 					_pos = 0;
 					_text = text;
 					IExpression result = ParseExpression();
-					do
-					{
-						RequireEndOfText();
-					}
-					while (8 == 0);
+					RequireEndOfText();
 					return result;
 				}
 				catch (Exception ex)
@@ -114,287 +110,129 @@ namespace Cvte.Windows.Data
 			private IExpression ParseExpression()
 			{
 				IExpression expression = ParseTerm();
-				IExpression expression2 = default(IExpression);
-				if (0 == 0)
-				{
-					expression2 = expression;
-				}
-				char c = default(char);
 				while (true)
 				{
-					int num;
-					if (7 != 0)
+					if (_pos < _text.Length)
 					{
-						num = _pos;
-						if (-1 == 0)
-						{
-							goto IL_0053;
-						}
-						if (num >= _text.Length)
+						char c = _text[_pos];
+						if (c != '+' && c != '-')
 						{
 							break;
 						}
+						_pos++;
+						IExpression right = ParseTerm();
+						expression = new BinaryOperation(c, expression, right);
+						continue;
 					}
-					c = _text[_pos];
-					num = c;
-					goto IL_0053;
-					IL_0053:
-					int num2 = 43;
-					while (num != num2)
-					{
-						if (0 == 0)
-						{
-							num = c;
-							num2 = 45;
-							if (num2 == 0)
-							{
-								continue;
-							}
-							if (num == num2)
-							{
-								break;
-							}
-						}
-						return expression2;
-					}
-					_pos++;
-					IExpression right = ParseTerm();
-					if (6 != 0)
-					{
-						expression2 = new BinaryOperation(c, expression2, right);
-					}
+					return expression;
 				}
-				return expression2;
+				return expression;
 			}
 
 			private IExpression ParseTerm()
 			{
 				IExpression expression = ParseFactor();
-				IExpression expression2 = default(IExpression);
-				if (0 == 0)
-				{
-					expression2 = expression;
-				}
-				char c = default(char);
 				while (true)
 				{
-					int num;
-					if (7 != 0)
+					if (_pos < _text.Length)
 					{
-						num = _pos;
-						if (-1 == 0)
-						{
-							goto IL_0053;
-						}
-						if (num >= _text.Length)
+						char c = _text[_pos];
+						if (c != '*' && c != '/')
 						{
 							break;
 						}
+						_pos++;
+						IExpression right = ParseFactor();
+						expression = new BinaryOperation(c, expression, right);
+						continue;
 					}
-					c = _text[_pos];
-					num = c;
-					goto IL_0053;
-					IL_0053:
-					int num2 = 42;
-					while (num != num2)
-					{
-						if (0 == 0)
-						{
-							num = c;
-							num2 = 47;
-							if (num2 == 0)
-							{
-								continue;
-							}
-							if (num == num2)
-							{
-								break;
-							}
-						}
-						return expression2;
-					}
-					_pos++;
-					IExpression right = ParseFactor();
-					if (6 != 0)
-					{
-						expression2 = new BinaryOperation(c, expression2, right);
-					}
+					return expression;
 				}
-				return expression2;
+				return expression;
 			}
 
 			private IExpression ParseFactor()
 			{
-				int num = 0;
-				Match match = default(Match);
 				SkipWhiteSpace();
 				if (_pos >= _text.Length)
 				{
 					throw new ArgumentException("Unexpected end of text");
 				}
-				char c;
-				if (0 == 0)
+				char c = _text[_pos];
+				switch (c)
 				{
-					c = _text[_pos];
-					if (c == '+')
-					{
-						_pos++;
-						return ParseFactor();
-					}
-					if (c == '-')
-					{
-						goto IL_006c;
-					}
-					if (c == 'x')
-					{
-						goto IL_0090;
-					}
-				}
-				if (c == 'a')
+				case '+':
+					_pos++;
+					return ParseFactor();
+				case '-':
+					_pos++;
+					return new Negate(ParseFactor());
+				case '(':
 				{
-					goto IL_0090;
-				}
-				if (c == 'y')
-				{
-					goto IL_00a8;
-				}
-				if (0 == 0)
-				{
-					if (c == 'b')
-					{
-						goto IL_00a8;
-					}
-					if (c != 'z')
-					{
-						num = c;
-						while (num != 99)
-						{
-							switch (c)
-							{
-							case 'd':
-							case 't':
-								return CreateVariable(3);
-							case '(':
-							{
-								_pos++;
-								IExpression result2 = ParseExpression();
-								SkipWhiteSpace();
-								Require(')');
-								SkipWhiteSpace();
-								return result2;
-							}
-							case '{':
-							{
-								int num2;
-								if (0 == 0)
-								{
-									_pos++;
-									num2 = _text.IndexOf('}', _pos);
-									num = num2;
-									if (1 == 0)
-									{
-										break;
-									}
-									if (num < 0)
-									{
-										_pos--;
-										throw new ArgumentException("Unmatched '{'");
-									}
-									if (num2 == _pos)
-									{
-										throw new ArgumentException("Missing parameter index after '{'");
-									}
-								}
-								Variable result = new Variable(_text.Substring(_pos, num2 - _pos).Trim());
-								_pos = num2 + 1;
-								SkipWhiteSpace();
-								return result;
-							}
-							default:
-								match = Regex.Match(_text.Substring(_pos), "(\\d+\\.?\\d*|\\d*\\.?\\d+)");
-								num = (match.Success ? 1 : 0);
-								break;
-							}
-							if (5 == 0)
-							{
-								continue;
-							}
-							goto IL_01d0;
-						}
-					}
-					if (-1 != 0)
-					{
-						return CreateVariable(2);
-					}
-				}
-				goto IL_01ec;
-				IL_00a8:
-				if (4 != 0)
-				{
-					return CreateVariable(1);
-				}
-				goto IL_006c;
-				IL_01ec:
-				return new Constant(match.Value);
-				IL_0090:
-				return CreateVariable(0);
-				IL_01d0:
-				if (num != 0)
-				{
-					_pos += match.Length;
+					_pos++;
+					IExpression result = ParseExpression();
 					SkipWhiteSpace();
-					goto IL_01ec;
+					Require(')');
+					SkipWhiteSpace();
+					return result;
 				}
-				throw new ArgumentException($"Unexpeted character '{c}'");
-				IL_006c:
-				_pos++;
-				return new Negate(ParseFactor());
+				case '{':
+				{
+					_pos++;
+					int num = _text.IndexOf('}', _pos);
+					if (num < 0)
+					{
+						_pos--;
+						throw new ArgumentException("Unmatched '{'");
+					}
+					if (num == _pos)
+					{
+						throw new ArgumentException("Missing parameter index after '{'");
+					}
+					Variable result2 = new Variable(_text.Substring(_pos, num - _pos).Trim());
+					_pos = num + 1;
+					SkipWhiteSpace();
+					return result2;
+				}
+				default:
+				{
+					Match match = Regex.Match(_text.Substring(_pos), "(\\d+\\.?\\d*|\\d*\\.?\\d+)");
+					if (match.Success)
+					{
+						_pos += match.Length;
+						SkipWhiteSpace();
+						return new Constant(match.Value);
+					}
+					throw new ArgumentException($"Unexpeted character '{c}'");
+				}
+				case 'd':
+				case 't':
+					return CreateVariable(3);
+				case 'c':
+				case 'z':
+					return CreateVariable(2);
+				case 'b':
+				case 'y':
+					return CreateVariable(1);
+				case 'a':
+				case 'x':
+					return CreateVariable(0);
+				}
 			}
 
 			private IExpression CreateVariable(int n)
 			{
-				if (true)
-				{
-					_pos++;
-				}
+				_pos++;
 				SkipWhiteSpace();
 				return new Variable(n);
 			}
 
 			private void SkipWhiteSpace()
 			{
-				if (-1 == 0)
+				while (_pos < _text.Length && char.IsWhiteSpace(_text[_pos]))
 				{
-					goto IL_003c;
+					_pos++;
 				}
-				goto IL_0040;
-				IL_0040:
-				int num = _pos;
-				while (num < _text.Length)
-				{
-					num = (char.IsWhiteSpace(_text[_pos]) ? 1 : 0);
-					if (5 == 0)
-					{
-						continue;
-					}
-					goto IL_003a;
-				}
-				goto IL_003c;
-				IL_003c:
-				if (0 == 0)
-				{
-					return;
-				}
-				goto IL_0005;
-				IL_0005:
-				_pos++;
-				goto IL_0040;
-				IL_003a:
-				if (num != 0)
-				{
-					goto IL_0005;
-				}
-				goto IL_003c;
 			}
 
 			private void Require(char c)
@@ -408,19 +246,9 @@ namespace Cvte.Windows.Data
 
 			private void RequireEndOfText()
 			{
-				while (true)
+				if (_pos != _text.Length)
 				{
-					if (2 != 0 && _pos != _text.Length)
-					{
-						if (0 == 0)
-						{
-							throw new ArgumentException("Unexpected character '" + _text[_pos] + "'");
-						}
-					}
-					else if (0 == 0)
-					{
-						break;
-					}
+					throw new ArgumentException("Unexpected character '" + _text[_pos] + "'");
 				}
 			}
 		}
@@ -442,19 +270,9 @@ namespace Cvte.Windows.Data
 				_index = n;
 			}
 
-			public unsafe decimal Eval(object[] args)
+			public decimal Eval(object[] args)
 			{
-				int index = _index;
-				IntPtr intPtr = (IntPtr)(void*)args.LongLength;
-				do
-				{
-					if (6 != 0)
-					{
-						intPtr = (IntPtr)(int)(long)intPtr;
-					}
-				}
-				while (false ? true : false);
-				if ((long)index >= (long)intPtr || 4 == 0)
+				if (_index >= args.Length)
 				{
 					throw new ArgumentException($"MathConverter: parameter index {_index} is out of range. {args.Length} parameter(s) supplied");
 				}
@@ -479,40 +297,31 @@ namespace Cvte.Windows.Data
 			try
 			{
 				decimal num = Parse(parameter.ToString()).Eval(values);
-				int num2 = ((targetType == typeof(decimal)) ? 1 : 0);
-				if (7 != 0)
+				if (targetType == typeof(decimal))
 				{
-					if (num2 != 0)
-					{
-						return num;
-					}
-					if (targetType == typeof(string))
-					{
-						return num.ToString(CultureInfo.InvariantCulture);
-					}
-					if (!(targetType == typeof(int)))
-					{
-						if (targetType == typeof(double))
-						{
-							return (double)num;
-						}
-						if (targetType == typeof(long))
-						{
-							return (long)num;
-						}
-						throw new ArgumentException($"Unsupported target type {targetType.FullName}");
-					}
-					num2 = (int)num;
+					return num;
 				}
-				return num2;
+				if (targetType == typeof(string))
+				{
+					return num.ToString(CultureInfo.InvariantCulture);
+				}
+				if (targetType == typeof(int))
+				{
+					return (int)num;
+				}
+				if (targetType == typeof(double))
+				{
+					return (double)num;
+				}
+				if (!(targetType == typeof(long)))
+				{
+					throw new ArgumentException($"Unsupported target type {targetType.FullName}");
+				}
+				return (long)num;
 			}
 			catch (Exception ex)
 			{
-				do
-				{
-					ProcessException(ex);
-				}
-				while (6 == 0);
+				ProcessException(ex);
 			}
 			return DependencyProperty.UnsetValue;
 		}
@@ -532,15 +341,8 @@ namespace Cvte.Windows.Data
 			IExpression value;
 			if (!_storedExpressions.TryGetValue(s, out value))
 			{
-				IExpression expression = new Parser().Parse(s);
-				if (0 == 0)
-				{
-					value = expression;
-				}
-				if (true)
-				{
-					_storedExpressions[s] = value;
-				}
+				value = new Parser().Parse(s);
+				_storedExpressions[s] = value;
 			}
 			return value;
 		}

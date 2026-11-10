@@ -1,24 +1,25 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Cvte.Pipe.Http.Request
 {
 	public class ReqeustAttribute : Attribute
 	{
-		// 原版 SmartAssembly 把多个字段命名为同一字符、靠类型区分，C# 无法表达；
-		// 反编译时被合并成一个 dynamic 字段，导致 Api 与 Type 互相覆盖。这里还原为独立字段。
-		private string _api;
-		private ReqeustType _type;
-		private string _apiPrefix;
+		private string string_0;
+
+		private ReqeustType reqeustType_0;
+
+		private string string_1;
 
 		public string Api
 		{
 			get
 			{
-				return _api;
+				return string_0;
 			}
 			private set
 			{
-				_api = value;
+				string_0 = value;
 			}
 		}
 
@@ -26,11 +27,11 @@ namespace Cvte.Pipe.Http.Request
 		{
 			get
 			{
-				return _type;
+				return reqeustType_0;
 			}
 			private set
 			{
-				_type = value;
+				reqeustType_0 = value;
 			}
 		}
 
@@ -38,11 +39,11 @@ namespace Cvte.Pipe.Http.Request
 		{
 			get
 			{
-				return _apiPrefix;
+				return string_1;
 			}
 			set
 			{
-				_apiPrefix = value;
+				string_1 = value;
 			}
 		}
 

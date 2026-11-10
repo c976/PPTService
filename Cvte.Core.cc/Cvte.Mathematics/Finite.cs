@@ -15,29 +15,29 @@ namespace Cvte.Mathematics
 
 		public static bool IsFinite(Point point)
 		{
-			if (!IsFinite(point.X))
+			if (IsFinite(point.X))
 			{
-				return false;
+				return IsFinite(point.Y);
 			}
-			return IsFinite(point.Y);
+			return false;
 		}
 
 		public static bool IsFinite(Rect rect)
 		{
-			if (!IsFinite(rect.TopLeft))
+			if (IsFinite(rect.TopLeft))
 			{
-				return false;
+				return IsFinite(rect.BottomRight);
 			}
-			return IsFinite(rect.BottomRight);
+			return false;
 		}
 
 		public static bool IsFinite(Size size)
 		{
-			if (!IsFinite(size.Width))
+			if (IsFinite(size.Width))
 			{
-				return false;
+				return IsFinite(size.Height);
 			}
-			return IsFinite(size.Height);
+			return false;
 		}
 	}
 }

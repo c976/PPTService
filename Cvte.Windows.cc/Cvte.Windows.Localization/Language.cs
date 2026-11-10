@@ -76,56 +76,19 @@ namespace Cvte.Windows.Localization
 
 		private void Merge(Language language, bool read, Action action)
 		{
-			while (true)
+			if (language == null)
 			{
-				if (language != null)
-				{
-					if (object.Equals(language.Culture, Culture))
-					{
-						if (2 == 0)
-						{
-							continue;
-						}
-						break;
-					}
-					if (-1 != 0)
-					{
-						throw new ArgumentException("合并的 Language 对象必须具有同种区域属性。");
-					}
-				}
 				throw new ArgumentNullException("language");
 			}
-			List<ILanguageReader>.Enumerator enumerator = language._languageReaderList.GetEnumerator();
-			try
+			if (!object.Equals(language.Culture, Culture))
 			{
-				while (true)
-				{
-					if (false || 6 != 0)
-					{
-					}
-					while (0 == 0)
-					{
-						if (enumerator.MoveNext())
-						{
-							ILanguageReader current = enumerator.Current;
-							if (!_languageReaderList.Contains(current))
-							{
-								_languageReaderList.Add(current);
-							}
-							continue;
-						}
-						goto end_IL_004e;
-					}
-					continue;
-					end_IL_004e:
-					break;
-				}
+				throw new ArgumentException("合并的 Language 对象必须具有同种区域属性。");
 			}
-			finally
+			foreach (ILanguageReader languageReader in language._languageReaderList)
 			{
-				if (7 != 0)
+				if (!_languageReaderList.Contains(languageReader))
 				{
-					((IDisposable)enumerator/*cast due to constrained. prefix*/).Dispose();
+					_languageReaderList.Add(languageReader);
 				}
 			}
 			if (read)
@@ -143,10 +106,6 @@ namespace Cvte.Windows.Localization
 			IsReady = false;
 			_resetEvent.Reset();
 			IsReady = false;
-			if (false)
-			{
-				return;
-			}
 			Task task = new Task(() =>
 			{
 				ReadInner(readers);
@@ -165,12 +124,7 @@ namespace Cvte.Windows.Localization
 		{
 			try
 			{
-				IEnumerable<ILanguageReader> obj = specifiedReaders ?? _languageReaderList;
-				IEnumerable<ILanguageReader> enumerable;
-				if (4u != 0)
-				{
-					enumerable = obj;
-				}
+				IEnumerable<ILanguageReader> enumerable = specifiedReaders ?? _languageReaderList;
 				foreach (ILanguageReader item in enumerable)
 				{
 					try
@@ -230,19 +184,9 @@ namespace Cvte.Windows.Localization
 		[DebuggerStepThrough]
 		public bool TryGet(string key, out string value)
 		{
-			while (true)
+			if (key == null)
 			{
-				if (key == null)
-				{
-					if (0 == 0)
-					{
-						throw new ArgumentNullException("key");
-					}
-				}
-				else if (4 != 0)
-				{
-					break;
-				}
+				throw new ArgumentNullException("key");
 			}
 			value = GetLocalWithLocker(key, true);
 			return value != null;
@@ -251,31 +195,11 @@ namespace Cvte.Windows.Localization
 		[DebuggerStepThrough]
 		internal string GetLocalWithLocker(string key, bool isTrying)
 		{
-			while (2 != 0)
+			_resetEvent.WaitOne();
+			if (!IsReady)
 			{
-				bool flag = _resetEvent.WaitOne();
-				while (4 != 0)
-				{
-					flag = IsReady;
-					if (false)
-					{
-						continue;
-					}
-					goto IL_0017;
-				}
-				break;
-				IL_0017:
-				if (!flag)
-				{
-					if (0 == 0)
-					{
-						Load();
-						flag = _resetEvent.WaitOne();
-						break;
-					}
-					continue;
-				}
-				break;
+				Load();
+				_resetEvent.WaitOne();
 			}
 			return GetLocal(key, isTrying);
 		}
@@ -283,33 +207,15 @@ namespace Cvte.Windows.Localization
 		[DebuggerStepThrough]
 		private string GetLocal(string key, bool isTrying)
 		{
-			if (0 == 0)
+			string value;
+			if (_langDictionary.TryGetValue(key, out value))
 			{
-				string value;
-				bool flag = _langDictionary.TryGetValue(key, out value);
-				if (5 != 0)
-				{
-					if (flag)
-					{
-						return value;
-					}
-					if (false)
-					{
-						goto IL_002b;
-					}
-					flag = isTrying;
-				}
-				if (flag)
-				{
-					goto IL_002b;
-				}
+				return value;
 			}
-			if (true)
+			if (!isTrying)
 			{
 				return Lang.HandleKeyNotFound(Culture, key);
 			}
-			goto IL_002b;
-			IL_002b:
 			return null;
 		}
 	}

@@ -1,5 +1,7 @@
 using System.Net;
 using System.Runtime.Serialization;
+using Cvte.Pipe.Http.Internal;
+
 namespace Cvte.Pipe.Http.Request
 {
 	[DataContract]
@@ -68,7 +70,7 @@ namespace Cvte.Pipe.Http.Request
 			string text;
 			if (string.IsNullOrEmpty(RequestMethod))
 			{
-				text = ((!SA_Attr<ReqeustAttribute>.Has(GetType(), false)) ? ReqeustType.Post.ToString() : SA_Attr<ReqeustAttribute>.Get(GetType(), false).Type.ToString().ToUpper());
+				text = ((!AttributeHelper<ReqeustAttribute>.smethod_1(GetType())) ? ReqeustType.Post.ToString() : AttributeHelper<ReqeustAttribute>.smethod_4(GetType()).Type.ToString().ToUpper());
 			}
 			else
 			{
@@ -79,11 +81,11 @@ namespace Cvte.Pipe.Http.Request
 
 		public virtual string GetRequestUrl()
 		{
-			if (!SA_Attr<ReqeustAttribute>.Has(GetType(), false))
+			if (!AttributeHelper<ReqeustAttribute>.smethod_1(GetType()))
 			{
 				return Host;
 			}
-			ReqeustAttribute reqeustAttribute = SA_Attr<ReqeustAttribute>.Get(GetType(), false);
+			ReqeustAttribute reqeustAttribute = AttributeHelper<ReqeustAttribute>.smethod_4(GetType());
 			return Host + reqeustAttribute.ApiPrefix + reqeustAttribute.Api;
 		}
 

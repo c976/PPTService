@@ -22,32 +22,11 @@ namespace Cvte.WebService.Feedback
 		{
 			get
 			{
-				int num;
-				while (true)
+				if (Status != null)
 				{
-					if (Status == null && 3 != 0)
-					{
-						if (false)
-						{
-							continue;
-						}
-						num = 0;
-						if (num == 0)
-						{
-							break;
-						}
-					}
-					else
-					{
-						num = SA_Proxy._0098___0086(Status);
-					}
-					if (0 == 0)
-					{
-						num = ((num == 200) ? 1 : 0);
-					}
-					return (byte)num != 0;
+					return int.Parse(Status) == 200;
 				}
-				return (byte)num != 0;
+				return false;
 			}
 		}
 	}

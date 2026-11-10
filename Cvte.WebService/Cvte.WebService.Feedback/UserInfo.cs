@@ -4,25 +4,25 @@ namespace Cvte.WebService.Feedback
 {
 	public class UserInfo
 	{
-		private string _0001;
+		private string string_0;
 
-		private string _0002;
+		private string string_1;
 
-		private string _0003;
+		private string string_2;
 
-		private string _0004;
+		private string string_3;
 
-		private string _0005;
+		private string string_4;
 
 		public string UserId
 		{
 			get
 			{
-				return _0001;
+				return string_0;
 			}
 			set
 			{
-				_0001 = value;
+				string_0 = value;
 			}
 		}
 
@@ -30,11 +30,11 @@ namespace Cvte.WebService.Feedback
 		{
 			get
 			{
-				return _0002;
+				return string_1;
 			}
 			set
 			{
-				_0002 = value;
+				string_1 = value;
 			}
 		}
 
@@ -42,11 +42,11 @@ namespace Cvte.WebService.Feedback
 		{
 			get
 			{
-				return _0003;
+				return string_2;
 			}
 			set
 			{
-				_0003 = value;
+				string_2 = value;
 			}
 		}
 
@@ -54,11 +54,11 @@ namespace Cvte.WebService.Feedback
 		{
 			get
 			{
-				return _0004;
+				return string_3;
 			}
 			set
 			{
-				_0004 = value;
+				string_3 = value;
 			}
 		}
 
@@ -66,51 +66,21 @@ namespace Cvte.WebService.Feedback
 		{
 			get
 			{
-				return _0005;
+				return string_4;
 			}
 			set
 			{
-				_0005 = value;
+				string_4 = value;
 			}
 		}
 
 		public bool Verify()
 		{
-			bool flag = SA_Proxy._001D___0016(UserId);
-			int num;
-			while (true)
+			if (string.IsNullOrEmpty(UserId) && string.IsNullOrEmpty(Email) && string.IsNullOrEmpty(Wenxin) && string.IsNullOrEmpty(Mobile))
 			{
-				if (flag)
-				{
-					flag = SA_Proxy._001D___0016(Email);
-					if (2 == 0)
-					{
-						continue;
-					}
-					if (flag && SA_Proxy._001D___0016(Wenxin))
-					{
-						num = (SA_Proxy._001D___0016(Mobile) ? 1 : 0);
-						while (num != 0)
-						{
-							num = ((!SA_Proxy._001D___0016(Device)) ? 1 : 0);
-							if (5 != 0)
-							{
-								return (byte)num != 0;
-							}
-							if (num != 0)
-							{
-								goto end_IL_000e;
-							}
-						}
-					}
-				}
-				num = 1;
-				break;
-				continue;
-				end_IL_000e:
-				break;
+				return !string.IsNullOrEmpty(Device);
 			}
-			return (byte)num != 0;
+			return true;
 		}
 	}
 }

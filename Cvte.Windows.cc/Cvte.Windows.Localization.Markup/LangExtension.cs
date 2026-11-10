@@ -66,28 +66,23 @@ namespace Cvte.Windows.Localization.Markup
 		private string ProvideBindingValue(object target, object property)
 		{
 			DependencyObject dependencyObject = target as DependencyObject;
-			DependencyProperty obj = property as DependencyProperty;
-			DependencyProperty dependencyProperty;
-			if (4u != 0)
-			{
-				dependencyProperty = obj;
-			}
+			DependencyProperty dependencyProperty = property as DependencyProperty;
 			string result = Reference.UpdateValue();
-			if (dependencyObject == null || dependencyProperty == null)
+			if (dependencyObject != null && dependencyProperty != null)
 			{
+				Binding binding = new Binding(ReferencedLang.ValueProperty.Name);
+				binding.Source = Reference;
+				binding.Mode = BindingMode.OneWay;
+				Binding binding2 = binding;
+				BindingOperations.SetBinding(dependencyObject, dependencyProperty, binding2);
 				return result;
 			}
-			Binding binding = new Binding(ReferencedLang.ValueProperty.Name);
-			binding.Source = Reference;
-			binding.Mode = BindingMode.OneWay;
-			Binding binding2 = binding;
-			BindingOperations.SetBinding(dependencyObject, dependencyProperty, binding2);
 			return result;
 		}
 
 		private object Convert(string source)
 		{
-			if (4 != 0 && Converter != null)
+			if (Converter != null)
 			{
 				return Converter(Reference.Key, source, Lang.Current);
 			}

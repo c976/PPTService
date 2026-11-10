@@ -85,7 +85,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cvte.ComponentModel\DebuggingProperties.cs" />
     <Compile Include="Cvte.Aop\AspectAdvice.cs" />
     <Compile Include="Cvte.Aop\DynamicProxy.cs" />
     <Compile Include="Cvte.Aop\IInterceptor.cs" />

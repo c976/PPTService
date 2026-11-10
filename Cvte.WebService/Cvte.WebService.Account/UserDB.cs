@@ -1,16 +1,16 @@
 using System.Runtime.CompilerServices;
-using _0002;
 using LinqToDB;
 using LinqToDB.Data;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Account
 {
 	internal class UserDB : DataConnection
 	{
 		[SpecialName]
-		public ITable<global::_0002._0002> _0001()
+		public ITable<UserEntity> method_0()
 		{
-			return GetTable<global::_0002._0002>();
+			return ((DataConnection)this).GetTable<UserEntity>();
 		}
 	}
 }

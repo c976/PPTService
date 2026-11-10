@@ -13,11 +13,11 @@ namespace Cvte.Windows.Localization
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value == null)
+			if (value != null)
 			{
-				return null;
+				return new ReferencedLang(value.ToString());
 			}
-			return new ReferencedLang(value.ToString());
+			return null;
 		}
 	}
 }

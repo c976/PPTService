@@ -15,7 +15,7 @@ namespace Cvte.WebService.Account
 		public override byte[] GetRequestData()
 		{
 			Sign = Body.GetSign();
-			return SA_Proxy._0015___0010(this);
+			return base.GetRequestData();
 		}
 	}
 }

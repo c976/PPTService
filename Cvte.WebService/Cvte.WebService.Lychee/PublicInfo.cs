@@ -1,36 +1,63 @@
+using System.Runtime.CompilerServices;
+
 namespace Cvte.WebService.Lychee
 {
 	public class PublicInfo
 	{
-		// 原版 Title / Scale 是两个独立字段，反编译被合并成一个 dynamic，
-		// 导致先赋 Title 再赋 Scale 后 Title 读出 double，请求构造时抛绑定异常。
-		private string _title;
-		private string _author;
-		private double _scale;
-		private string _device;
+		private string string_0;
+
+		private string string_1;
+
+		private double double_0;
+
+		private string string_2;
 
 		public string Title
 		{
-			get { return _title; }
-			set { _title = value; }
+			get
+			{
+				return string_0;
+			}
+			set
+			{
+				string_0 = value;
+			}
 		}
 
 		public string Author
 		{
-			get { return _author; }
-			set { _author = value; }
+			get
+			{
+				return string_1;
+			}
+			set
+			{
+				string_1 = value;
+			}
 		}
 
 		public double Scale
 		{
-			get { return _scale; }
-			set { _scale = value; }
+			get
+			{
+				return double_0;
+			}
+			set
+			{
+				double_0 = value;
+			}
 		}
 
 		public string Device
 		{
-			get { return _device; }
-			set { _device = value; }
+			get
+			{
+				return string_2;
+			}
+			set
+			{
+				string_2 = value;
+			}
 		}
 	}
 }

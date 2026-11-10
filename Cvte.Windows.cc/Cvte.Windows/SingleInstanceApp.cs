@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
-using System.Threading;
 using System.Windows;
 
 namespace Cvte.Windows
@@ -10,99 +9,13 @@ namespace Cvte.Windows
 	{
 		private const string CommandLineArgsSeperator = " O(∩_∩)O~ ";
 
-		private EventHandler<OtherInstanceStartedUpEventArgs> m_OtherInstanceStartedUp;
-
 		private readonly string _uniqueAppName;
 
 		public bool ActivatedOnOtherInstanceStartingUp { get; set; }
 
 		internal bool HasToExit { get; private set; }
 
-		public event EventHandler<OtherInstanceStartedUpEventArgs> OtherInstanceStartedUp
-		{
-			add
-			{
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_OtherInstanceStartedUp;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler2 = default(EventHandler<OtherInstanceStartedUpEventArgs>);
-				EventHandler<OtherInstanceStartedUpEventArgs> value2 = (EventHandler<OtherInstanceStartedUpEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_OtherInstanceStartedUp, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_OtherInstanceStartedUp;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler2 = default(EventHandler<OtherInstanceStartedUpEventArgs>);
-				EventHandler<OtherInstanceStartedUpEventArgs> value2 = (EventHandler<OtherInstanceStartedUpEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_OtherInstanceStartedUp, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OtherInstanceStartedUpEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<OtherInstanceStartedUpEventArgs> OtherInstanceStartedUp;
 
 		public SingleInstanceApp(string uniqueAppName)
 			: this(uniqueAppName, false)
@@ -145,7 +58,7 @@ namespace Cvte.Windows
 
 		protected virtual void OnOtherInstanceStartedUp(OtherInstanceStartedUpEventArgs e)
 		{
-			this.m_OtherInstanceStartedUp?.Invoke(this, e);
+			OtherInstanceStartedUp?.Invoke(this, e);
 		}
 
 		private void SingleInstanceApp_OtherInstanceStartedUp(object sender, OtherInstanceStartedUpEventArgs e)
@@ -176,10 +89,7 @@ namespace Cvte.Windows
 			int timeout = 5000;
 			try
 			{
-				if (0 == 0)
-				{
-					namedPipeClientStream.Connect(timeout);
-				}
+				namedPipeClientStream.Connect(timeout);
 			}
 			catch (TimeoutException)
 			{
@@ -204,12 +114,7 @@ namespace Cvte.Windows
 			try
 			{
 				NamedPipeServerStream namedPipeServerStream = new NamedPipeServerStream(_uniqueAppName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-				NamedPipeServerStream namedPipeServerStream2 = default(NamedPipeServerStream);
-				if (0 == 0)
-				{
-					namedPipeServerStream2 = namedPipeServerStream;
-				}
-				namedPipeServerStream2.BeginWaitForConnection(OnWaitForConnection, namedPipeServerStream2);
+				namedPipeServerStream.BeginWaitForConnection(OnWaitForConnection, namedPipeServerStream);
 				return true;
 			}
 			catch (IOException)

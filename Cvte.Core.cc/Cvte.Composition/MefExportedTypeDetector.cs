@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Cvte.Composition
 {
@@ -29,99 +27,13 @@ namespace Cvte.Composition
 			}
 		}
 
-		private EventHandler<NewTypesDetectedEventArgs> m_NewTypesDetected;
-
 		private readonly HashSet<Assembly> _processedAssemblies;
 
 		private readonly AggregateCatalog _aggregateCatalog;
 
 		public CompositionContainer CompositionContainer { get; set; }
 
-		public event EventHandler<NewTypesDetectedEventArgs> NewTypesDetected
-		{
-			add
-			{
-				EventHandler<NewTypesDetectedEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_NewTypesDetected;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<NewTypesDetectedEventArgs> eventHandler2 = default(EventHandler<NewTypesDetectedEventArgs>);
-				EventHandler<NewTypesDetectedEventArgs> value2 = (EventHandler<NewTypesDetectedEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_NewTypesDetected, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<NewTypesDetectedEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<NewTypesDetectedEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_NewTypesDetected;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<NewTypesDetectedEventArgs> eventHandler2 = default(EventHandler<NewTypesDetectedEventArgs>);
-				EventHandler<NewTypesDetectedEventArgs> value2 = (EventHandler<NewTypesDetectedEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_NewTypesDetected, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<NewTypesDetectedEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<NewTypesDetectedEventArgs> NewTypesDetected;
 
 		public MefExportedTypeDetector()
 		{
@@ -132,17 +44,13 @@ namespace Cvte.Composition
 
 		public void Detect(Assembly assembly)
 		{
-			if (!_processedAssemblies.Contains(assembly) || 7 == 0)
+			if (!_processedAssemblies.Contains(assembly))
 			{
 				_processedAssemblies.Add(assembly);
 				AssemblyCatalog assemblyCatalog = new AssemblyCatalog(assembly);
 				CompositionContainer container = new CompositionContainer(assemblyCatalog);
-				do
-				{
-					_aggregateCatalog.Catalogs.Add(assemblyCatalog);
-					OnNewTypesDetected(new NewTypesDetectedEventArgs(new ContainerTypeCollection(container), assembly));
-				}
-				while (1 == 0);
+				_aggregateCatalog.Catalogs.Add(assemblyCatalog);
+				OnNewTypesDetected(new NewTypesDetectedEventArgs(new ContainerTypeCollection(container), assembly));
 			}
 		}
 
@@ -154,7 +62,7 @@ namespace Cvte.Composition
 
 		protected virtual void OnNewTypesDetected(NewTypesDetectedEventArgs e)
 		{
-			this.m_NewTypesDetected?.Invoke(this, e);
+			NewTypesDetected?.Invoke(this, e);
 		}
 	}
 }

@@ -45,30 +45,11 @@ namespace Cvte.Windows.Threading
 
 		public void Start()
 		{
-			while (true)
+			if (HasStarted)
 			{
-				if (8 == 0 || 5 == 0)
-				{
-					return;
-				}
-				if (HasStarted)
-				{
-					if (0 == 0)
-					{
-						throw new InvalidOperationException("This task has started already.");
-					}
-					continue;
-				}
-				if (2 != 0)
-				{
-					DispatcherTimer timer = _timer;
-					if (3u != 0)
-					{
-						timer.Start();
-					}
-				}
-				break;
+				throw new InvalidOperationException("This task has started already.");
 			}
+			_timer.Start();
 			HasStarted = true;
 		}
 
@@ -80,29 +61,10 @@ namespace Cvte.Windows.Threading
 
 		public void Restart()
 		{
-			do
-			{
-				if (8 != 0 && 5 != 0)
-				{
-					_hitCount = 0;
-					continue;
-				}
-				return;
-			}
-			while (false);
-			DispatcherTimer timer = _timer;
-			if (3u != 0)
-			{
-				timer.Stop();
-			}
-			if (2 != 0)
-			{
-				_timer.Start();
-			}
-			if (5u != 0)
-			{
-				HasStarted = true;
-			}
+			_hitCount = 0;
+			_timer.Stop();
+			_timer.Start();
+			HasStarted = true;
 		}
 
 		public DispatcherTask(Action action)
@@ -136,63 +98,25 @@ namespace Cvte.Windows.Threading
 
 		private void OnTimerTick(object sender, EventArgs e)
 		{
-			while (true)
+			_hitCount++;
+			DispatcherTimer dispatcherTimer = (DispatcherTimer)sender;
+			if (_hitCount == _loopCount)
 			{
-				_hitCount++;
-				while (true)
+				dispatcherTimer.Stop();
+			}
+			if (SwallowsException)
+			{
+				try
 				{
-					DispatcherTimer dispatcherTimer = (DispatcherTimer)sender;
-					while (true)
-					{
-						if (_hitCount != _loopCount)
-						{
-							goto IL_0034;
-						}
-						goto IL_0084;
-						IL_0034:
-						if (0 == 0)
-						{
-							if (SwallowsException)
-							{
-								try
-								{
-									_action();
-								}
-								catch (Exception)
-								{
-								}
-							}
-							else
-							{
-								if (false)
-								{
-									break;
-								}
-								if (1 == 0)
-								{
-									goto end_IL_006c;
-								}
-								_action();
-							}
-							if (5 != 0)
-							{
-								if (6 == 0)
-								{
-									continue;
-								}
-								return;
-							}
-						}
-						goto IL_0084;
-						IL_0084:
-						dispatcherTimer.Stop();
-						goto IL_0034;
-					}
-					continue;
-					end_IL_006c:
-					break;
+					_action();
+					return;
+				}
+				catch (Exception)
+				{
+					return;
 				}
 			}
+			_action();
 		}
 	}
 }

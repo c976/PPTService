@@ -1,23 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Cvte.Documents
 {
 	public class UndoRedoProvider : MarshalByRefObject, IUndoRedoProvider
 	{
-		private EventHandler<OperationEventArgs> m_UndoExecuting;
-
-		private EventHandler<OperationEventArgs> m_RedoExecuting;
-
-		private EventHandler<OperationEventArgs> m_UndoExecuted;
-
-		private EventHandler<OperationEventArgs> m_RedoExecuted;
-
-		private EventHandler m_UndoRedoEnableChanged;
-
 		private bool _isUndoRedoing;
 
 		private readonly UndoRedoStack _currentUndoRedoStack = new UndoRedoStack();
@@ -34,613 +21,79 @@ namespace Cvte.Documents
 
 		public bool CanRedo => _currentUndoRedoStack.RedoStack.Count != 0;
 
-		public event EventHandler<OperationEventArgs> UndoExecuting
-		{
-			add
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoExecuting;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoExecuting, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoExecuting;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoExecuting, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<OperationEventArgs> UndoExecuting;
 
-		public event EventHandler<OperationEventArgs> RedoExecuting
-		{
-			add
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_RedoExecuting;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_RedoExecuting, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_RedoExecuting;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_RedoExecuting, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<OperationEventArgs> RedoExecuting;
 
-		public event EventHandler<OperationEventArgs> UndoExecuted
-		{
-			add
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoExecuted;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoExecuted, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoExecuted;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoExecuted, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<OperationEventArgs> UndoExecuted;
 
-		public event EventHandler<OperationEventArgs> RedoExecuted
-		{
-			add
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_RedoExecuted;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_RedoExecuted, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler<OperationEventArgs> eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_RedoExecuted;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler<OperationEventArgs> eventHandler2 = default(EventHandler<OperationEventArgs>);
-				EventHandler<OperationEventArgs> value2 = (EventHandler<OperationEventArgs>)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_RedoExecuted, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler<OperationEventArgs> eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler<OperationEventArgs> RedoExecuted;
 
-		public event EventHandler UndoRedoEnableChanged
-		{
-			add
-			{
-				EventHandler eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoRedoEnableChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler eventHandler2 = default(EventHandler);
-				EventHandler value2 = (EventHandler)Delegate.Combine(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoRedoEnableChanged, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				EventHandler eventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						eventHandler = this.m_UndoRedoEnableChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				EventHandler eventHandler2 = default(EventHandler);
-				EventHandler value2 = (EventHandler)Delegate.Remove(eventHandler2, value);
-				eventHandler = Interlocked.CompareExchange(ref this.m_UndoRedoEnableChanged, value2, eventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				EventHandler eventHandler3 = eventHandler;
-				if (6u != 0)
-				{
-					eventHandler2 = eventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)eventHandler != eventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event EventHandler UndoRedoEnableChanged;
 
 		public void Undo(int levels = 1)
 		{
-			if (0 == 0)
+			SnapshotForCanUndoAndCanRedo();
+			for (int i = 1; i <= levels; i++)
 			{
-				SnapshotForCanUndoAndCanRedo();
-			}
-			int num = 1;
-			IOperation operation = default(IOperation);
-			while (true)
-			{
-				if (4 == 0)
+				if (_currentUndoRedoStack.UndoStack.Count != 0)
 				{
-					goto IL_003f;
-				}
-				if (num <= levels)
-				{
-					goto IL_00a9;
-				}
-				RaiseUndoRedoFeatureEnableChanged();
-				break;
-				IL_007e:
-				num++;
-				continue;
-				IL_00a9:
-				if (_currentUndoRedoStack.UndoStack.Count == 0)
-				{
-					goto IL_007e;
-				}
-				operation = _currentUndoRedoStack.UndoStack.Pop();
-				goto IL_003f;
-				IL_003f:
-				if (3 == 0)
-				{
-					goto IL_00a9;
-				}
-				_isUndoRedoing = true;
-				if (7 != 0)
-				{
+					IOperation operation = _currentUndoRedoStack.UndoStack.Pop();
+					_isUndoRedoing = true;
 					RaiseUndoExecutingEvent(operation);
-				}
-				operation.Undo();
-				if (0 == 0)
-				{
+					operation.Undo();
 					RaiseUndoExecutedEvent(operation);
-					do
-					{
-						_isUndoRedoing = false;
-					}
-					while (false);
+					_isUndoRedoing = false;
 					_currentUndoRedoStack.RedoStack.Push(operation);
-					goto IL_007e;
 				}
-				break;
 			}
+			RaiseUndoRedoFeatureEnableChanged();
 		}
 
 		public void Redo(int levels = 1)
 		{
-			if (0 == 0)
+			SnapshotForCanUndoAndCanRedo();
+			for (int i = 1; i <= levels; i++)
 			{
-				SnapshotForCanUndoAndCanRedo();
-			}
-			int num = 1;
-			IOperation operation = default(IOperation);
-			while (true)
-			{
-				if (4 == 0)
+				if (_currentUndoRedoStack.RedoStack.Count != 0)
 				{
-					goto IL_003f;
-				}
-				if (num <= levels)
-				{
-					goto IL_00a9;
-				}
-				RaiseUndoRedoFeatureEnableChanged();
-				break;
-				IL_007e:
-				num++;
-				continue;
-				IL_00a9:
-				if (_currentUndoRedoStack.RedoStack.Count == 0)
-				{
-					goto IL_007e;
-				}
-				operation = _currentUndoRedoStack.RedoStack.Pop();
-				goto IL_003f;
-				IL_003f:
-				if (3 == 0)
-				{
-					goto IL_00a9;
-				}
-				_isUndoRedoing = true;
-				if (7 != 0)
-				{
+					IOperation operation = _currentUndoRedoStack.RedoStack.Pop();
+					_isUndoRedoing = true;
 					RaiseRedoExecutingEvent(operation);
-				}
-				operation.Redo();
-				if (0 == 0)
-				{
+					operation.Redo();
 					RaiseRedoExecutedEvent(operation);
-					do
-					{
-						_isUndoRedoing = false;
-					}
-					while (false);
+					_isUndoRedoing = false;
 					_currentUndoRedoStack.UndoStack.Push(operation);
-					goto IL_007e;
 				}
-				break;
 			}
+			RaiseUndoRedoFeatureEnableChanged();
 		}
 
 		public void Insert(IOperation operation)
 		{
 			if (operation == null)
 			{
-				if (0 == 0)
+				throw new ArgumentNullException("operation");
+			}
+			if (!_isUndoRedoing)
+			{
+				if (_currenTransaction != null && !(operation is TransactionOperation))
 				{
-					throw new ArgumentNullException("operation");
+					_currenTransaction.Insert(operation);
+					return;
 				}
-				goto IL_00a4;
-			}
-			if (false)
-			{
-				goto IL_005b;
-			}
-			if (_isUndoRedoing)
-			{
-				return;
-			}
-			goto IL_008e;
-			IL_0097:
-			_currenTransaction.Insert(operation);
-			return;
-			IL_008e:
-			if (_currenTransaction != null && !(operation is TransactionOperation))
-			{
-				goto IL_0097;
-			}
-			goto IL_00a4;
-			IL_005b:
-			if (0 == 0)
-			{
-				if (false)
-				{
-					goto IL_008e;
-				}
+				SnapshotForCanUndoAndCanRedo();
+				_currentUndoRedoStack.UndoStack.Push(operation);
 				_currentUndoRedoStack.RedoStack.Clear();
 				RaiseUndoRedoFeatureEnableChanged();
-				return;
 			}
-			goto IL_0097;
-			IL_00a4:
-			SnapshotForCanUndoAndCanRedo();
-			_currentUndoRedoStack.UndoStack.Push(operation);
-			goto IL_005b;
 		}
 
 		public void ClearAll()
 		{
-			if (8 == 0 || 5 == 0)
-			{
-				return;
-			}
-			if (3u != 0)
-			{
-				SnapshotForCanUndoAndCanRedo();
-			}
+			SnapshotForCanUndoAndCanRedo();
 			_currentUndoRedoStack.RedoStack.Clear();
-			if (2 != 0)
-			{
-				Stack<IOperation> undoStack = _currentUndoRedoStack.UndoStack;
-				if (5u != 0)
-				{
-					undoStack.Clear();
-				}
-			}
+			_currentUndoRedoStack.UndoStack.Clear();
 			RaiseUndoRedoFeatureEnableChanged();
 		}
 
@@ -655,17 +108,9 @@ namespace Cvte.Documents
 
 		private void RaiseUndoRedoFeatureEnableChanged()
 		{
-			if (_canRedoSnapshot == CanRedo && _canUndoSnapshot == CanUndo)
+			if (_canRedoSnapshot != CanRedo || _canUndoSnapshot != CanUndo)
 			{
-				return;
-			}
-			EventHandler eventHandler = this.m_UndoRedoEnableChanged;
-			if (eventHandler != null)
-			{
-				eventHandler(this, null);
-				if (0 == 0 && false)
-				{
-				}
+				UndoRedoEnableChanged?.Invoke(this, null);
 			}
 		}
 
@@ -677,106 +122,22 @@ namespace Cvte.Documents
 
 		private void RaiseUndoExecutingEvent(IOperation operatiom)
 		{
-			do
-			{
-				IL_0000:
-				if (0 == 0)
-				{
-					EventHandler<OperationEventArgs> eventHandler = this.m_UndoExecuting;
-					if (eventHandler != null)
-					{
-						eventHandler(this, new OperationEventArgs(operatiom));
-						continue;
-					}
-				}
-				if (false)
-				{
-					goto IL_0000;
-				}
-				if (5 != 0)
-				{
-					break;
-				}
-			}
-			while (false);
+			UndoExecuting?.Invoke(this, new OperationEventArgs(operatiom));
 		}
 
 		private void RaiseRedoExecutingEvent(IOperation operation)
 		{
-			do
-			{
-				IL_0000:
-				if (0 == 0)
-				{
-					EventHandler<OperationEventArgs> eventHandler = this.m_RedoExecuting;
-					if (eventHandler != null)
-					{
-						eventHandler(this, new OperationEventArgs(operation));
-						continue;
-					}
-				}
-				if (false)
-				{
-					goto IL_0000;
-				}
-				if (5 != 0)
-				{
-					break;
-				}
-			}
-			while (false);
+			RedoExecuting?.Invoke(this, new OperationEventArgs(operation));
 		}
 
 		private void RaiseUndoExecutedEvent(IOperation operation)
 		{
-			do
-			{
-				IL_0000:
-				if (0 == 0)
-				{
-					EventHandler<OperationEventArgs> eventHandler = this.m_UndoExecuted;
-					if (eventHandler != null)
-					{
-						eventHandler(this, new OperationEventArgs(operation));
-						continue;
-					}
-				}
-				if (false)
-				{
-					goto IL_0000;
-				}
-				if (5 != 0)
-				{
-					break;
-				}
-			}
-			while (false);
+			UndoExecuted?.Invoke(this, new OperationEventArgs(operation));
 		}
 
 		private void RaiseRedoExecutedEvent(IOperation operation)
 		{
-			do
-			{
-				IL_0000:
-				if (0 == 0)
-				{
-					EventHandler<OperationEventArgs> eventHandler = this.m_RedoExecuted;
-					if (eventHandler != null)
-					{
-						eventHandler(this, new OperationEventArgs(operation));
-						continue;
-					}
-				}
-				if (false)
-				{
-					goto IL_0000;
-				}
-				if (5 != 0)
-				{
-					break;
-				}
-			}
-			while (false);
+			RedoExecuted?.Invoke(this, new OperationEventArgs(operation));
 		}
 	}
 }

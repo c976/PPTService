@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Cvte.Diagnostics.Annotations;
@@ -11,20 +10,23 @@ namespace Cvte
 {
 	public sealed class NdpInfo
 	{
-		[Serializable]
-		private sealed class _003C_003Ec
+		private static readonly Dictionary<int, string> ReleaseToNameDictionary = new Dictionary<int, string>
 		{
-			public static readonly _003C_003Ec _003C_003E9 = new _003C_003Ec();
-
-			public static Func<Dictionary<string, NdpInfo>> _003C_003E9__23_0;
-
-			internal Dictionary<string, NdpInfo> _003CReadFromRegistryAsync_003Eb__23_0()
-			{
-				return ReadFromRegistry();
-			}
-		}
-
-		private static readonly Dictionary<int, string> ReleaseToNameDictionary;
+			{ 378389, "4.5" },
+			{ 378675, "4.5.1" },
+			{ 378758, "4.5.1" },
+			{ 379893, "4.5.2" },
+			{ 393295, "4.6" },
+			{ 393297, "4.6" },
+			{ 394254, "4.6.1" },
+			{ 394271, "4.6.1" },
+			{ 394802, "4.6.2" },
+			{ 394806, "4.6.2" },
+			{ 460798, "4.7" },
+			{ 460805, "4.7" },
+			{ 461308, "4.7.1" },
+			{ 461310, "4.7.1" }
+		};
 
 		[NotNull]
 		public string MainVersion { get; }
@@ -44,30 +46,12 @@ namespace Cvte
 			get
 			{
 				string value;
-				Version version2 = default(Version);
-				while (true)
+				if (ReleaseToNameDictionary.TryGetValue(Release, out value))
 				{
-					if (2 != 0)
-					{
-						if (false || ReleaseToNameDictionary.TryGetValue(Release, out value))
-						{
-							break;
-						}
-						if (0 == 0)
-						{
-							Version version = new Version(Version);
-							if (0 == 0)
-							{
-								version2 = version;
-							}
-						}
-					}
-					if (7 != 0)
-					{
-						return $"{version2.Major}.{version2.Minor}";
-					}
+					return value;
 				}
-				return value;
+				Version version = new Version(Version);
+				return $"{version.Major}.{version.Minor}";
 			}
 		}
 
@@ -75,36 +59,15 @@ namespace Cvte
 		{
 			get
 			{
-				while (true)
+				if (!string.IsNullOrWhiteSpace(ReleaseVersionName) && !(ReleaseVersionName == "Full"))
 				{
-					if (-1 != 0)
+					if (ReleaseVersionName == "Client")
 					{
-						if (false || string.IsNullOrWhiteSpace(ReleaseVersionName))
-						{
-							goto IL_001e;
-						}
-						bool flag = ReleaseVersionName == "Full";
-						if (0 == 0)
-						{
-							if (flag)
-							{
-								goto IL_001e;
-							}
-							flag = ReleaseVersionName == "Client";
-						}
-						if (!flag)
-						{
-							break;
-						}
+						return "Client Profile";
 					}
-					return "Client Profile";
-					IL_001e:
-					if (8 != 0)
-					{
-						return "";
-					}
+					return ReleaseVersionName;
 				}
-				return ReleaseVersionName;
+				return "";
 			}
 		}
 
@@ -136,45 +99,25 @@ namespace Cvte
 		public static string GetCurrentVersionName()
 		{
 			Dictionary<string, NdpInfo> dictionary = ReadFromRegistry();
-			if (dictionary.Any())
+			if (!dictionary.Any())
 			{
-				NdpInfo value;
-				bool flag = dictionary.TryGetValue("v4 Full", out value);
-				if (8 != 0 && 0 == 0)
-				{
-					if (flag)
-					{
-						return value.DisplayVersion;
-					}
-					flag = dictionary.TryGetValue("v4", out value);
-				}
-				if (flag)
-				{
-					return value.DisplayVersion;
-				}
-				if (0 == 0)
-				{
-					return dictionary.Last().Value.DisplayVersion;
-				}
+				return null;
 			}
-			return null;
+			NdpInfo value;
+			if (dictionary.TryGetValue("v4 Full", out value))
+			{
+				return value.DisplayVersion;
+			}
+			if (dictionary.TryGetValue("v4", out value))
+			{
+				return value.DisplayVersion;
+			}
+			return dictionary.Last().Value.DisplayVersion;
 		}
 
 		public static Task<Dictionary<string, NdpInfo>> ReadFromRegistryAsync()
 		{
-			Func<Dictionary<string, NdpInfo>> func;
-			if (true)
-			{
-				func = _003C_003Ec._003C_003E9__23_0;
-				if (func != null)
-				{
-					goto IL_0025;
-				}
-			}
-			func = (_003C_003Ec._003C_003E9__23_0 = () => ReadFromRegistry());
-			goto IL_0025;
-			IL_0025:
-			return Task.Run(func);
+			return Task.Run(() => ReadFromRegistry());
 		}
 
 		[NotNull]
@@ -184,113 +127,58 @@ namespace Cvte
 			Dictionary<string, NdpInfo> dictionary = new Dictionary<string, NdpInfo>();
 			using (RegistryKey registryKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\"))
 			{
-				if (registryKey != null)
+				if (registryKey == null)
 				{
-					string[] subKeyNames = registryKey.GetSubKeyNames();
-					*(int*)ptr = 0;
-					RegistryKey registryKey2 = default(RegistryKey);
-					string text2 = default(string);
-					string text3 = default(string);
-					string[] subKeyNames2 = default(string[]);
-					RegistryKey registryKey3 = default(RegistryKey);
-					string text4 = default(string);
-					for (; *(int*)ptr < subKeyNames.Length; (*(int*)ptr)++)
-					{
-						string text = subKeyNames[*(int*)ptr];
-						if (2 == 0)
-						{
-							goto IL_01bc;
-						}
-						if (!text.StartsWith("v") || !(text != "v4.0"))
-						{
-							continue;
-						}
-						if (5 == 0)
-						{
-							goto IL_01fd;
-						}
-						registryKey2 = registryKey.OpenSubKey(text);
-						if (registryKey2 == null)
-						{
-							continue;
-						}
-						text2 = (string)registryKey2.GetValue("Version", "");
-						((int*)ptr)[1] = (int)registryKey2.GetValue("SP", 0);
-						text3 = registryKey2.GetValue("Install", "").ToString();
-						((int*)ptr)[2] = (int)registryKey2.GetValue("Release", 0);
-						if (!(text3 == "") && text3 == "1")
-						{
-							dictionary[text] = new NdpInfo(text, null, text2, ((int*)ptr)[2], ((int*)ptr)[1]);
-						}
-						if (text2 != "")
-						{
-							continue;
-						}
-						subKeyNames2 = registryKey2.GetSubKeyNames();
-						((int*)ptr)[3] = 0;
-						goto IL_023e;
-						IL_01bc:
-						text3 = registryKey3.GetValue("Install", "").ToString();
-						((int*)ptr)[2] = (int)registryKey3.GetValue("Release", 0);
-						if (!(text3 == ""))
-						{
-							goto IL_01fd;
-						}
-						goto IL_0232;
-						IL_0232:
-						((int*)ptr)[3]++;
-						goto IL_023e;
-						IL_01fd:
-						if (text3 == "1")
-						{
-							dictionary[text + " " + text4] = new NdpInfo(text, text4, text2, ((int*)ptr)[2], ((int*)ptr)[1]);
-						}
-						goto IL_0232;
-						IL_023e:
-						if (((int*)ptr)[3] >= subKeyNames2.Length)
-						{
-							continue;
-						}
-						text4 = subKeyNames2[((int*)ptr)[3]];
-						registryKey3 = registryKey2.OpenSubKey(text4);
-						if (registryKey3 != null)
-						{
-							text2 = (string)registryKey3.GetValue("Version", "");
-							if (text2 != "")
-							{
-								((int*)ptr)[1] = (int)registryKey3.GetValue("SP", 0);
-							}
-							goto IL_01bc;
-						}
-						goto IL_0232;
-					}
 					return dictionary;
 				}
-				return dictionary;
-			}
-		}
-
-		static NdpInfo()
-		{
-			if (true)
-			{
-				ReleaseToNameDictionary = new Dictionary<int, string>
+				string[] subKeyNames = registryKey.GetSubKeyNames();
+				*(int*)ptr = 0;
+				while (*(int*)ptr < subKeyNames.Length)
 				{
-					{ 378389, "4.5" },
-					{ 378675, "4.5.1" },
-					{ 378758, "4.5.1" },
-					{ 379893, "4.5.2" },
-					{ 393295, "4.6" },
-					{ 393297, "4.6" },
-					{ 394254, "4.6.1" },
-					{ 394271, "4.6.1" },
-					{ 394802, "4.6.2" },
-					{ 394806, "4.6.2" },
-					{ 460798, "4.7" },
-					{ 460805, "4.7" },
-					{ 461308, "4.7.1" },
-					{ 461310, "4.7.1" }
-				};
+					string text = subKeyNames[*(int*)ptr];
+					if (text.StartsWith("v") && text != "v4.0")
+					{
+						RegistryKey registryKey2 = registryKey.OpenSubKey(text);
+						if (registryKey2 != null)
+						{
+							string text2 = (string)registryKey2.GetValue("Version", "");
+							((int*)ptr)[1] = (int)registryKey2.GetValue("SP", 0);
+							string text3 = registryKey2.GetValue("Install", "").ToString();
+							((int*)ptr)[2] = (int)registryKey2.GetValue("Release", 0);
+							if (!(text3 == "") && text3 == "1")
+							{
+								dictionary[text] = new NdpInfo(text, null, text2, ((int*)ptr)[2], ((int*)ptr)[1]);
+							}
+							if (!(text2 != ""))
+							{
+								string[] subKeyNames2 = registryKey2.GetSubKeyNames();
+								((int*)ptr)[3] = 0;
+								while (((int*)ptr)[3] < subKeyNames2.Length)
+								{
+									string text4 = subKeyNames2[((int*)ptr)[3]];
+									RegistryKey registryKey3 = registryKey2.OpenSubKey(text4);
+									if (registryKey3 != null)
+									{
+										text2 = (string)registryKey3.GetValue("Version", "");
+										if (text2 != "")
+										{
+											((int*)ptr)[1] = (int)registryKey3.GetValue("SP", 0);
+										}
+										text3 = registryKey3.GetValue("Install", "").ToString();
+										((int*)ptr)[2] = (int)registryKey3.GetValue("Release", 0);
+										if (!(text3 == "") && text3 == "1")
+										{
+											dictionary[text + " " + text4] = new NdpInfo(text, text4, text2, ((int*)ptr)[2], ((int*)ptr)[1]);
+										}
+									}
+									((int*)ptr)[3]++;
+								}
+							}
+						}
+					}
+					(*(int*)ptr)++;
+				}
+				return dictionary;
 			}
 		}
 	}

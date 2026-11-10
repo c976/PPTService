@@ -18,14 +18,7 @@ namespace Cvte.WebService.Feedback
 
 		public override string GetRequestUrl()
 		{
-			return SA_Proxy._0097___0084(new string[5]
-			{
-				SA_Proxy._0082___0018(this),
-				"?authId=",
-				AuthId,
-				"&timestamp=",
-				Timestamp
-			});
+			return base.GetRequestUrl() + "?authId=" + AuthId + "&timestamp=" + Timestamp;
 		}
 	}
 }

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
-using _0006;
 using Cvte.Pipe.Http.Request;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Account
 {
@@ -14,7 +14,7 @@ namespace Cvte.WebService.Account
 			{
 				UserId = userId,
 				UserName = userName,
-				Password = SA_Helpers.Str(password ?? string.Empty).ToLower(),
+				Password = Md5Hash.smethod_0(password ?? string.Empty).ToLower(),
 				AppName = appName
 			};
 		}

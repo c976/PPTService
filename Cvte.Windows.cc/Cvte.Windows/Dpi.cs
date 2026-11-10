@@ -13,29 +13,9 @@ namespace Cvte.Windows
 		{
 			PropertyInfo property = typeof(SystemParameters).GetProperty("DpiX", BindingFlags.Static | BindingFlags.NonPublic);
 			PropertyInfo property2 = typeof(SystemParameters).GetProperty("Dpi", BindingFlags.Static | BindingFlags.NonPublic);
-			PropertyInfo propertyInfo = default(PropertyInfo);
-			if (0 == 0)
-			{
-				propertyInfo = property2;
-			}
-			int num;
-			if (!(property != null))
-			{
-				num = 96;
-				goto IL_0057;
-			}
-			goto IL_00c2;
-			IL_0057:
-			int x = num;
-			if (-1 != 0)
-			{
-				int y = ((propertyInfo != null) ? ((int)propertyInfo.GetValue(null, null)) : 96);
-				return new Dpi(x, y);
-			}
-			goto IL_00c2;
-			IL_00c2:
-			num = (int)property.GetValue(null, null);
-			goto IL_0057;
+			int x = ((property != null) ? ((int)property.GetValue(null, null)) : 96);
+			int y = ((property2 != null) ? ((int)property2.GetValue(null, null)) : 96);
+			return new Dpi(x, y);
 		}, LazyThreadSafetyMode.ExecutionAndPublication);
 
 		public static readonly Dpi ScreenStandard = new Dpi(96, 96);
@@ -59,34 +39,11 @@ namespace Cvte.Windows
 
 		public static bool operator ==(Dpi dpi1, Dpi dpi2)
 		{
-			while (true)
+			if (dpi1.X == dpi2.X)
 			{
-				int num = dpi1.X;
-				int num2 = dpi2.X;
-				while (true)
-				{
-					if (0 == 0)
-					{
-						if (num != num2)
-						{
-							if (false)
-							{
-								break;
-							}
-							if (2 != 0)
-							{
-								return false;
-							}
-						}
-						num = dpi1.Y;
-						num2 = dpi2.Y;
-					}
-					if (-1 != 0)
-					{
-						return num == num2;
-					}
-				}
+				return dpi1.Y == dpi2.Y;
 			}
+			return false;
 		}
 
 		public static bool operator !=(Dpi dpi1, Dpi dpi2)
@@ -96,71 +53,24 @@ namespace Cvte.Windows
 
 		public bool Equals(Dpi other)
 		{
-			while (true)
+			if (X == other.X)
 			{
-				int num = X;
-				int num2 = other.X;
-				while (true)
-				{
-					if (0 == 0)
-					{
-						if (num != num2)
-						{
-							if (false)
-							{
-								break;
-							}
-							if (2 != 0)
-							{
-								return false;
-							}
-						}
-						num = Y;
-						num2 = other.Y;
-					}
-					if (-1 != 0)
-					{
-						return num == num2;
-					}
-				}
+				return Y == other.Y;
 			}
+			return false;
 		}
 
 		public override bool Equals(object obj)
 		{
-			int num = (object.ReferenceEquals(null, obj) ? 1 : 0);
-			while (true)
+			if (object.ReferenceEquals(null, obj))
 			{
-				if (num != 0)
-				{
-					num = 0;
-					goto IL_0008;
-				}
-				if (0 == 0 && !(obj is Dpi))
-				{
-					num = 0;
-					if (num == 0)
-					{
-						if (num != 0)
-						{
-							continue;
-						}
-						if (num == 0)
-						{
-							break;
-						}
-						goto IL_0008;
-					}
-				}
-				else
-				{
-					num = (Equals((Dpi)obj) ? 1 : 0);
-				}
-				return (byte)num != 0;
-				IL_0008:
-				return (byte)num != 0;
+				return false;
 			}
-			return (byte)num != 0;
+			if (obj is Dpi)
+			{
+				return Equals((Dpi)obj);
+			}
+			return false;
 		}
 
 		public override int GetHashCode()

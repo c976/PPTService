@@ -66,7 +66,7 @@ namespace Cvte.Windows
 			resourceKeyToResourceConverter.ResourceKeyConverter = Converter;
 			resourceKeyToResourceConverter.ConverterParameter = ConverterParameter;
 			resourceKeyToResourceConverter.StringFormat = StringFormat;
-			resourceKeyToResourceConverter.FindResource = (FrameworkElement element, object o) => (4 != 0 && (element == null || 3 == 0 || o == null)) ? null : ProvideValue(element, targetProperty, o);
+			resourceKeyToResourceConverter.FindResource = (FrameworkElement element, object o) => (element != null && o != null) ? ProvideValue(element, targetProperty, o) : null;
 			ResourceKeyToResourceConverter converter = resourceKeyToResourceConverter;
 			MultiBinding multiBinding = new MultiBinding();
 			multiBinding.Converter = converter;

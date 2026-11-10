@@ -26,26 +26,20 @@ namespace Cvte.Windows
 				return null;
 			}
 			FrameworkElement frameworkElement = values[0] as FrameworkElement;
-			object result;
-			do
+			object obj = values[1];
+			if (frameworkElement == null)
 			{
-				object obj = values[1];
-				if (frameworkElement == null)
-				{
-					return null;
-				}
-				if (ResourceKeyConverter != null)
-				{
-					obj = ResourceKeyConverter.Convert(obj, targetType, ConverterParameter, culture);
-				}
-				else if (StringFormat != null)
-				{
-					obj = string.Format(StringFormat, obj);
-				}
-				result = ((FindResource == null) ? frameworkElement.TryFindResource(obj) : FindResource(frameworkElement, obj));
+				return null;
 			}
-			while (4 == 0);
-			return result;
+			if (ResourceKeyConverter != null)
+			{
+				obj = ResourceKeyConverter.Convert(obj, targetType, ConverterParameter, culture);
+			}
+			else if (StringFormat != null)
+			{
+				obj = string.Format(StringFormat, obj);
+			}
+			return (FindResource == null) ? frameworkElement.TryFindResource(obj) : FindResource(frameworkElement, obj);
 		}
 
 		public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

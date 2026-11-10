@@ -29,108 +29,50 @@ namespace Cvte.Configuration
 			{
 				int num = _003C_003E1__state;
 				Configurator CS_0024_003C_003E8__locals8 = _003C_003E4__this;
-				try
+				ConfiguredTaskAwaitable.ConfiguredTaskAwaiter awaiter;
+				if (num != 0)
 				{
-					while (true)
+					awaiter = Task.Run(() =>
 					{
-						ConfiguredTaskAwaitable.ConfiguredTaskAwaiter awaiter;
-						if (num == 0)
+						if (!CS_0024_003C_003E8__locals8._fileInfo.Exists)
 						{
-							awaiter = _003C_003Eu__1;
-							_003C_003Eu__1 = default(ConfiguredTaskAwaitable.ConfiguredTaskAwaiter);
-							goto IL_0092;
+							CS_0024_003C_003E8__locals8.CreateNewXmlFile();
 						}
-						ConfiguredTaskAwaitable configuredTaskAwaitable = Task.Run(() =>
+						if (CS_0024_003C_003E8__locals8._isExceptionHandled)
 						{
-							bool flag = CS_0024_003C_003E8__locals8._fileInfo.Exists;
-							while (true)
+							try
 							{
-								if (4 != 0)
-								{
-									if (!flag && 0 == 0)
-									{
-										CS_0024_003C_003E8__locals8.CreateNewXmlFile();
-									}
-									if (2 == 0)
-									{
-										break;
-									}
-									flag = CS_0024_003C_003E8__locals8._isExceptionHandled;
-								}
-								if (6 != 0 && 0 == 0)
-								{
-									if (!flag)
-									{
-										CS_0024_003C_003E8__locals8.LoadConfigFile();
-										break;
-									}
-									try
-									{
-										CS_0024_003C_003E8__locals8.LoadConfigFile();
-										break;
-									}
-									catch (Exception)
-									{
-										CS_0024_003C_003E8__locals8._fileInfo.Delete();
-										CS_0024_003C_003E8__locals8.CreateNewXmlFile();
-										break;
-									}
-								}
+								CS_0024_003C_003E8__locals8.LoadConfigFile();
+								return;
 							}
-						}).ConfigureAwait(false);
-						goto IL_0045;
-						IL_0062:
-						if (0 == 0)
-						{
-							_003C_003Eu__1 = awaiter;
-							_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-							return;
-						}
-						goto IL_0092;
-						IL_0045:
-						awaiter = configuredTaskAwaitable.GetAwaiter();
-						if (5 != 0)
-						{
-							if (!awaiter.IsCompleted)
+							catch (Exception)
 							{
-								num = (_003C_003E1__state = 0);
-								goto IL_0062;
+								CS_0024_003C_003E8__locals8._fileInfo.Delete();
+								CS_0024_003C_003E8__locals8.CreateNewXmlFile();
+								return;
 							}
-							goto IL_009b;
 						}
-						break;
-						IL_0092:
-						num = (_003C_003E1__state = -1);
-						goto IL_009b;
-						IL_009b:
-						if (2 != 0)
-						{
-							awaiter.GetResult();
-							if (0 == 0)
-							{
-								awaiter = default(ConfiguredTaskAwaitable.ConfiguredTaskAwaiter);
-								if (4 == 0)
-								{
-									continue;
-								}
-								CS_0024_003C_003E8__locals8.Root._hasRead = true;
-								break;
-							}
-							goto IL_0045;
-						}
-						goto IL_0062;
+						CS_0024_003C_003E8__locals8.LoadConfigFile();
+					}).ConfigureAwait(false).GetAwaiter();
+					if (!awaiter.IsCompleted)
+					{
+						num = 0;
+						_003C_003E1__state = 0;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+						return;
 					}
 				}
-				catch (Exception exception)
+				else
 				{
-					do
-					{
-						_003C_003E1__state = -2;
-						_003C_003Et__builder.SetException(exception);
-					}
-					while (false);
-					return;
+					awaiter = _003C_003Eu__1;
+					_003C_003Eu__1 = default(ConfiguredTaskAwaitable.ConfiguredTaskAwaiter);
+					num = -1;
+					_003C_003E1__state = -1;
 				}
+				awaiter.GetResult();
+				awaiter = default(ConfiguredTaskAwaitable.ConfiguredTaskAwaiter);
+				CS_0024_003C_003E8__locals8.Root._hasRead = true;
 				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult();
 			}
@@ -167,69 +109,36 @@ namespace Cvte.Configuration
 
 			private void MoveNext()
 			{
-				int num;
-				if (0 == 0)
-				{
-					num = _003C_003E1__state;
-				}
+				int num = _003C_003E1__state;
 				Configurator configurator = _003C_003E4__this;
-				try
+				TaskAwaiter awaiter;
+				if (num != 0)
 				{
-					TaskAwaiter awaiter = default(TaskAwaiter);
-					if ((num != 0) ? true : false)
+					Configurator configurator2 = configurator;
+					Configurator root = ((configurator == configurator.Root) ? configurator : FindRoot(configurator));
+					awaiter = Task.Run(() =>
 					{
-						if (4 == 0)
-						{
-							goto IL_00cb;
-						}
-						if (8 != 0)
-						{
-							Configurator configurator2 = configurator;
-							Configurator root = ((configurator != configurator.Root) ? FindRoot(configurator) : configurator);
-							awaiter = Task.Run(() =>
-							{
-								root._contextDocument.Save(configurator2._fileInfo.FullName);
-							}).GetAwaiter();
-							if (!awaiter.IsCompleted)
-							{
-								num = (_003C_003E1__state = 0);
-								_003C_003Eu__1 = awaiter;
-								_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-								return;
-							}
-							goto IL_00c4;
-						}
-					}
-					else
+						root._contextDocument.Save(configurator2._fileInfo.FullName);
+					}).GetAwaiter();
+					if (!awaiter.IsCompleted)
 					{
-						awaiter = _003C_003Eu__1;
-						_003C_003Eu__1 = default(TaskAwaiter);
-					}
-					num = (_003C_003E1__state = -1);
-					goto IL_00c4;
-					IL_00cb:
-					awaiter = default(TaskAwaiter);
-					if (false)
-					{
+						num = 0;
+						_003C_003E1__state = 0;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
 						return;
 					}
-					goto end_IL_0021;
-					IL_00c4:
-					awaiter.GetResult();
-					goto IL_00cb;
-					end_IL_0021:;
 				}
-				catch (Exception exception)
+				else
 				{
-					_003C_003E1__state = -2;
-					_003C_003Et__builder.SetException(exception);
-					return;
+					awaiter = _003C_003Eu__1;
+					_003C_003Eu__1 = default(TaskAwaiter);
+					num = -1;
+					_003C_003E1__state = -1;
 				}
-				do
-				{
-					_003C_003E1__state = -2;
-				}
-				while (false);
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult();
 			}
 
@@ -271,60 +180,47 @@ namespace Cvte.Configuration
 			{
 				int num = _003C_003E1__state;
 				Configurator configurator = _003C_003E4__this;
-				string result;
-				try
+				TaskAwaiter awaiter;
+				if (num != 0)
 				{
-					TaskAwaiter awaiter;
-					if (num != 0)
+					if (configurator.Root._hasRead)
 					{
-						if (configurator.Root._hasRead)
-						{
-							goto IL_00a8;
-						}
-						awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
-						if (!awaiter.IsCompleted)
-						{
-							num = (_003C_003E1__state = 0);
-							_003C_003Eu__1 = awaiter;
-							_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-							if (0 == 0)
-							{
-								return;
-							}
-							goto IL_00c6;
-						}
+						goto IL_0089;
 					}
-					else
+					awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
 					{
-						awaiter = _003C_003Eu__1;
-						_003C_003Eu__1 = default(TaskAwaiter);
-						num = (_003C_003E1__state = -1);
-					}
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					goto IL_00a8;
-					IL_00a8:
-					XmlNode xmlNode = configurator._contextDocument.SelectSingleNode(configurator.CombineNodePath(configurator._nodePath, key));
-					goto IL_00c6;
-					IL_00c6:
-					if (xmlNode != null)
-					{
-						result = xmlNode.InnerText;
-					}
-					else
-					{
-						if (defaultValue == null)
-						{
-							throw new KeyNotFoundException($"Key {key} not found.");
-						}
-						result = defaultValue;
+						num = 0;
+						_003C_003E1__state = 0;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+						return;
 					}
 				}
-				catch (Exception exception)
+				else
 				{
-					_003C_003E1__state = -2;
-					_003C_003Et__builder.SetException(exception);
-					return;
+					awaiter = _003C_003Eu__1;
+					_003C_003Eu__1 = default(TaskAwaiter);
+					num = -1;
+					_003C_003E1__state = -1;
+				}
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_0089;
+				IL_0089:
+				XmlNode xmlNode = configurator._contextDocument.SelectSingleNode(configurator.CombineNodePath(configurator._nodePath, key));
+				string result;
+				if (xmlNode != null)
+				{
+					result = xmlNode.InnerText;
+				}
+				else
+				{
+					if (defaultValue == null)
+					{
+						throw new KeyNotFoundException($"Key {key} not found.");
+					}
+					result = defaultValue;
 				}
 				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult(result);
@@ -366,90 +262,67 @@ namespace Cvte.Configuration
 
 			private void MoveNext()
 			{
-				int num;
-				do
-				{
-					num = _003C_003E1__state;
-				}
-				while (4 == 0);
+				int num = _003C_003E1__state;
 				Configurator configurator = _003C_003E4__this;
-				Configurator configurator2;
-				if (2u != 0)
+				TaskAwaiter awaiter;
+				if (num != 0)
 				{
-					configurator2 = configurator;
-				}
-				try
-				{
-					TaskAwaiter awaiter;
-					if (num != 0)
-					{
-						if (num == 1)
-						{
-							awaiter = _003C_003Eu__1;
-							_003C_003Eu__1 = default(TaskAwaiter);
-							num = (_003C_003E1__state = -1);
-							goto IL_013f;
-						}
-						if (configurator2.Root._hasRead)
-						{
-							goto IL_00b2;
-						}
-						awaiter = configurator2.Root.ReadConfigsAsync().GetAwaiter();
-						if (!awaiter.IsCompleted)
-						{
-							num = (_003C_003E1__state = 0);
-							_003C_003Eu__1 = awaiter;
-							_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-							goto IL_019c;
-						}
-					}
-					else
+					if (num == 1)
 					{
 						awaiter = _003C_003Eu__1;
 						_003C_003Eu__1 = default(TaskAwaiter);
-						num = (_003C_003E1__state = -1);
+						num = -1;
+						_003C_003E1__state = -1;
+						goto IL_011f;
 					}
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					goto IL_00b2;
-					IL_013f:
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					goto end_IL_0023;
-					IL_00b2:
-					key = configurator2.CombineNodePath(configurator2._nodePath, key);
-					configurator2.CreateAndSelectNode(key).InnerText = value;
-					if (configurator2.IsAutoSave)
+					if (configurator.Root._hasRead)
 					{
-						awaiter = configurator2.Root.SaveConfigsAsync().GetAwaiter();
-						if (awaiter.IsCompleted)
-						{
-							goto IL_013f;
-						}
-						num = (_003C_003E1__state = 1);
+						goto IL_00ae;
+					}
+					awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
+					{
+						num = 0;
+						_003C_003E1__state = 0;
 						_003C_003Eu__1 = awaiter;
 						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-						goto IL_019c;
+						return;
 					}
-					end_IL_0023:;
 				}
-				catch (Exception exception)
+				else
 				{
-					_003C_003E1__state = -2;
-					_003C_003Et__builder.SetException(exception);
-					goto IL_019c;
+					awaiter = _003C_003Eu__1;
+					_003C_003Eu__1 = default(TaskAwaiter);
+					num = -1;
+					_003C_003E1__state = -1;
 				}
-				goto IL_0189;
-				IL_0189:
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_00ae;
+				IL_00ae:
+				key = configurator.CombineNodePath(configurator._nodePath, key);
+				configurator.CreateAndSelectNode(key).InnerText = value;
+				if (configurator.IsAutoSave)
+				{
+					awaiter = configurator.Root.SaveConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
+					{
+						num = 1;
+						_003C_003E1__state = 1;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+						return;
+					}
+					goto IL_011f;
+				}
+				goto IL_0130;
+				IL_011f:
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_0130;
+				IL_0130:
 				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult();
-				goto IL_019c;
-				IL_019c:
-				if (0 == 0)
-				{
-					return;
-				}
-				goto IL_0189;
 			}
 
 			void IAsyncStateMachine.MoveNext()
@@ -490,64 +363,48 @@ namespace Cvte.Configuration
 			{
 				int num = _003C_003E1__state;
 				Configurator configurator = _003C_003E4__this;
-				Configurator configurator2;
-				if (true)
+				TaskAwaiter awaiter;
+				if (num != 0)
 				{
-					configurator2 = configurator;
-				}
-				string[] result;
-				try
-				{
-					TaskAwaiter awaiter;
-					if (num != 0)
+					if (configurator.Root._hasRead)
 					{
-						if (configurator2.Root._hasRead)
-						{
-							goto IL_00a7;
-						}
-						awaiter = configurator2.Root.ReadConfigsAsync().GetAwaiter();
-						if (!awaiter.IsCompleted)
-						{
-							num = (_003C_003E1__state = 0);
-							_003C_003Eu__1 = awaiter;
-							_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-							return;
-						}
+						goto IL_0089;
 					}
-					else
+					awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
 					{
-						awaiter = _003C_003Eu__1;
-						_003C_003Eu__1 = default(TaskAwaiter);
-						num = (_003C_003E1__state = -1);
-					}
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					goto IL_00a7;
-					IL_00a7:
-					XmlNode xmlNode = configurator2._contextDocument.SelectSingleNode(configurator2.CombineNodePath(configurator2._nodePath, key));
-					if (-1 == 0)
-					{
+						num = 0;
+						_003C_003E1__state = 0;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
 						return;
 					}
-					if (xmlNode != null)
-					{
-						result = (from XmlNode child in xmlNode.ChildNodes
-							select child.InnerText).ToArray();
-					}
-					else
-					{
-						if (defaultValue == null)
-						{
-							throw new KeyNotFoundException($"Key {key} not found.");
-						}
-						result = defaultValue;
-					}
 				}
-				catch (Exception exception)
+				else
 				{
-					_003C_003E1__state = -2;
-					_003C_003Et__builder.SetException(exception);
-					return;
+					awaiter = _003C_003Eu__1;
+					_003C_003Eu__1 = default(TaskAwaiter);
+					num = -1;
+					_003C_003E1__state = -1;
+				}
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_0089;
+				IL_0089:
+				XmlNode xmlNode = configurator._contextDocument.SelectSingleNode(configurator.CombineNodePath(configurator._nodePath, key));
+				string[] result;
+				if (xmlNode != null)
+				{
+					result = (from XmlNode child in xmlNode.ChildNodes
+						select child.InnerText).ToArray();
+				}
+				else
+				{
+					if (defaultValue == null)
+					{
+						throw new KeyNotFoundException($"Key {key} not found.");
+					}
+					result = defaultValue;
 				}
 				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult(result);
@@ -591,115 +448,82 @@ namespace Cvte.Configuration
 			{
 				int num = _003C_003E1__state;
 				Configurator configurator = _003C_003E4__this;
-				try
+				TaskAwaiter awaiter;
+				if (num != 0)
 				{
-					TaskAwaiter awaiter;
-					if (num == 0)
+					if (num == 1)
 					{
 						awaiter = _003C_003Eu__1;
 						_003C_003Eu__1 = default(TaskAwaiter);
-						num = (_003C_003E1__state = -1);
-						goto IL_00ad;
+						num = -1;
+						_003C_003E1__state = -1;
+						goto IL_0175;
 					}
-					int num2 = num;
-					goto IL_002a;
-					IL_00ad:
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					goto IL_00bc;
-					IL_00bc:
-					key = configurator.CombineNodePath(configurator._nodePath, key);
-					XmlNode xmlNode = configurator.CreateAndSelectNode(key);
-					xmlNode.RemoveAll();
-					IEnumerator<string> enumerator = values.GetEnumerator();
-					try
+					if (configurator.Root._hasRead)
 					{
-						while (enumerator.MoveNext())
-						{
-							string current = enumerator.Current;
-							XmlNode xmlNode2 = configurator._contextDocument.CreateNode(XmlNodeType.Element, "value", null);
-							xmlNode2.InnerText = current;
-							xmlNode.AppendChild(xmlNode2);
-						}
+						goto IL_00ae;
 					}
-					finally
+					awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
 					{
-						if (num < 0 && 0 == 0 && enumerator != null)
-						{
-							goto IL_013b;
-						}
-						goto IL_0142;
-						IL_013b:
-						enumerator.Dispose();
-						goto IL_0142;
-						IL_0142:
-						if (4 == 0)
-						{
-							goto IL_013b;
-						}
+						num = 0;
+						_003C_003E1__state = 0;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+						return;
 					}
-					if (configurator.IsAutoSave)
-					{
-						awaiter = configurator.Root.SaveConfigsAsync().GetAwaiter();
-						if (false)
-						{
-							goto IL_0191;
-						}
-						num2 = (awaiter.IsCompleted ? 1 : 0);
-						if (8 == 0)
-						{
-							goto IL_002a;
-						}
-						if (num2 == 0)
-						{
-							num = (_003C_003E1__state = 1);
-							_003C_003Eu__1 = awaiter;
-							_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-							return;
-						}
-						goto IL_01ad;
-					}
-					goto end_IL_001e;
-					IL_002a:
-					if (num2 != 1 && 7 != 0)
-					{
-						if (!configurator.Root._hasRead)
-						{
-							awaiter = configurator.Root.ReadConfigsAsync().GetAwaiter();
-							if (!awaiter.IsCompleted)
-							{
-								if (true)
-								{
-									num = (_003C_003E1__state = 0);
-									if (0 == 0)
-									{
-										_003C_003Eu__1 = awaiter;
-									}
-									_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-								}
-								return;
-							}
-							goto IL_00ad;
-						}
-						goto IL_00bc;
-					}
-					goto IL_0191;
-					IL_0191:
+				}
+				else
+				{
 					awaiter = _003C_003Eu__1;
 					_003C_003Eu__1 = default(TaskAwaiter);
-					num = (_003C_003E1__state = -1);
-					goto IL_01ad;
-					IL_01ad:
-					awaiter.GetResult();
-					awaiter = default(TaskAwaiter);
-					end_IL_001e:;
+					num = -1;
+					_003C_003E1__state = -1;
 				}
-				catch (Exception exception)
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_00ae;
+				IL_00ae:
+				key = configurator.CombineNodePath(configurator._nodePath, key);
+				XmlNode xmlNode = configurator.CreateAndSelectNode(key);
+				xmlNode.RemoveAll();
+				IEnumerator<string> enumerator = values.GetEnumerator();
+				try
 				{
-					_003C_003E1__state = -2;
-					_003C_003Et__builder.SetException(exception);
-					return;
+					while (enumerator.MoveNext())
+					{
+						string current = enumerator.Current;
+						XmlNode xmlNode2 = configurator._contextDocument.CreateNode(XmlNodeType.Element, "value", null);
+						xmlNode2.InnerText = current;
+						xmlNode.AppendChild(xmlNode2);
+					}
 				}
+				finally
+				{
+					if (num < 0)
+					{
+						enumerator?.Dispose();
+					}
+				}
+				if (configurator.IsAutoSave)
+				{
+					awaiter = configurator.Root.SaveConfigsAsync().GetAwaiter();
+					if (!awaiter.IsCompleted)
+					{
+						num = 1;
+						_003C_003E1__state = 1;
+						_003C_003Eu__1 = awaiter;
+						_003C_003Et__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+						return;
+					}
+					goto IL_0175;
+				}
+				goto IL_0186;
+				IL_0175:
+				awaiter.GetResult();
+				awaiter = default(TaskAwaiter);
+				goto IL_0186;
+				IL_0186:
 				_003C_003E1__state = -2;
 				_003C_003Et__builder.SetResult();
 			}
@@ -733,7 +557,7 @@ namespace Cvte.Configuration
 
 		private const char NodeSeparatorChar = '/';
 
-		private static readonly char[] NodeSeparatorChars;
+		private static readonly char[] NodeSeparatorChars = new char[2] { '/', '\\' };
 
 		private FileInfo _fileInfo;
 
@@ -798,29 +622,13 @@ namespace Cvte.Configuration
 
 		private void LoadConfigFile()
 		{
-			Configurator configurator = default(Configurator);
-			while (true)
+			if (this == Root)
 			{
-				if (-1 != 0)
-				{
-					if (this == Root)
-					{
-						break;
-					}
-					configurator = FindRoot(this);
-				}
-				if (0 == 0 || 1 == 0)
-				{
-					if (-1 != 0)
-					{
-						configurator._contextDocument.Load(configurator._fileInfo.FullName);
-						return;
-					}
-					continue;
-				}
+				_contextDocument.Load(_fileInfo.FullName);
 				return;
 			}
-			_contextDocument.Load(_fileInfo.FullName);
+			Configurator configurator = FindRoot(this);
+			configurator._contextDocument.Load(configurator._fileInfo.FullName);
 		}
 
 		[AsyncStateMachine(typeof(_003CReadConfigsAsync_003Ed__28))]
@@ -828,17 +636,9 @@ namespace Cvte.Configuration
 		{
 			_003CReadConfigsAsync_003Ed__28 stateMachine = default(_003CReadConfigsAsync_003Ed__28);
 			stateMachine._003C_003E4__this = this;
-			AsyncTaskMethodBuilder asyncTaskMethodBuilder;
-			do
-			{
-				if (2 != 0)
-				{
-					stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
-					stateMachine._003C_003E1__state = -1;
-				}
-				asyncTaskMethodBuilder = stateMachine._003C_003Et__builder;
-			}
-			while (false);
+			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
+			stateMachine._003C_003E1__state = -1;
+			AsyncTaskMethodBuilder asyncTaskMethodBuilder = stateMachine._003C_003Et__builder;
 			asyncTaskMethodBuilder.Start(ref stateMachine);
 			return stateMachine._003C_003Et__builder.Task;
 		}
@@ -848,17 +648,9 @@ namespace Cvte.Configuration
 		{
 			_003CSaveConfigsAsync_003Ed__29 stateMachine = default(_003CSaveConfigsAsync_003Ed__29);
 			stateMachine._003C_003E4__this = this;
-			AsyncTaskMethodBuilder asyncTaskMethodBuilder;
-			do
-			{
-				if (2 != 0)
-				{
-					stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
-					stateMachine._003C_003E1__state = -1;
-				}
-				asyncTaskMethodBuilder = stateMachine._003C_003Et__builder;
-			}
-			while (false);
+			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
+			stateMachine._003C_003E1__state = -1;
+			AsyncTaskMethodBuilder asyncTaskMethodBuilder = stateMachine._003C_003Et__builder;
 			asyncTaskMethodBuilder.Start(ref stateMachine);
 			return stateMachine._003C_003Et__builder.Task;
 		}
@@ -868,10 +660,7 @@ namespace Cvte.Configuration
 		{
 			_003CGetAsync_003Ed__30 stateMachine = default(_003CGetAsync_003Ed__30);
 			stateMachine._003C_003E4__this = this;
-			if (4 != 0)
-			{
-				stateMachine.key = key;
-			}
+			stateMachine.key = key;
 			stateMachine.defaultValue = defaultValue;
 			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder<string>.Create();
 			stateMachine._003C_003E1__state = -1;
@@ -885,10 +674,7 @@ namespace Cvte.Configuration
 		{
 			_003CSetAsync_003Ed__31 stateMachine = default(_003CSetAsync_003Ed__31);
 			stateMachine._003C_003E4__this = this;
-			if (4 != 0)
-			{
-				stateMachine.key = key;
-			}
+			stateMachine.key = key;
 			stateMachine.value = value;
 			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
 			stateMachine._003C_003E1__state = -1;
@@ -902,10 +688,7 @@ namespace Cvte.Configuration
 		{
 			_003CGetArrayAsync_003Ed__32 stateMachine = default(_003CGetArrayAsync_003Ed__32);
 			stateMachine._003C_003E4__this = this;
-			if (4 != 0)
-			{
-				stateMachine.key = key;
-			}
+			stateMachine.key = key;
 			stateMachine.defaultValue = defaultValue;
 			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder<string[]>.Create();
 			stateMachine._003C_003E1__state = -1;
@@ -919,10 +702,7 @@ namespace Cvte.Configuration
 		{
 			_003CSetArrayAsync_003Ed__33 stateMachine = default(_003CSetArrayAsync_003Ed__33);
 			stateMachine._003C_003E4__this = this;
-			if (4 != 0)
-			{
-				stateMachine.key = key;
-			}
+			stateMachine.key = key;
 			stateMachine.values = values;
 			stateMachine._003C_003Et__builder = AsyncTaskMethodBuilder.Create();
 			stateMachine._003C_003E1__state = -1;
@@ -947,47 +727,14 @@ namespace Cvte.Configuration
 
 		private void CreateNewXmlFile()
 		{
-			XmlTextWriter xmlTextWriter = new XmlTextWriter(FileName, Encoding.UTF8);
-			try
+			using (XmlTextWriter xmlTextWriter = new XmlTextWriter(FileName, Encoding.UTF8))
 			{
-				if (false)
-				{
-					goto IL_004c;
-				}
 				xmlTextWriter.Formatting = Formatting.Indented;
-				goto IL_0061;
-				IL_0029:
+				xmlTextWriter.WriteStartDocument(false);
 				xmlTextWriter.WriteStartElement(Root._nodeName);
-				if (7 != 0)
-				{
-					xmlTextWriter.WriteEndElement();
-					if (false)
-					{
-						goto IL_0061;
-					}
-					xmlTextWriter.Flush();
-				}
-				goto IL_004c;
-				IL_0061:
-				if (true)
-				{
-					xmlTextWriter.WriteStartDocument(false);
-				}
-				goto IL_0029;
-				IL_004c:
-				if (false)
-				{
-					goto IL_0029;
-				}
+				xmlTextWriter.WriteEndElement();
+				xmlTextWriter.Flush();
 				xmlTextWriter.Close();
-			}
-			finally
-			{
-				do
-				{
-					((IDisposable)xmlTextWriter)?.Dispose();
-				}
-				while (false);
 			}
 			_fileInfo = new FileInfo(FileName);
 		}
@@ -995,71 +742,33 @@ namespace Cvte.Configuration
 		private XmlNode CreateAndSelectNode(string key)
 		{
 			XmlNode xmlNode = _contextDocument.SelectSingleNode(key);
-			string[] array;
-			if (0 == 0)
+			if (xmlNode == null)
 			{
-				if (xmlNode != null || 1 == 0)
+				string[] array = key.Split(NodeSeparatorChars);
+				xmlNode = _contextDocument.SelectSingleNode(Root._nodeName);
+				for (int i = 1; i < array.Length; i++)
 				{
-					goto IL_00a1;
-				}
-				array = key.Split(NodeSeparatorChars);
-			}
-			xmlNode = _contextDocument.SelectSingleNode(Root._nodeName);
-			int num = default(int);
-			while (true)
-			{
-				IL_0055:
-				if (8 != 0)
-				{
-					num = 1;
-				}
-				while (num < array.Length)
-				{
-					if (7 == 0)
-					{
-						goto IL_0055;
-					}
-					XmlNode xmlNode2 = xmlNode.SelectSingleNode(array[num]);
+					XmlNode xmlNode2 = xmlNode.SelectSingleNode(array[i]);
 					if (xmlNode2 != null)
 					{
 						xmlNode = xmlNode2;
-						if (false)
-						{
-							continue;
-						}
+						continue;
 					}
-					else
-					{
-						if (false)
-						{
-							continue;
-						}
-						xmlNode.AppendChild(_contextDocument.CreateNode(XmlNodeType.Element, array[num], null));
-						xmlNode = xmlNode.SelectSingleNode(array[num]);
-					}
-					num++;
+					xmlNode.AppendChild(_contextDocument.CreateNode(XmlNodeType.Element, array[i], null));
+					xmlNode = xmlNode.SelectSingleNode(array[i]);
 				}
-				break;
 			}
-			goto IL_00a1;
-			IL_00a1:
 			return xmlNode;
 		}
 
 		[Obsolete("同步读写配置的方法将于 2017年6月18日 删除；请在方法名称后加上 Async 替代。")]
 		private void ReadConfigs()
 		{
-			bool flag = _fileInfo.Exists;
-			do
+			if (!_fileInfo.Exists)
 			{
-				if (!flag)
-				{
-					CreateNewXmlFile();
-				}
-				flag = _isExceptionHandled;
+				CreateNewXmlFile();
 			}
-			while (-1 == 0);
-			if (flag)
+			if (_isExceptionHandled)
 			{
 				try
 				{
@@ -1081,82 +790,47 @@ namespace Cvte.Configuration
 		[Obsolete("同步读写配置的方法将于 2017年6月18日 删除；请在方法名称后加上 Async 替代。")]
 		private void SaveConfigs()
 		{
-			if (1 == 0 || this != Root)
+			if (this == Root)
+			{
+				_contextDocument.Save(_fileInfo.FullName);
+			}
+			else
 			{
 				FindRoot(this)._contextDocument.Save(_fileInfo.FullName);
-				if (0 == 0)
-				{
-					return;
-				}
 			}
-			_contextDocument.Save(_fileInfo.FullName);
 		}
 
 		[Obsolete("同步读写配置的方法将于 2017年6月18日 删除；请在方法名称后加上 Async 替代。")]
 		public string Get(string key, string defaultValue = null)
 		{
-			while (true)
+			if (!Root._hasRead)
 			{
-				if (!Root._hasRead)
-				{
-					Root.ReadConfigs();
-				}
-				while (6 != 0)
-				{
-					XmlNode xmlNode = _contextDocument.SelectSingleNode(CombineNodePath(_nodePath, key));
-					if (xmlNode != null)
-					{
-						if (6 != 0)
-						{
-							return xmlNode.InnerText;
-						}
-					}
-					else if (defaultValue == null)
-					{
-						throw new KeyNotFoundException($"Key {key} not found.");
-					}
-					if (0 == 0)
-					{
-						return defaultValue;
-					}
-				}
+				Root.ReadConfigs();
 			}
+			XmlNode xmlNode = _contextDocument.SelectSingleNode(CombineNodePath(_nodePath, key));
+			if (xmlNode != null)
+			{
+				return xmlNode.InnerText;
+			}
+			if (defaultValue == null)
+			{
+				throw new KeyNotFoundException($"Key {key} not found.");
+			}
+			return defaultValue;
 		}
 
 		[Obsolete("同步读写配置的方法将于 2017年6月18日 删除；请在方法名称后加上 Async 替代。")]
 		public void Set(string key, string value)
 		{
-			while (true)
+			if (!Root._hasRead)
 			{
-				bool flag = Root._hasRead;
-				if (4 != 0)
-				{
-					if (!flag)
-					{
-						Root.ReadConfigs();
-					}
-					key = CombineNodePath(_nodePath, key);
-					CreateAndSelectNode(key).InnerText = value;
-					goto IL_0030;
-				}
-				goto IL_0036;
-				IL_0036:
-				if (flag)
-				{
-					Root.SaveConfigs();
-				}
-				if (false)
-				{
-					continue;
-				}
-				if (0 == 0)
-				{
-					break;
-				}
-				goto IL_0030;
-				IL_0030:
-				flag = IsAutoSave;
-				goto IL_0036;
+				Root.ReadConfigs();
+			}
+			key = CombineNodePath(_nodePath, key);
+			CreateAndSelectNode(key).InnerText = value;
+			if (IsAutoSave)
+			{
+				Root.SaveConfigs();
 			}
 		}
 
@@ -1173,78 +847,33 @@ namespace Cvte.Configuration
 				return (from XmlNode child in xmlNode.ChildNodes
 					select child.InnerText).ToArray();
 			}
-			if (defaultValue != null)
+			if (defaultValue == null)
 			{
-				return defaultValue;
+				throw new KeyNotFoundException($"Key {key} not found.");
 			}
-			throw new KeyNotFoundException($"Key {key} not found.");
+			return defaultValue;
 		}
 
 		[Obsolete("同步读写配置的方法将于 2017年6月18日 删除；请在方法名称后加上 Async 替代。")]
 		public void SetArray(string key, IEnumerable<string> values)
 		{
-			if (true && !Root._hasRead)
+			if (!Root._hasRead)
 			{
 				Root.ReadConfigs();
 			}
-			if (false)
-			{
-				goto IL_0052;
-			}
 			key = CombineNodePath(_nodePath, key);
-			XmlNode xmlNode = default(XmlNode);
-			if (4 != 0)
-			{
-				xmlNode = CreateAndSelectNode(key);
-				goto IL_004c;
-			}
-			goto IL_00b1;
-			IL_00b1:
-			if (8 != 0)
-			{
-				return;
-			}
-			goto IL_004c;
-			IL_004c:
+			XmlNode xmlNode = CreateAndSelectNode(key);
 			xmlNode.RemoveAll();
-			goto IL_0052;
-			IL_0052:
-			using (IEnumerator<string> enumerator = values.GetEnumerator())
+			foreach (string value in values)
 			{
-				if (0 == 0)
-				{
-				}
-				while (enumerator.MoveNext())
-				{
-					string current;
-					XmlNode xmlNode2;
-					do
-					{
-						current = enumerator.Current;
-						xmlNode2 = _contextDocument.CreateNode(XmlNodeType.Element, "value", null);
-					}
-					while (-1 == 0);
-					xmlNode2.InnerText = current;
-					xmlNode.AppendChild(xmlNode2);
-				}
+				XmlNode xmlNode2 = _contextDocument.CreateNode(XmlNodeType.Element, "value", null);
+				xmlNode2.InnerText = value;
+				xmlNode.AppendChild(xmlNode2);
 			}
 			if (IsAutoSave)
 			{
 				Root.SaveConfigs();
 			}
-			goto IL_00b1;
-		}
-
-		static Configurator()
-		{
-			do
-			{
-				if (0 == 0)
-				{
-					NodeSeparatorChars = new char[2] { '/', '\\' };
-				}
-			}
-			while (false);
 		}
 	}
 }

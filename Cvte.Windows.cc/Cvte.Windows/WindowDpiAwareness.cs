@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -9,15 +8,34 @@ namespace Cvte.Windows
 {
 	public sealed class WindowDpiAwareness : DependencyObject
 	{
-		public static readonly DependencyProperty WindowDpiAwarenessProperty;
+		public static readonly DependencyProperty WindowDpiAwarenessProperty = DependencyProperty.RegisterAttached("WindowDpiAwareness", typeof(WindowDpiAwareness), typeof(WindowDpiAwareness), new PropertyMetadata(null, WindowDpiAwarenessPropertyChangedCallback));
 
-		private static readonly DependencyProperty MonitorDpiOfWindowProperty;
+		private static readonly DependencyProperty MonitorDpiOfWindowProperty = DependencyProperty.RegisterAttached("MonitorDpiOfWindow", typeof(Dpi), typeof(WindowDpiAwareness), new PropertyMetadata(Dpi.ScreenStandard));
 
-		public static readonly DpiChangedEventHandler VisualParentScaleTransformForDpiChanged;
+		public unsafe static readonly DpiChangedEventHandler VisualParentScaleTransformForDpiChanged = (object sender, DpiChangedEventArgs e) =>
+		{
+			void* ptr = stackalloc byte[16];
+			if (Monitor.IsPerMonitorDpiSupported)
+			{
+				PresentationSource presentationSource = PresentationSource.FromVisual(e.Window);
+				if (presentationSource != null)
+				{
+					FrameworkElement frameworkElement = VisualTreeHelper.GetChild(presentationSource.RootVisual, 0) as FrameworkElement;
+					if (frameworkElement != null)
+					{
+						frameworkElement.LayoutTransform = ((e.NewMonitorDpi == e.SystemDpi) ? Transform.Identity : new ScaleTransform((double)e.NewMonitorDpi.X / (double)e.SystemDpi.X, (double)e.NewMonitorDpi.Y / (double)e.SystemDpi.Y));
+						Rect restoreBounds = e.Window.RestoreBounds;
+						*(double*)ptr = e.Window.RestoreBounds.Width * (double)e.NewMonitorDpi.X / (double)e.OldMonitorDpi.X;
+						((double*)ptr)[1] = e.Window.RestoreBounds.Height * (double)e.NewMonitorDpi.Y / (double)e.OldMonitorDpi.Y;
+						e.Window.Left = restoreBounds.Left - (*(double*)ptr - restoreBounds.Width) / 2.0;
+						e.Window.Width = *(double*)ptr;
+						e.Window.Height = ((double*)ptr)[1];
+					}
+				}
+			}
+		};
 
-		public static readonly DependencyProperty DpiAwarenessProperty;
-
-		private DpiChangedEventHandler m_DpiChanged;
+		public static readonly DependencyProperty DpiAwarenessProperty = DependencyProperty.Register("DpiAwareness", typeof(DpiAwareness), typeof(WindowDpiAwareness), new PropertyMetadata(DpiAwareness.System));
 
 		private Window _target;
 
@@ -33,91 +51,7 @@ namespace Cvte.Windows
 			}
 		}
 
-		public event DpiChangedEventHandler DpiChanged
-		{
-			add
-			{
-				DpiChangedEventHandler dpiChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						dpiChangedEventHandler = this.m_DpiChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				DpiChangedEventHandler dpiChangedEventHandler2 = default(DpiChangedEventHandler);
-				DpiChangedEventHandler value2 = (DpiChangedEventHandler)Delegate.Combine(dpiChangedEventHandler2, value);
-				dpiChangedEventHandler = Interlocked.CompareExchange(ref this.m_DpiChanged, value2, dpiChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				DpiChangedEventHandler dpiChangedEventHandler3 = dpiChangedEventHandler;
-				if (6u != 0)
-				{
-					dpiChangedEventHandler2 = dpiChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)dpiChangedEventHandler != dpiChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-			remove
-			{
-				DpiChangedEventHandler dpiChangedEventHandler;
-				if (0 == 0)
-				{
-					if (0 == 0)
-					{
-						dpiChangedEventHandler = this.m_DpiChanged;
-					}
-					goto IL_000f;
-				}
-				goto IL_0038;
-				IL_0038:
-				if (false)
-				{
-					goto IL_0048;
-				}
-				return;
-				IL_0048:
-				DpiChangedEventHandler dpiChangedEventHandler2 = default(DpiChangedEventHandler);
-				DpiChangedEventHandler value2 = (DpiChangedEventHandler)Delegate.Remove(dpiChangedEventHandler2, value);
-				dpiChangedEventHandler = Interlocked.CompareExchange(ref this.m_DpiChanged, value2, dpiChangedEventHandler2);
-				goto IL_0034;
-				IL_000f:
-				if (7 == 0)
-				{
-					goto IL_0034;
-				}
-				DpiChangedEventHandler dpiChangedEventHandler3 = dpiChangedEventHandler;
-				if (6u != 0)
-				{
-					dpiChangedEventHandler2 = dpiChangedEventHandler3;
-				}
-				goto IL_0048;
-				IL_0034:
-				if ((object)dpiChangedEventHandler != dpiChangedEventHandler2)
-				{
-					goto IL_000f;
-				}
-				goto IL_0038;
-			}
-		}
+		public event DpiChangedEventHandler DpiChanged;
 
 		public static WindowDpiAwareness GetWindowDpiAwareness(DependencyObject element)
 		{
@@ -144,269 +78,99 @@ namespace Cvte.Windows
 			Window window = dp as Window;
 			if (window == null)
 			{
-				goto IL_0079;
+				if (!dp.IsDesignTimeWindow())
+				{
+					throw new InvalidOperationException("WindowDpiAwareness 属性只能附加到 Window 上。");
+				}
 			}
-			WindowDpiAwareness windowDpiAwareness = (WindowDpiAwareness)args.OldValue;
-			if (windowDpiAwareness != null)
+			else
 			{
-				goto IL_003a;
+				((WindowDpiAwareness)args.OldValue)?.OnDetaching();
+				((WindowDpiAwareness)args.NewValue)?.OnAttached(window);
 			}
-			goto IL_0043;
-			IL_0053:
-			if (false)
-			{
-				goto IL_0079;
-			}
-			if (false)
-			{
-				goto IL_003a;
-			}
-			WindowDpiAwareness windowDpiAwareness2 = default(WindowDpiAwareness);
-			windowDpiAwareness2?.OnAttached(window);
-			if (0 == 0)
-			{
-				return;
-			}
-			goto IL_0043;
-			IL_003a:
-			if (6 != 0)
-			{
-				windowDpiAwareness.OnDetaching();
-				goto IL_0043;
-			}
-			goto IL_0053;
-			IL_0079:
-			if (dp.IsDesignTimeWindow())
-			{
-				return;
-			}
-			throw new InvalidOperationException("WindowDpiAwareness 属性只能附加到 Window 上。");
-			IL_0043:
-			if (false)
-			{
-				return;
-			}
-			windowDpiAwareness2 = (WindowDpiAwareness)args.NewValue;
-			goto IL_0053;
 		}
 
 		private void HandleAndRaiseDpiChanged(Dpi dpi)
 		{
-			do
+			DpiChangedEventHandler dpiChanged = DpiChanged;
+			if (dpiChanged != null)
 			{
-				IL_005a:
-				DpiChangedEventHandler dpiChanged = this.m_DpiChanged;
-				if (dpiChanged == null)
-				{
-					continue;
-				}
 				Dpi monitorDpiOfWindow = GetMonitorDpiOfWindow(_target);
 				if (monitorDpiOfWindow != dpi)
 				{
 					Dpi systemDpi = _target.GetSystemDpi();
-					if (false)
-					{
-						goto IL_005a;
-					}
 					SetMonitorDpiOfWindow(_target, dpi);
 					dpiChanged(this, new DpiChangedEventArgs(_target, monitorDpiOfWindow, dpi, systemDpi));
 				}
 			}
-			while (false);
 		}
 
 		private void OnAttached(Window target)
 		{
 			_target = target;
-			do
+			if (target.IsLoaded)
 			{
-				if (target.IsLoaded)
-				{
-					HandleTargetDpi();
-					continue;
-				}
-				target.SourceInitialized += TargetWindow_SourceInitialized;
-				if (8 != 0)
-				{
-					break;
-				}
+				HandleTargetDpi();
 			}
-			while (false);
+			else
+			{
+				target.SourceInitialized += TargetWindow_SourceInitialized;
+			}
 		}
 
 		private void OnDetaching()
 		{
-			HwndSource hwndSource;
-			while (true)
+			HwndSource hwndSource = PresentationSource.FromVisual(_target) as HwndSource;
+			if (hwndSource != null)
 			{
-				hwndSource = PresentationSource.FromVisual(_target) as HwndSource;
-				if (3 != 0)
+				if (Monitor.IsPerMonitorDpiSupported)
 				{
-					if (6 == 0)
-					{
-						return;
-					}
-					if (hwndSource != null)
-					{
-						break;
-					}
+					hwndSource.RemoveHook(WndProc);
 				}
-				if (7 == 0)
-				{
-					continue;
-				}
-				if (false)
-				{
-				}
-				return;
+				_target = null;
 			}
-			if (Monitor.IsPerMonitorDpiSupported)
-			{
-				hwndSource.RemoveHook(WndProc);
-			}
-			_target = null;
 		}
 
 		private void TargetWindow_SourceInitialized(object sender, EventArgs e)
 		{
-			if (false || _target != null)
+			if (_target != null)
 			{
-				goto IL_002d;
+				_target.SourceInitialized -= TargetWindow_SourceInitialized;
 			}
-			goto IL_003a;
-			IL_003a:
 			HandleTargetDpi();
-			if (false)
-			{
-				goto IL_002d;
-			}
-			return;
-			IL_002d:
-			_target.SourceInitialized -= TargetWindow_SourceInitialized;
-			goto IL_003a;
 		}
 
 		private void HandleTargetDpi()
 		{
 			HwndSource hwndSource = PresentationSource.FromVisual(_target) as HwndSource;
-			while (hwndSource != null)
+			if (hwndSource != null)
 			{
-				while (true)
+				Dpi systemDpi = _target.GetSystemDpi();
+				Dpi dpi;
+				if (Monitor.IsPerMonitorDpiSupported)
 				{
-					Dpi dpi;
-					if (8 != 0)
-					{
-						if (false)
-						{
-							break;
-						}
-						Dpi systemDpi = _target.GetSystemDpi();
-						if (Monitor.IsPerMonitorDpiSupported)
-						{
-							dpi = hwndSource.GetMonitorDpi();
-							goto IL_0032;
-						}
-						dpi = systemDpi;
-						goto IL_0048;
-					}
-					goto IL_0052;
-					IL_0048:
-					if (false)
-					{
-						continue;
-					}
-					HandleAndRaiseDpiChanged(dpi);
-					goto IL_0052;
-					IL_0052:
-					if (0 == 0)
-					{
-						return;
-					}
-					goto IL_0032;
-					IL_0032:
+					dpi = hwndSource.GetMonitorDpi();
 					hwndSource.AddHook(WndProc);
-					goto IL_0048;
 				}
+				else
+				{
+					dpi = systemDpi;
+				}
+				HandleAndRaiseDpiChanged(dpi);
 			}
 		}
 
 		private unsafe IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
 		{
 			void* ptr = stackalloc byte[4];
-			if (0 == 0)
-			{
-				if (-1 == 0)
-				{
-					goto IL_0050;
-				}
-			}
-			if (msg != 736)
-			{
-				goto IL_0044;
-			}
-			goto IL_0050;
-			IL_0050:
-			if (DpiAwareness == DpiAwareness.PerMonitor)
+			if (msg == 736 && DpiAwareness == DpiAwareness.PerMonitor)
 			{
 				*(ushort*)ptr = wParam.ToHiWord();
 				((short*)ptr)[1] = (short)wParam.ToLoWord();
 				HandleAndRaiseDpiChanged(new Dpi(*(ushort*)ptr, ((ushort*)ptr)[1]));
 				handled = true;
 			}
-			goto IL_0044;
-			IL_0044:
 			return IntPtr.Zero;
-		}
-
-		unsafe static WindowDpiAwareness()
-		{
-			if (0 == 0)
-			{
-				WindowDpiAwarenessProperty = DependencyProperty.RegisterAttached("WindowDpiAwareness", typeof(WindowDpiAwareness), typeof(WindowDpiAwareness), new PropertyMetadata(null, WindowDpiAwarenessPropertyChangedCallback));
-			}
-			if (0 == 0)
-			{
-				MonitorDpiOfWindowProperty = DependencyProperty.RegisterAttached("MonitorDpiOfWindow", typeof(Dpi), typeof(WindowDpiAwareness), new PropertyMetadata(Dpi.ScreenStandard));
-				VisualParentScaleTransformForDpiChanged = (object sender, DpiChangedEventArgs args) =>
-				{
-					int num = 16;
-					void* ptr = stackalloc byte[num];
-					if (num != 0)
-					{
-						num = (Monitor.IsPerMonitorDpiSupported ? 1 : 0);
-					}
-					if (num != 0)
-					{
-						PresentationSource presentationSource = PresentationSource.FromVisual(args.Window);
-						PresentationSource presentationSource2;
-						if (true)
-						{
-							presentationSource2 = presentationSource;
-						}
-						if (presentationSource2 != null)
-						{
-							FrameworkElement frameworkElement = VisualTreeHelper.GetChild(presentationSource2.RootVisual, 0) as FrameworkElement;
-							if (frameworkElement != null)
-							{
-								Rect restoreBounds = default(Rect);
-								Rect restoreBounds2 = default(Rect);
-								if (8 != 0)
-								{
-									frameworkElement.LayoutTransform = ((args.NewMonitorDpi == args.SystemDpi) ? Transform.Identity : new ScaleTransform((double)args.NewMonitorDpi.X / (double)args.SystemDpi.X, (double)args.NewMonitorDpi.Y / (double)args.SystemDpi.Y));
-									restoreBounds = args.Window.RestoreBounds;
-									*(double*)ptr = args.Window.RestoreBounds.Width * (double)args.NewMonitorDpi.X / (double)args.OldMonitorDpi.X;
-									restoreBounds2 = args.Window.RestoreBounds;
-								}
-								((double*)ptr)[1] = restoreBounds2.Height * (double)args.NewMonitorDpi.Y / (double)args.OldMonitorDpi.Y;
-								args.Window.Left = restoreBounds.Left - (*(double*)ptr - restoreBounds.Width) / 2.0;
-								args.Window.Width = *(double*)ptr;
-								args.Window.Height = ((double*)ptr)[1];
-							}
-						}
-					}
-				};
-			}
-			DpiAwarenessProperty = DependencyProperty.Register("DpiAwareness", typeof(DpiAwareness), typeof(WindowDpiAwareness), new PropertyMetadata(DpiAwareness.System));
 		}
 	}
 }

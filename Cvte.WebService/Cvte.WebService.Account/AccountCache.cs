@@ -3,178 +3,128 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using _0002;
 using Cvte.WebService.Utils;
 using LinqToDB;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Account
 {
 	internal class AccountCache : IAccountCache
 	{
-		private sealed class SA_C2
+		private sealed class Class23
 		{
-			public dynamic _0001;
+			public string string_0;
 
-			internal UserInfo _0001_M2(UserDB P_0)
+			internal UserInfo method_0(UserDB userDB_0)
 			{
-				ITable<global::_0002._0002> source = P_0._0001();
-				ParameterExpression parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-				IQueryable<global::_0002._0002> source2 = source.Where(Expression.Lambda<Func<global::_0002._0002, bool>>(SA_Proxy._0014_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0013_0002___0099(SA_Proxy._0011_0002___0097(this, Type.GetTypeFromHandle(typeof(object).TypeHandle)), SA_Proxy._0012_0002___0098(null))), new ParameterExpression[1] { parameterExpression }));
-				parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-				return source2.Select(Expression.Lambda<Func<global::_0002._0002, UserInfo>>(SA_Proxy._0019_0002___009E(SA_Proxy._0016_0002___009B(Type.GetTypeFromHandle(typeof(UserInfo).TypeHandle)), new MemberBinding[7]
-				{
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0018_0002___009D(null, (MethodInfo)SA_Proxy._000F_0002___0095(null), new Expression[2]
+				return (from u in (IQueryable<UserEntity>)userDB_0.method_0()
+					where u.method_2() == string_0
+					select new UserInfo
 					{
-						SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)),
-						SA_Proxy._0011_0002___0097("EasiUser", Type.GetTypeFromHandle(typeof(string).TypeHandle))
-					})),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0015_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0011_0002___0097(0L, Type.GetTypeFromHandle(typeof(long).TypeHandle))))
-				}), new ParameterExpression[1] { parameterExpression })).FirstOrDefault();
+						Name = u.method_8(),
+						Id = u.method_2(),
+						Key = u.method_0(),
+						Password = DesSecurityUtility.smethod_4(u.method_4(), "EasiUser"),
+						Photo = u.method_6(),
+						TokenId = u.method_10(),
+						LastTime = (u.method_12() ?? 0L)
+					}).FirstOrDefault();
 			}
 		}
 
-		private sealed class _0002
+		private sealed class Class24
 		{
-			public dynamic _0001;
+			public UserInfo userInfo_0;
 
-			internal void _0001_M2(UserDB P_0)
+			internal void method_0(UserDB userDB_0)
 			{
-				global::_0002._0002 obj = new global::_0002._0002();
-				obj._0001(this._0001.Key);
-				obj._0005(this._0001.Name);
-				obj._0002_Set(this._0001.Id);
-				obj._0003(DesSecurityUtility._0001(this._0001.Password, "EasiUser"));
-				obj._0004(this._0001.Photo);
-				obj._0006(this._0001.TokenId);
-				obj._0001(this._0001.LastTime);
-				P_0.InsertOrReplace(obj);
+				UserEntity @class = new UserEntity();
+				@class.method_1(userInfo_0.Key);
+				@class.method_9(userInfo_0.Name);
+				@class.method_3(userInfo_0.Id);
+				@class.method_5(DesSecurityUtility.smethod_1(userInfo_0.Password, "EasiUser"));
+				@class.method_7(userInfo_0.Photo);
+				@class.method_11(userInfo_0.TokenId);
+				@class.method_13(userInfo_0.LastTime);
+				DataExtensions.InsertOrReplace<UserEntity>((IDataContext)(object)userDB_0, @class, (string)null, (string)null, (string)null, (string)null, (TableOptions)0);
 			}
 		}
 
-		private sealed class _0003
+		private sealed class Class25
 		{
-			public dynamic _0001;
+			public string string_0;
 
-			internal void _0001_M2(UserDB P_0)
+			internal void method_0(UserDB userDB_0)
 			{
-				ITable<global::_0002._0002> source = P_0._0001();
-				ParameterExpression parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-				source.Delete(Expression.Lambda<Func<global::_0002._0002, bool>>(SA_Proxy._0014_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0013_0002___0099(SA_Proxy._0011_0002___0097(this, Type.GetTypeFromHandle(typeof(object).TypeHandle)), SA_Proxy._0012_0002___0098(null))), new ParameterExpression[1] { parameterExpression }));
+				LinqExtensions.Delete<UserEntity>((IQueryable<UserEntity>)userDB_0.method_0(), (Expression<Func<UserEntity, bool>>)((UserEntity u) => u.method_2() == string_0));
 			}
 		}
 
-		private readonly DBCache<UserDB> m__0001;
+		private readonly DBCache<UserDB> dbcache_0;
 
-		public AccountCache(string P_0, string P_1)
+		public AccountCache(string string_0, string string_1)
 		{
-			string text = P_0 + "\\User.db";
+			string text = string_0 + "\\User.db";
 			if (!File.Exists(text))
 			{
-				File.Copy(Path.Combine(P_1, "User.db"), text);
+				File.Copy(Path.Combine(string_1, "User.db"), text);
 			}
-			this.m__0001 = new DBCache<UserDB>("Data Source=" + text);
+			dbcache_0 = new DBCache<UserDB>("Data Source=" + text);
 		}
 
-		public UserInfo _0001(string P_0)
+		public UserInfo method_0(string string_0)
 		{
-			SA_C2 CS_0024_003C_003E8__locals2 = new SA_C2();
-			CS_0024_003C_003E8__locals2._0001 = P_0;
-			return this.m__0001.Execute((UserDB userDB) =>
-			{
-				ITable<global::_0002._0002> source = userDB._0001();
-				ParameterExpression parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-				IQueryable<global::_0002._0002> source2 = source.Where(Expression.Lambda<Func<global::_0002._0002, bool>>(SA_Proxy._0014_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0013_0002___0099(SA_Proxy._0011_0002___0097(CS_0024_003C_003E8__locals2, Type.GetTypeFromHandle(typeof(object).TypeHandle)), SA_Proxy._0012_0002___0098(null))), new ParameterExpression[1] { parameterExpression }));
-				parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-				return source2.Select(Expression.Lambda<Func<global::_0002._0002, UserInfo>>(SA_Proxy._0019_0002___009E(SA_Proxy._0016_0002___009B(Type.GetTypeFromHandle(typeof(UserInfo).TypeHandle)), new MemberBinding[7]
+			return dbcache_0.Execute((UserDB userDB_0) => (from u in (IQueryable<UserEntity>)userDB_0.method_0()
+				where u.method_2() == string_0
+				select new UserInfo
 				{
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0018_0002___009D(null, (MethodInfo)SA_Proxy._000F_0002___0095(null), new Expression[2]
-					{
-						SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)),
-						SA_Proxy._0011_0002___0097("EasiUser", Type.GetTypeFromHandle(typeof(string).TypeHandle))
-					})),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null))),
-					SA_Proxy._0017_0002___009C((MethodInfo)SA_Proxy._000F_0002___0095(null), SA_Proxy._0015_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0011_0002___0097(0L, Type.GetTypeFromHandle(typeof(long).TypeHandle))))
-				}), new ParameterExpression[1] { parameterExpression })).FirstOrDefault();
-			});
+					Name = u.method_8(),
+					Id = u.method_2(),
+					Key = u.method_0(),
+					Password = DesSecurityUtility.smethod_4(u.method_4(), "EasiUser"),
+					Photo = u.method_6(),
+					TokenId = u.method_10(),
+					LastTime = (u.method_12() ?? 0L)
+				}).FirstOrDefault());
 		}
 
 		public IList<UserInfo> GetAllUserInfo()
 		{
-			return this.m__0001.Execute((UserDB P_0) =>
-			{
-				ITable<global::_0002._0002> source = P_0._0001();
-				ParameterExpression parameterExpression = Expression.Parameter(typeof(global::_0002._0002), "u");
-				ParameterExpression parameterExpression2 = default(ParameterExpression);
-				if (0 == 0)
+			return dbcache_0.Execute((UserDB userDB_0) => (from u in (IQueryable<UserEntity>)userDB_0.method_0()
+				select (u) into u
+				where u.method_12() != (long?)null
+				orderby u.method_12() descending
+				select new UserInfo
 				{
-					parameterExpression2 = parameterExpression;
-				}
-				return (from u in source.Select(Expression.Lambda<Func<global::_0002._0002, global::_0002._0002>>(parameterExpression2, new ParameterExpression[1] { parameterExpression2 }))
-					where u._0001() != (long?)null
-					orderby u._0001() descending
-					select new UserInfo
-					{
-						Id = u._0002_Get(),
-						Name = u._0005(),
-						Photo = u._0004()
-					}).ToList();
+					Id = u.method_2(),
+					Name = u.method_8(),
+					Photo = u.method_6()
+				}).ToList());
+		}
+
+		public void method_1(UserInfo userInfo_0)
+		{
+			dbcache_0.Execute((UserDB userDB_0) =>
+			{
+				UserEntity @class = new UserEntity();
+				@class.method_1(userInfo_0.Key);
+				@class.method_9(userInfo_0.Name);
+				@class.method_3(userInfo_0.Id);
+				@class.method_5(DesSecurityUtility.smethod_1(userInfo_0.Password, "EasiUser"));
+				@class.method_7(userInfo_0.Photo);
+				@class.method_11(userInfo_0.TokenId);
+				@class.method_13(userInfo_0.LastTime);
+				DataExtensions.InsertOrReplace<UserEntity>((IDataContext)(object)userDB_0, @class, (string)null, (string)null, (string)null, (string)null, (TableOptions)0);
 			});
 		}
 
-		public void _0001(UserInfo P_0)
+		public void Remove(string userId)
 		{
-			if (0 == 0)
+			dbcache_0.Execute((UserDB userDB_0) =>
 			{
-			}
-			UserInfo userInfo;
-			do
-			{
-				userInfo = P_0;
-				this.m__0001.Execute((UserDB dataContext) =>
-				{
-					global::_0002._0002 obj = new global::_0002._0002();
-					obj._0001(userInfo.Key);
-					obj._0005(userInfo.Name);
-					obj._0002_Set(userInfo.Id);
-					obj._0003(DesSecurityUtility._0001(userInfo.Password, "EasiUser"));
-					obj._0004(userInfo.Photo);
-					obj._0006(userInfo.TokenId);
-					obj._0001(userInfo.LastTime);
-					dataContext.InsertOrReplace(obj);
-				});
-			}
-			while (false);
-		}
-
-		public void Remove(string P_0)
-		{
-			_0003 CS_0024_003C_003E8__locals2;
-			if (0 == 0)
-			{
-				CS_0024_003C_003E8__locals2 = new _0003();
-			}
-			do
-			{
-				CS_0024_003C_003E8__locals2._0001 = P_0;
-				this.m__0001.Execute((UserDB userDB) =>
-				{
-					ITable<global::_0002._0002> source = userDB._0001();
-					ParameterExpression parameterExpression = SA_Proxy._000E_0002___0094(Type.GetTypeFromHandle(typeof(global::_0002._0002).TypeHandle), "u");
-					source.Delete(Expression.Lambda<Func<global::_0002._0002, bool>>(SA_Proxy._0014_0002___009A(SA_Proxy._0010_0002___0096(parameterExpression, (MethodInfo)SA_Proxy._000F_0002___0095(null)), SA_Proxy._0013_0002___0099(SA_Proxy._0011_0002___0097(CS_0024_003C_003E8__locals2, Type.GetTypeFromHandle(typeof(object).TypeHandle)), SA_Proxy._0012_0002___0098(null))), new ParameterExpression[1] { parameterExpression }));
-				});
-			}
-			while (false);
+				LinqExtensions.Delete<UserEntity>((IQueryable<UserEntity>)userDB_0.method_0(), (Expression<Func<UserEntity, bool>>)((UserEntity u) => u.method_2() == userId));
+			});
 		}
 	}
 }

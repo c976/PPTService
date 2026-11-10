@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -18,52 +17,20 @@ namespace Cvte.Windows
 
 		public static StreamGeometry ConvertToGeometry(this IEnumerable<Point> points)
 		{
-			StreamGeometry streamGeometry;
-			while (true)
+			StreamGeometry streamGeometry = new StreamGeometry();
+			using (StreamGeometryContext streamGeometryContext = streamGeometry.Open())
 			{
-				if (0 == 0)
+				if (points.Any())
 				{
-					streamGeometry = new StreamGeometry();
-				}
-				if (false)
-				{
-					continue;
-				}
-				StreamGeometryContext streamGeometryContext = streamGeometry.Open();
-				try
-				{
-					while (points.Any())
+					streamGeometryContext.BeginFigure(points.First(), true, true);
+					IEnumerable<Point> enumerable = points.Skip(1);
+					foreach (Point item in enumerable)
 					{
-						streamGeometryContext.BeginFigure(points.First(), true, true);
-						IEnumerable<Point> enumerable = points.Skip(1);
-						if (false)
-						{
-							continue;
-						}
-						foreach (Point item in enumerable)
-						{
-							streamGeometryContext.LineTo(item, true, true);
-						}
-						break;
+						streamGeometryContext.LineTo(item, true, true);
 					}
-				}
-				finally
-				{
-					while (streamGeometryContext != null)
-					{
-						if (0 == 0 && 0 == 0)
-						{
-							((IDisposable)streamGeometryContext).Dispose();
-							break;
-						}
-					}
-				}
-				streamGeometry.Freeze();
-				if (4 != 0)
-				{
-					break;
 				}
 			}
+			streamGeometry.Freeze();
 			return streamGeometry;
 		}
 	}

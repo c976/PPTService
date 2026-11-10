@@ -22,75 +22,34 @@ namespace Cvte.Windows.Controls
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			if (7 != 0 && 0 == 0)
+			if (object.Equals(value, Visible))
 			{
-				bool flag = object.Equals(value, Visible);
-				do
-				{
-					if (flag)
-					{
-						return Visibility.Visible;
-					}
-					flag = object.Equals(value, Hidden);
-				}
-				while (6 == 0);
-				if (!flag)
-				{
-					if (0 == 0)
-					{
-						if (3 == 0)
-						{
-							goto IL_0024;
-						}
-						if (object.Equals(value, Collapsed))
-						{
-							return Visibility.Collapsed;
-						}
-					}
-					return DefaultVisibility;
-				}
+				return Visibility.Visible;
 			}
-			goto IL_0024;
-			IL_0024:
-			return Visibility.Hidden;
+			if (object.Equals(value, Hidden))
+			{
+				return Visibility.Hidden;
+			}
+			if (object.Equals(value, Collapsed))
+			{
+				return Visibility.Collapsed;
+			}
+			return DefaultVisibility;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			Visibility visibility = (Visibility)value;
-			Visibility visibility2;
-			do
+			switch ((Visibility)value)
 			{
-				visibility2 = visibility;
+			default:
+				throw new ArgumentException($"不支持指定值 {value} 的转换。");
+			case Visibility.Visible:
+				return Visible;
+			case Visibility.Hidden:
+				return Hidden;
+			case Visibility.Collapsed:
+				return Collapsed;
 			}
-			while (false);
-			if (7 != 0)
-			{
-				switch (visibility2)
-				{
-				case Visibility.Visible:
-					if (6 == 0)
-					{
-						goto default;
-					}
-					if (0 == 0)
-					{
-						return Visible;
-					}
-					goto case Visibility.Collapsed;
-				case Visibility.Collapsed:
-					return Collapsed;
-				default:
-					if (false)
-					{
-						break;
-					}
-					throw new ArgumentException($"不支持指定值 {value} 的转换。");
-				case Visibility.Hidden:
-					break;
-				}
-			}
-			return Hidden;
 		}
 	}
 }

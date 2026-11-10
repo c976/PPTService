@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using Cvte.Diagnostics.Annotations;
@@ -8,42 +7,6 @@ namespace Cvte.Windows
 {
 	public static class XamlDomExtensions
 	{
-		private sealed class _003C_003Ec__DisplayClass1<SA_T0> where SA_T0 : DependencyObject
-		{
-			public Predicate<SA_T0> predicate;
-
-			public bool _003CVisualAncestor_003Eb__0(DependencyObject x)
-			{
-				if (4 != 0)
-				{
-					SA_T0 val = x as SA_T0;
-					if (val != null && 0 == 0)
-					{
-						return predicate(val);
-					}
-				}
-				return false;
-			}
-		}
-
-		private sealed class _003C_003Ec__DisplayClass5<SA_T0> where SA_T0 : DependencyObject
-		{
-			public Predicate<SA_T0> predicate;
-
-			public bool _003CLogicalAncestor_003Eb__4(DependencyObject x)
-			{
-				if (4 != 0)
-				{
-					SA_T0 val = x as SA_T0;
-					if (val != null && 0 == 0)
-					{
-						return predicate(val);
-					}
-				}
-				return false;
-			}
-		}
-
 		public static DependencyObject VisualAncestor([NotNull] this DependencyObject element, [NotNull] Predicate<DependencyObject> predicate)
 		{
 			return FindAncestor(element, VisualTreeHelper.GetParent, predicate);
@@ -51,27 +14,15 @@ namespace Cvte.Windows
 
 		public static T VisualAncestor<T>([NotNull] this DependencyObject element, [NotNull] Predicate<T> predicate) where T : DependencyObject
 		{
-			_003C_003Ec__DisplayClass1<T> obj2 = default(_003C_003Ec__DisplayClass1<T>);
-			while (true)
+			if (predicate == null)
 			{
-				_003C_003Ec__DisplayClass1<T> obj = new _003C_003Ec__DisplayClass1<T>();
-				if (0 == 0)
-				{
-					obj2 = obj;
-				}
-				while (0 == 0)
-				{
-					obj2.predicate = predicate;
-					if (4 != 0)
-					{
-						if (obj2.predicate == null)
-						{
-							throw new ArgumentNullException("predicate");
-						}
-						return (T)element.VisualAncestor(obj2._003CVisualAncestor_003Eb__0);
-					}
-				}
+				throw new ArgumentNullException("predicate");
 			}
+			return (T)element.VisualAncestor((DependencyObject x) =>
+			{
+				T val = x as T;
+				return val != null && predicate(val);
+			});
 		}
 
 		public static T VisualAncestor<T>([NotNull] this DependencyObject element) where T : DependencyObject
@@ -86,27 +37,15 @@ namespace Cvte.Windows
 
 		public static T LogicalAncestor<T>([NotNull] this DependencyObject element, [NotNull] Predicate<T> predicate) where T : DependencyObject
 		{
-			_003C_003Ec__DisplayClass5<T> obj2 = default(_003C_003Ec__DisplayClass5<T>);
-			while (true)
+			if (predicate == null)
 			{
-				_003C_003Ec__DisplayClass5<T> obj = new _003C_003Ec__DisplayClass5<T>();
-				if (0 == 0)
-				{
-					obj2 = obj;
-				}
-				while (0 == 0)
-				{
-					obj2.predicate = predicate;
-					if (4 != 0)
-					{
-						if (obj2.predicate == null)
-						{
-							throw new ArgumentNullException("predicate");
-						}
-						return (T)element.LogicalAncestor(obj2._003CLogicalAncestor_003Eb__4);
-					}
-				}
+				throw new ArgumentNullException("predicate");
 			}
+			return (T)element.LogicalAncestor((DependencyObject x) =>
+			{
+				T val = x as T;
+				return val != null && predicate(val);
+			});
 		}
 
 		public static T LogicalAncestor<T>([NotNull] this DependencyObject element) where T : DependencyObject
@@ -128,27 +67,21 @@ namespace Cvte.Windows
 			{
 				throw new ArgumentNullException("predicate");
 			}
+			DependencyObject dependencyObject = parentSelector(element);
 			while (true)
 			{
-				DependencyObject dependencyObject = parentSelector(element);
-				while (true)
+				if (dependencyObject != null)
 				{
-					if (dependencyObject != null)
+					if (predicate(dependencyObject))
 					{
-						if (predicate(dependencyObject))
-						{
-							return dependencyObject;
-						}
-						if (5 == 0)
-						{
-							break;
-						}
-						dependencyObject = parentSelector(dependencyObject);
-						continue;
+						break;
 					}
-					return null;
+					dependencyObject = parentSelector(dependencyObject);
+					continue;
 				}
+				return null;
 			}
+			return dependencyObject;
 		}
 	}
 }

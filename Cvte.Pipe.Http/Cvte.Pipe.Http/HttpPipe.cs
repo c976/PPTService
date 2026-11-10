@@ -10,136 +10,134 @@ namespace Cvte.Pipe.Http
 {
 	public abstract class HttpPipe : IHttpPipe
 	{
-		// SA_COMPAT: unused compiler-generated display classes preserved below.
-#if SA_ORIGINAL_DISPLAY_CLASSES
-		private sealed class SA_C1<_0001, _0002> where _0001 : RequestBase where _0002 : ResponseBase, new()
+		private sealed class Class0<T, U> where T : RequestBase where U : ResponseBase, new()
 		{
-			public dynamic _0001;
+			public T gparam_0;
 
-			internal string _0001_M2()
+			internal string method_0()
 			{
-				return HttpUtility._0001(this._0001.GetRequestUrl(), this._0001.GetRequestMethod(), this._0001.ContentType, this._0001.UserAgent, this._0001.HeaderCollection, this._0001.CookieCollection, this._0001.TimeOut);
+				return HttpUtility.smethod_0(gparam_0.GetRequestUrl(), gparam_0.GetRequestMethod(), gparam_0.ContentType, gparam_0.UserAgent, gparam_0.HeaderCollection, gparam_0.CookieCollection, gparam_0.TimeOut);
 			}
 		}
 
-		private sealed class _0002<_0001, _0002> where _0001 : RequestBase where _0002 : ResponseBase, new()
+		private sealed class Class1<T, U> where T : RequestBase where U : ResponseBase, new()
 		{
-			public dynamic _0001;
+			public T gparam_0;
 
-			internal string _0001_M2()
+			internal string method_0()
 			{
-				return HttpUtility._0001(this._0001.GetRequestUrl(), this._0001.GetRequestMethod(), this._0001.ContentType, this._0001.UserAgent, this._0001.GetRequestData(), this._0001.HeaderCollection, this._0001.CookieCollection, this._0001.TimeOut);
+				return HttpUtility.smethod_3(gparam_0.GetRequestUrl(), gparam_0.GetRequestMethod(), gparam_0.ContentType, gparam_0.UserAgent, gparam_0.GetRequestData(), gparam_0.HeaderCollection, gparam_0.CookieCollection, gparam_0.TimeOut);
 			}
 		}
 
-		private sealed class _0003<_0001, _0002> where _0001 : UploadFileRequest where _0002 : ResponseBase, new()
+		private sealed class Class2<T, U> where T : UploadFileRequest where U : ResponseBase, new()
 		{
-			public dynamic _0001;
+			public T gparam_0;
 
-			internal string _0001_M2()
+			internal string method_0()
 			{
-				return HttpUtility._0001(this._0001.GetRequestUrl(), this._0001.FileKey, this._0001.FilePath, this._0001.GetParams(), this._0001.HeaderCollection, this._0001.UpdateProgress);
+				return HttpUtility.smethod_5(gparam_0.GetRequestUrl(), gparam_0.FileKey, gparam_0.FilePath, gparam_0.GetParams(), gparam_0.HeaderCollection, gparam_0.UpdateProgress);
 			}
 		}
 
-		private sealed class _0004<_0001, _0002> where _0001 : UploadFilesRequest where _0002 : ResponseBase, new()
+		private sealed class Class3<T, U> where T : UploadFilesRequest where U : ResponseBase, new()
 		{
-			public dynamic _0001;
+			public T gparam_0;
 
-			internal string _0001_M2()
+			internal string method_0()
 			{
-				return HttpUtility._0001(this._0001.GetRequestUrl(), this._0001.KeyFilePathMapping, this._0001.GetParams(), this._0001.HeaderCollection, this._0001.UpdateProgress);
+				return HttpUtility.smethod_6(gparam_0.GetRequestUrl(), gparam_0.KeyFilePathMapping, gparam_0.GetParams(), gparam_0.HeaderCollection, gparam_0.UpdateProgress);
 			}
 		}
 
-		private sealed class _0005<_0001, _0002> where _0001 : DownloadFileRequest where _0002 : ResponseBase, new()
+		private sealed class Class4<T, U> where T : DownloadFileRequest where U : ResponseBase, new()
 		{
-			public dynamic _0001;
+			public T gparam_0;
 
-			internal string _0001_M2()
+			internal string method_0()
 			{
-				HttpUtility._0001(this._0001.GetRequestUrl(), this._0001.SavePath, this._0001.GetRequestMethod(), this._0001.ContentType, this._0001.GetRequestData(), this._0001.UpdateProgress, this._0001.HandleError, this._0001.TimeOut);
+				HttpUtility.smethod_7(gparam_0.GetRequestUrl(), gparam_0.SavePath, gparam_0.GetRequestMethod(), gparam_0.ContentType, gparam_0.GetRequestData(), gparam_0.UpdateProgress, gparam_0.HandleError, gparam_0.TimeOut);
 				return null;
 			}
 		}
-#endif
-		private bool m__0001;
+
+		private bool bool_0;
 
 		public bool DebugMode
 		{
 			get
 			{
-				return this.m__0001;
+				return bool_0;
 			}
 			set
 			{
-				this.m__0001 = value;
+				bool_0 = value;
 			}
 		}
 
 		public TResponse Get<TRequest, TResponse>(TRequest request) where TRequest : RequestBase where TResponse : ResponseBase, new()
 		{
 			PreRequest(request);
-			return SA_Execute<TRequest, TResponse>(request, () => HttpUtility._0001(request.GetRequestUrl(), request.GetRequestMethod(), request.ContentType, request.UserAgent, request.HeaderCollection, request.CookieCollection, request.TimeOut));
+			return method_0<TRequest, TResponse>(request, () => HttpUtility.smethod_0(request.GetRequestUrl(), request.GetRequestMethod(), request.ContentType, request.UserAgent, request.HeaderCollection, request.CookieCollection, request.TimeOut));
 		}
 
 		public TResponse Post<TRequest, TResponse>(TRequest request) where TRequest : RequestBase where TResponse : ResponseBase, new()
 		{
 			PreRequest(request);
-			return SA_Execute<TRequest, TResponse>(request, () => HttpUtility._0001(request.GetRequestUrl(), request.GetRequestMethod(), request.ContentType, request.UserAgent, request.GetRequestData(), request.HeaderCollection, request.CookieCollection, request.TimeOut));
+			return method_0<TRequest, TResponse>(request, () => HttpUtility.smethod_3(request.GetRequestUrl(), request.GetRequestMethod(), request.ContentType, request.UserAgent, request.GetRequestData(), request.HeaderCollection, request.CookieCollection, request.TimeOut));
 		}
 
 		public TResponse UploadFile<TRequest, TResponse>(TRequest request) where TRequest : UploadFileRequest where TResponse : ResponseBase, new()
 		{
 			PreRequest(request);
-			return SA_Execute<TRequest, TResponse>(request, () => HttpUtility._0001(request.GetRequestUrl(), request.FileKey, request.FilePath, request.GetParams(), request.HeaderCollection, request.UpdateProgress));
+			return method_0<TRequest, TResponse>(request, () => HttpUtility.smethod_5(request.GetRequestUrl(), request.FileKey, request.FilePath, request.GetParams(), request.HeaderCollection, request.UpdateProgress));
 		}
 
 		public TResponse UploadFiles<TRequest, TResponse>(TRequest request) where TRequest : UploadFilesRequest where TResponse : ResponseBase, new()
 		{
 			PreRequest(request);
-			return SA_Execute<TRequest, TResponse>(request, () => HttpUtility._0001(request.GetRequestUrl(), request.KeyFilePathMapping, request.GetParams(), request.HeaderCollection, request.UpdateProgress));
+			return method_0<TRequest, TResponse>(request, () => HttpUtility.smethod_6(request.GetRequestUrl(), request.KeyFilePathMapping, request.GetParams(), request.HeaderCollection, request.UpdateProgress));
 		}
 
 		public TResponse DownloadFile<TRequest, TResponse>(TRequest request) where TRequest : DownloadFileRequest where TResponse : ResponseBase, new()
 		{
 			PreRequest(request);
-			return SA_Execute<TRequest, TResponse>(request, () =>
+			return method_0<TRequest, TResponse>(request, () =>
 			{
-				HttpUtility._0001(request.GetRequestUrl(), request.SavePath, request.GetRequestMethod(), request.ContentType, request.GetRequestData(), request.UpdateProgress, request.HandleError, request.TimeOut);
+				HttpUtility.smethod_7(request.GetRequestUrl(), request.SavePath, request.GetRequestMethod(), request.ContentType, request.GetRequestData(), request.UpdateProgress, request.HandleError, request.TimeOut);
 				return (string)null;
 			});
 		}
 
-		private SA_TRes SA_Execute<SA_TReq, SA_TRes>(SA_TReq SA_request, Func<string> SA_getHtml) where SA_TReq : RequestBase where SA_TRes : ResponseBase, new()
+		private U method_0<T, U>(T gparam_0, Func<string> func_0) where T : RequestBase where U : ResponseBase, new()
 		{
-			SA_TRes val;
+			U val;
 			try
 			{
 				Stopwatch stopwatch = new Stopwatch();
 				stopwatch.Start();
-				string html = SA_getHtml();
+				string html = func_0();
 				stopwatch.Stop();
-				val = new SA_TRes
+				val = new U
 				{
 					ErrorCode = ErrorCode.Ok
 				};
 				val.ParseHtml(html);
-				if (!(SA_request is UploadFileRequest) && !(SA_request is DownloadFileRequest) && val.MonitorCode.HasValue)
+				if (!(gparam_0 is UploadFileRequest) && !(gparam_0 is DownloadFileRequest) && val.MonitorCode.HasValue)
 				{
-					string text = SA_request.GetRequestUrl();
+					string text = gparam_0.GetRequestUrl();
 					int num = text.IndexOf('?');
 					if (num > 0)
 					{
 						text = text.Substring(0, num);
 					}
-					HandleMonitor(text, SA_request.GetRequestMethod(), val.MonitorCode.Value, stopwatch.ElapsedMilliseconds);
+					HandleMonitor(text, gparam_0.GetRequestMethod(), val.MonitorCode.Value, stopwatch.ElapsedMilliseconds);
 				}
 			}
 			catch (TimeoutException ex)
 			{
 				HandleException(ex);
-				val = new SA_TRes
+				val = new U
 				{
 					ErrorCode = ErrorCode.TimeOut
 				};
@@ -147,7 +145,7 @@ namespace Cvte.Pipe.Http
 			catch (WebException ex2)
 			{
 				HandleException(ex2);
-				val = new SA_TRes
+				val = new U
 				{
 					ErrorCode = ErrorCode.WebError
 				};
@@ -155,7 +153,7 @@ namespace Cvte.Pipe.Http
 			catch (UriFormatException ex3)
 			{
 				HandleException(ex3);
-				val = new SA_TRes
+				val = new U
 				{
 					ErrorCode = ErrorCode.InvalidUri
 				};
@@ -163,7 +161,7 @@ namespace Cvte.Pipe.Http
 			catch (Exception ex4)
 			{
 				HandleException(ex4);
-				val = new SA_TRes
+				val = new U
 				{
 					ErrorCode = ErrorCode.Unknow
 				};

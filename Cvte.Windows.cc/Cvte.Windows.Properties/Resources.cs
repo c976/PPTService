@@ -20,7 +20,7 @@ namespace Cvte.Windows.Properties
 		{
 			get
 			{
-				if (4 != 0 && object.ReferenceEquals(resourceMan, null))
+				if (object.ReferenceEquals(resourceMan, null))
 				{
 					ResourceManager resourceManager = new ResourceManager("Cvte.Windows.Properties.Resources", typeof(Resources).Assembly);
 					resourceMan = resourceManager;

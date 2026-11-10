@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using Cvte.Pipe.Http.Internal;
+
 namespace Cvte.Pipe.Http.Response
 {
 	[DataContract]
@@ -17,9 +19,9 @@ namespace Cvte.Pipe.Http.Response
 			}
 			Html = html;
 			byte[] bytes = Encoding.UTF8.GetBytes(html);
-			object response = SA_Json.FromJson(GetType(), bytes);
+			object response = DataContractJsonHelper.smethod_6(GetType(), bytes);
 			IEnumerable<PropertyInfo> responseProps = from p in response.GetType().GetProperties()
-				where SA_Attr<DataMemberAttribute>.Has(p, false)
+				where AttributeHelper<DataMemberAttribute>.smethod_2(p)
 				select p;
 			GetType().GetProperties().ToList().ForEach((PropertyInfo p) =>
 			{
@@ -39,7 +41,7 @@ namespace Cvte.Pipe.Http.Response
 		public static TResponse FromHtml<TResponse>(string html) where TResponse : ResponseBase, new()
 		{
 			byte[] bytes = Encoding.UTF8.GetBytes(html);
-			return SA_Json.FromJson(typeof(TResponse), bytes) as TResponse;
+			return DataContractJsonHelper.smethod_6(typeof(TResponse), bytes) as TResponse;
 		}
 	}
 }

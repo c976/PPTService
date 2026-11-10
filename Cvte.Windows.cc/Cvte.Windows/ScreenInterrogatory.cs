@@ -272,38 +272,22 @@ namespace Cvte.Windows
 
 		private static string MonitorFriendlyName(LUID adapterId, uint targetId)
 		{
-			DISPLAYCONFIG_TARGET_DEVICE_NAME dISPLAYCONFIG_TARGET_DEVICE_NAME = new DISPLAYCONFIG_TARGET_DEVICE_NAME
+			DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName = new DISPLAYCONFIG_TARGET_DEVICE_NAME
 			{
 				header = 
 				{
 					size = (uint)Marshal.SizeOf(typeof(DISPLAYCONFIG_TARGET_DEVICE_NAME)),
 					adapterId = adapterId,
-					id = targetId
+					id = targetId,
+					type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME
 				}
 			};
-			int num = default(int);
-			if (-1 != 0)
+			int num = DisplayConfigGetDeviceInfo(ref deviceName);
+			if (num != 0)
 			{
-				dISPLAYCONFIG_TARGET_DEVICE_NAME.header.type = DISPLAYCONFIG_DEVICE_INFO_TYPE.DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
-				DISPLAYCONFIG_TARGET_DEVICE_NAME dISPLAYCONFIG_TARGET_DEVICE_NAME2 = dISPLAYCONFIG_TARGET_DEVICE_NAME;
-				DISPLAYCONFIG_TARGET_DEVICE_NAME deviceName = default(DISPLAYCONFIG_TARGET_DEVICE_NAME);
-				if (0 == 0)
-				{
-					deviceName = dISPLAYCONFIG_TARGET_DEVICE_NAME2;
-				}
-				if (0 == 0)
-				{
-					num = DisplayConfigGetDeviceInfo(ref deviceName);
-					if (num != 0)
-					{
-						goto IL_005c;
-					}
-				}
-				return deviceName.monitorFriendlyDeviceName;
+				throw new Win32Exception(num);
 			}
-			goto IL_005c;
-			IL_005c:
-			throw new Win32Exception(num);
+			return deviceName.monitorFriendlyDeviceName;
 		}
 
 		private static IEnumerable<string> GetAllMonitorsFriendlyNames()
@@ -311,91 +295,44 @@ namespace Cvte.Windows
 			uint pathCount;
 			uint modeCount;
 			int error = GetDisplayConfigBufferSizes(QUERY_DEVICE_CONFIG_FLAGS.QDC_ONLY_ACTIVE_PATHS, out pathCount, out modeCount);
-			DISPLAYCONFIG_PATH_INFO[] displayPaths = default(DISPLAYCONFIG_PATH_INFO[]);
-			DISPLAYCONFIG_MODE_INFO[] displayModes = default(DISPLAYCONFIG_MODE_INFO[]);
 			if (error != 0)
 			{
-				if (-1 != 0)
-				{
-					throw new Win32Exception(error);
-				}
+				throw new Win32Exception(error);
 			}
-			else
-			{
-				displayPaths = new DISPLAYCONFIG_PATH_INFO[pathCount];
-				displayModes = new DISPLAYCONFIG_MODE_INFO[modeCount];
-			}
+			DISPLAYCONFIG_PATH_INFO[] displayPaths = new DISPLAYCONFIG_PATH_INFO[pathCount];
+			DISPLAYCONFIG_MODE_INFO[] displayModes = new DISPLAYCONFIG_MODE_INFO[modeCount];
 			error = QueryDisplayConfig(QUERY_DEVICE_CONFIG_FLAGS.QDC_ONLY_ACTIVE_PATHS, ref pathCount, displayPaths, ref modeCount, displayModes, IntPtr.Zero);
 			if (error != 0)
 			{
 				throw new Win32Exception(error);
 			}
-			int i = 0;
-			while (true)
+			for (int i = 0; i < modeCount; i++)
 			{
-				if (0 == 0)
+				if (displayModes[i].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
 				{
-					if (i >= modeCount)
-					{
-						break;
-					}
-					if (displayModes[i].infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
-					{
-						yield return MonitorFriendlyName(displayModes[i].adapterId, displayModes[i].id);
-					}
+					yield return MonitorFriendlyName(displayModes[i].adapterId, displayModes[i].id);
 				}
-				i++;
 			}
 		}
 
-		public unsafe static string GetDeviceFriendlyName(this Screen screen)
+		public static string GetDeviceFriendlyName(this Screen screen)
 		{
-			IEnumerable<string> allMonitorsFriendlyNames;
-			int num;
-			do
-			{
-				allMonitorsFriendlyNames = GetAllMonitorsFriendlyNames();
-				num = 0;
-			}
-			while (2 == 0);
-			if (false)
-			{
-				goto IL_001a;
-			}
-			goto IL_002b;
-			IL_002b:
+			IEnumerable<string> allMonitorsFriendlyNames = GetAllMonitorsFriendlyNames();
+			int num = 0;
 			while (true)
 			{
-				int num2 = num;
-				IntPtr intPtr = (IntPtr)(void*)Screen.AllScreens.LongLength;
-				if (0 == 0)
-				{
-					intPtr = (IntPtr)(int)(long)intPtr;
-				}
-				if ((long)num2 < (long)intPtr)
+				if (num < Screen.AllScreens.Length)
 				{
 					if (object.Equals(screen, Screen.AllScreens[num]))
 					{
 						break;
 					}
-					int num3 = num;
-					do
-					{
-						num3++;
-					}
-					while (false);
-					num = num3;
+					num++;
 					continue;
 				}
 				return null;
 			}
-			goto IL_001a;
-			IL_001a:
-			if (0 == 0)
-			{
-				return allMonitorsFriendlyNames.ToArray()[num];
-			}
-			goto IL_002b;
+			return allMonitorsFriendlyNames.ToArray()[num];
 		}
 	}
 }

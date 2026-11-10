@@ -27,50 +27,20 @@ namespace Cvte.Diagnostics
 		public static int CountSurvivedInstances([NotNull] string key)
 		{
 			HashSet<WeakReference> value;
-			if (0 == 0)
-			{
-				WeakReferences.TryGetValue(key, out value);
-			}
-			while (true)
-			{
-				if (value == null)
-				{
-					break;
-				}
-				int result = value.Count((WeakReference x) => x.Target != null);
-				while (0 == 0)
-				{
-					if (0 == 0)
-					{
-						return result;
-					}
-					int num;
-					if (num == 0)
-					{
-						goto end_IL_004c;
-					}
-				}
-				continue;
-				end_IL_004c:
-				break;
-			}
-			return 0;
+			WeakReferences.TryGetValue(key, out value);
+			return value?.Count((WeakReference x) => x.Target != null) ?? 0;
 		}
 
 		private static void WathcerInternal([NotNull] string tag, [NotNull] object obj)
 		{
-			do
+			if (tag == null)
 			{
-				if (tag == null)
-				{
-					throw new ArgumentNullException("tag");
-				}
-				if (obj == null)
-				{
-					throw new ArgumentNullException("obj");
-				}
+				throw new ArgumentNullException("tag");
 			}
-			while (4 == 0);
+			if (obj == null)
+			{
+				throw new ArgumentNullException("obj");
+			}
 			if (obj is ValueType)
 			{
 				throw new ArgumentException("obj 必须是一个引用类型。");

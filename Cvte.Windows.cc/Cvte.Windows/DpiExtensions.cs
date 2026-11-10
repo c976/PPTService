@@ -15,99 +15,39 @@ namespace Cvte.Windows
 
 		internal static Dpi GetSystemDpi(this PresentationSource source)
 		{
-			if ((false || -1 == 0 || source != null) && source.CompositionTarget != null)
+			if (source != null && source.CompositionTarget != null)
 			{
-				double num = Dpi.ScreenStandard.X;
-				Matrix transformToDevice;
-				if (0 == 0)
-				{
-					transformToDevice = source.CompositionTarget.TransformToDevice;
-				}
-				int x = (int)(num * transformToDevice.M11);
-				double num2 = Dpi.ScreenStandard.Y;
-				Matrix transformToDevice2 = default(Matrix);
-				do
-				{
-					if (5 != 0)
-					{
-						transformToDevice2 = source.CompositionTarget.TransformToDevice;
-					}
-					num2 *= transformToDevice2.M22;
-				}
-				while (false);
-				return new Dpi(x, (int)num2);
+				return new Dpi((int)((double)Dpi.ScreenStandard.X * source.CompositionTarget.TransformToDevice.M11), (int)((double)Dpi.ScreenStandard.Y * source.CompositionTarget.TransformToDevice.M22));
 			}
 			return Dpi.System;
 		}
 
 		public static Dpi GetMonitorDpi(this Visual visual)
 		{
-			HwndSource hwndSource = default(HwndSource);
-			while (true)
-			{
-				hwndSource = PresentationSource.FromVisual(visual) as HwndSource;
-				while (0 == 0)
-				{
-					if ((hwndSource != null) ? true : false)
-					{
-						goto end_IL_0000;
-					}
-					if (8 != 0)
-					{
-						return Dpi.System;
-					}
-				}
-				continue;
-				end_IL_0000:
-				break;
-			}
-			return hwndSource.GetMonitorDpi();
+			return (PresentationSource.FromVisual(visual) as HwndSource)?.GetMonitorDpi() ?? Dpi.System;
 		}
 
 		internal static Dpi GetMonitorDpi(this HwndSource hwndSource)
 		{
-			do
+			if (!Monitor.IsPerMonitorDpiSupported)
 			{
-				if (false || !Monitor.IsPerMonitorDpiSupported)
-				{
-					return Dpi.System;
-				}
+				return Dpi.System;
 			}
-			while (false);
-			IntPtr intPtr = hwndSource.Handle;
-			do
-			{
-				intPtr = NativeMethods.MonitorFromWindow(intPtr, MonitorDefaultTo.MONITOR_DEFAULTTONEAREST);
-			}
-			while (7 == 0 || 8 == 0);
-			IntPtr hmonitor = intPtr;
+			IntPtr hmonitor = NativeMethods.MonitorFromWindow(hwndSource.Handle, MonitorDefaultTo.MONITOR_DEFAULTTONEAREST);
 			return GetMonitorDpi(hmonitor);
 		}
 
 		internal unsafe static Dpi GetMonitorDpi(IntPtr hmonitor)
 		{
-			int num = 8;
-			while (true)
+			void* ptr = stackalloc byte[8];
+			if (!Monitor.IsPerMonitorDpiSupported)
 			{
-				void* ptr = stackalloc byte[num];
-				num = (Monitor.IsPerMonitorDpiSupported ? 1 : 0);
-				while (7 != 0)
-				{
-					if (num != 0)
-					{
-						*(int*)ptr = 1;
-						((int*)ptr)[1] = 1;
-						NativeMethods.GetDpiForMonitor(hmonitor, MonitorDpiType.EffectiveDpi, ref *(uint*)ptr, ref *(uint*)((byte*)ptr + 4));
-						num = *(int*)ptr;
-						if (0 == 0)
-						{
-							return new Dpi(num, ((int*)ptr)[1]);
-						}
-						continue;
-					}
-					return Dpi.System;
-				}
+				return Dpi.System;
 			}
+			*(int*)ptr = 1;
+			((int*)ptr)[1] = 1;
+			NativeMethods.GetDpiForMonitor(hmonitor, MonitorDpiType.EffectiveDpi, ref *(uint*)ptr, ref *(uint*)((byte*)ptr + 4));
+			return new Dpi(*(int*)ptr, ((int*)ptr)[1]);
 		}
 	}
 }

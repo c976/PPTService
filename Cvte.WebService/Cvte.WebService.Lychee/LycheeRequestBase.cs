@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using Cvte.Pipe.Http.Request;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Lychee
 {
@@ -23,36 +25,54 @@ namespace Cvte.WebService.Lychee
 
 		public override byte[] GetRequestData()
 		{
-			// 与反混淆后的原版一致：按反射属性顺序收集 [DataMember] 参数，
-			// 值逐字符 URL 编码后拼 key=value&...，再以 UTF-8 编码成请求体。
-			Dictionary<string, string> values = new Dictionary<string, string>();
-			foreach (PropertyInfo property in GetType().GetProperties())
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			PropertyInfo[] properties = GetType().GetProperties();
+			foreach (PropertyInfo propertyInfo in properties)
 			{
-				DataMemberAttribute dataMember = LycheeSign.GetDataMember(property);
-				if (dataMember == null)
+				DataMemberAttribute dataMemberAttribute = PropertyAttributeHelper<DataMemberAttribute>.smethod_0(propertyInfo);
+				if (dataMemberAttribute == null)
 				{
 					continue;
 				}
-				object value = property.GetValue(this, null);
-				values.Add(dataMember.Name, (value == null) ? "" : (value.ToString() ?? ""));
-			}
-
-			StringBuilder builder = new StringBuilder();
-			bool first = true;
-			foreach (KeyValuePair<string, string> item in values)
-			{
-				string text = LycheeSign.UrlEncode(item.Value, Encoding.UTF8);
-				if (first)
+				object value = propertyInfo.GetValue(this, null);
+				string name = dataMemberAttribute.Name;
+				object obj;
+				if (value == null)
 				{
-					builder.Append(item.Key + "=" + text);
-					first = false;
+					obj = null;
 				}
 				else
 				{
-					builder.Append("&" + item.Key + "=" + text);
+					obj = value.ToString();
+					if (obj != null)
+					{
+						goto IL_0053;
+					}
+				}
+				obj = "";
+				goto IL_0053;
+				IL_0053:
+				dictionary.Add(name, (string)obj);
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			if (dictionary.Any())
+			{
+				bool flag = true;
+				foreach (KeyValuePair<string, string> item in dictionary)
+				{
+					string text = SignatureUrlEncoder.smethod_0(item.Value, Encoding.UTF8);
+					if (flag)
+					{
+						stringBuilder.Append(item.Key + "=" + text);
+						flag = false;
+					}
+					else
+					{
+						stringBuilder.Append("&" + item.Key + "=" + text);
+					}
 				}
 			}
-			return Encoding.UTF8.GetBytes(builder.ToString());
+			return Encoding.UTF8.GetBytes(stringBuilder.ToString());
 		}
 	}
 }

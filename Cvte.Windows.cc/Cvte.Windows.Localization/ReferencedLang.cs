@@ -13,15 +13,15 @@ namespace Cvte.Windows.Localization
 	[TypeConverter(typeof(ReferencedLangConverter))]
 	public sealed class ReferencedLang : DependencyObject
 	{
-		private static readonly DependencyPropertyKey KeyPropertyKey;
+		private static readonly DependencyPropertyKey KeyPropertyKey = DependencyProperty.RegisterReadOnly("Key", typeof(string), typeof(ReferencedLang), new PropertyMetadata((object)null));
 
-		private static readonly DependencyProperty KeyProperty;
+		private static readonly DependencyProperty KeyProperty = KeyPropertyKey.DependencyProperty;
 
-		private static readonly DependencyPropertyKey ValuePropertyKey;
+		private static readonly DependencyPropertyKey ValuePropertyKey = DependencyProperty.RegisterReadOnly("Value", typeof(string), typeof(ReferencedLang), new PropertyMetadata((object)null));
 
-		public static readonly DependencyProperty ValueProperty;
+		public static readonly DependencyProperty ValueProperty = ValuePropertyKey.DependencyProperty;
 
-		private static readonly List<WeakReference> UsingLangs;
+		private static readonly List<WeakReference> UsingLangs = new List<WeakReference>(256);
 
 		public string Key
 		{
@@ -62,120 +62,34 @@ namespace Cvte.Windows.Localization
 
 		internal static void UpdateValues()
 		{
-			do
+			Task.Factory.StartNew(() =>
 			{
-				if (1 == 0)
+				List<ReferencedLang> list = new List<ReferencedLang>();
+				WeakReference[] array = UsingLangs.ToArray();
+				foreach (WeakReference weakReference in array)
 				{
-					continue;
-				}
-				Task.Factory.StartNew(() =>
-				{
-					List<ReferencedLang> list = new List<ReferencedLang>();
-					WeakReference[] array = UsingLangs.ToArray();
-					int num = 0;
-					while (true)
+					ReferencedLang referencedLang = (ReferencedLang)weakReference.Target;
+					if (referencedLang == null)
 					{
-						int num2 = num;
-						int num3 = array.Length;
-						do
-						{
-							if (num2 >= num3)
-							{
-								foreach (IGrouping<Dispatcher, ReferencedLang> item in list.ToLookup((ReferencedLang lang) => lang.Dispatcher))
-								{
-									IGrouping<Dispatcher, ReferencedLang> group = item;
-									group.Key.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
-									{
-										if (-1 != 0)
-										{
-											IEnumerator<ReferencedLang> enumerator2 = group.GetEnumerator();
-											IEnumerator<ReferencedLang> enumerator3;
-											if (4u != 0)
-											{
-												enumerator3 = enumerator2;
-											}
-											try
-											{
-												while (true)
-												{
-													if (!enumerator3.MoveNext())
-													{
-														if (0 == 0 && 0 == 0)
-														{
-															break;
-														}
-													}
-													else
-													{
-														ReferencedLang current2 = enumerator3.Current;
-														if (0 == 0)
-														{
-															current2.UpdateValue();
-														}
-													}
-												}
-											}
-											finally
-											{
-												enumerator3?.Dispose();
-											}
-										}
-									}));
-								}
-								return;
-							}
-							WeakReference weakReference = array[num];
-							ReferencedLang referencedLang = (ReferencedLang)weakReference.Target;
-							if (referencedLang == null)
-							{
-								UsingLangs.Remove(weakReference);
-							}
-							else
-							{
-								list.Add(referencedLang);
-							}
-							while (false)
-							{
-							}
-							num2 = num;
-							num3 = 1;
-						}
-						while (num3 == 0);
-						num = num2 + num3;
+						UsingLangs.Remove(weakReference);
 					}
-				});
-			}
-			while (false ? true : false);
-		}
-
-		static ReferencedLang()
-		{
-			while (true)
-			{
-				if (0 == 0)
-				{
-					KeyPropertyKey = DependencyProperty.RegisterReadOnly("Key", typeof(string), typeof(ReferencedLang), new PropertyMetadata((object)null));
-					if (false)
+					else
 					{
-						continue;
-					}
-					if (false)
-					{
-						break;
-					}
-					if (0 == 0)
-					{
-						KeyProperty = KeyPropertyKey.DependencyProperty;
-						if (0 == 0)
-						{
-							ValuePropertyKey = DependencyProperty.RegisterReadOnly("Value", typeof(string), typeof(ReferencedLang), new PropertyMetadata((object)null));
-						}
+						list.Add(referencedLang);
 					}
 				}
-				ValueProperty = ValuePropertyKey.DependencyProperty;
-				UsingLangs = new List<WeakReference>(256);
-				break;
-			}
+				foreach (IGrouping<Dispatcher, ReferencedLang> item in list.ToLookup((ReferencedLang lang) => lang.Dispatcher))
+				{
+					IGrouping<Dispatcher, ReferencedLang> group = item;
+					group.Key.BeginInvoke(DispatcherPriority.Loaded, (Action)(() =>
+					{
+						foreach (ReferencedLang item2 in group)
+						{
+							item2.UpdateValue();
+						}
+					}));
+				}
+			});
 		}
 	}
 }

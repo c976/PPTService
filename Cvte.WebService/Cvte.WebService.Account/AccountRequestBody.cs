@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using _0005;
-using _0008;
+using Newtonsoft.Json;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Account
 {
@@ -16,122 +15,76 @@ namespace Cvte.WebService.Account
 		public string GetSign()
 		{
 			Dictionary<string, string> dictionary = new Dictionary<string, string>();
-			PropertyInfo[] array = SA_Proxy._007E_008D___001F(SA_Proxy._008C___001E(this));
-			foreach (PropertyInfo propertyInfo in array)
+			PropertyInfo[] properties = GetType().GetProperties();
+			foreach (PropertyInfo propertyInfo in properties)
 			{
-				DataMemberAttribute dataMemberAttribute = SA_Attr<DataMemberAttribute>._0001(propertyInfo, false);
-				if (dataMemberAttribute != null && !dictionary.ContainsKey(SA_Proxy._007E_0081___0018(dataMemberAttribute)))
+				DataMemberAttribute dataMemberAttribute = PropertyAttributeHelper<DataMemberAttribute>.smethod_0(propertyInfo);
+				if (dataMemberAttribute == null || dictionary.ContainsKey(dataMemberAttribute.Name))
 				{
-					object obj = SA_Proxy._007E_008E___007F(propertyInfo, this, null);
-					if (obj is string)
-					{
-						SA_Proxy._007E_0003_0002___008E(propertyInfo, this, SA_Helpers.Str(SA_Proxy._007E_007F___0018(obj), SA_Proxy._0003___0003()), null);
-					}
-					dictionary.Add(SA_Proxy._007E_0081___0018(dataMemberAttribute), ((obj != null) ? SA_Proxy._007E_007F___0018(obj) : null) ?? "");
+					continue;
 				}
+				object value = propertyInfo.GetValue(this, null);
+				if (value is string)
+				{
+					propertyInfo.SetValue(this, SignatureUrlEncoder.smethod_0(value.ToString(), Encoding.UTF8), null);
+				}
+				string name = dataMemberAttribute.Name;
+				object obj;
+				if (value == null)
+				{
+					obj = null;
+				}
+				else
+				{
+					obj = value.ToString();
+					if (obj != null)
+					{
+						goto IL_0085;
+					}
+				}
+				obj = "";
+				goto IL_0085;
+				IL_0085:
+				dictionary.Add(name, (string)obj);
 			}
 			StringBuilder stringBuilder = new StringBuilder();
 			if (dictionary.Any())
 			{
 				bool flag = true;
-				IEnumerator<KeyValuePair<string, string>> enumerator = dictionary.OrderBy((KeyValuePair<string, string> P_0) => P_0.Key).GetEnumerator();
-				try
+				foreach (KeyValuePair<string, string> item in dictionary.OrderBy((KeyValuePair<string, string> keyValuePair_0) => keyValuePair_0.Key))
 				{
-					while (SA_Proxy._007E_0096___0083(enumerator))
+					string text = SignatureUrlEncoder.smethod_0(item.Value, Encoding.UTF8);
+					if (flag)
 					{
-						KeyValuePair<string, string> current = enumerator.Current;
-						string text = SA_Helpers.Str(current.Value, SA_Proxy._0003___0003());
-						if (flag)
-						{
-							SA_Proxy._007E_0088___001A(stringBuilder, SA_Proxy._008F___0080(current.Key, "=", text));
-							flag = false;
-						}
-						else
-						{
-							SA_Proxy._007E_0088___001A(stringBuilder, SA_Proxy._0090___0081("&", current.Key, "=", text));
-						}
+						stringBuilder.Append(item.Key + "=" + text);
+						flag = false;
 					}
-				}
-				finally
-				{
-					if (enumerator != null)
+					else
 					{
-						SA_Proxy._007E_0013___000F(enumerator);
+						stringBuilder.Append("&" + item.Key + "=" + text);
 					}
 				}
 			}
-			return Hmacsha256(SA_Proxy._007E_007F___0018(stringBuilder), "EN5_key");
+			return Hmacsha256(stringBuilder.ToString(), "EN5_key");
 		}
 
 		public override string ToString()
 		{
-			return SA_Helpers.Str(SA_Proxy._009E___008A(this), SA_Proxy._0003___0003());
+			return SignatureUrlEncoder.smethod_0(JsonConvert.SerializeObject((object)this), Encoding.UTF8);
 		}
 
-		private unsafe static string Hmacsha256(string value, string password)
+		private static string Hmacsha256(string value, string password)
 		{
-			HMACSHA256 hMACSHA = new HMACSHA256(SA_Proxy._007E_0005___0004(SA_Proxy._0003___0003(), password));
-			try
+			using (HMACSHA256 hMACSHA = new HMACSHA256(Encoding.UTF8.GetBytes(password)))
 			{
-				byte[] array = SA_Proxy._007E_0087___0019(hMACSHA, SA_Proxy._007E_0005___0004(SA_Proxy._0003___0003(), value));
+				byte[] array = hMACSHA.ComputeHash(Encoding.UTF8.GetBytes(value));
 				StringBuilder stringBuilder = new StringBuilder();
 				byte[] array2 = array;
-				int num = 0;
-				while (true)
+				foreach (byte b in array2)
 				{
-					int num2 = num;
-					while (true)
-					{
-						IntPtr intPtr = (IntPtr)(void*)array2.LongLength;
-						int num3;
-						while (true)
-						{
-							num3 = (int)(long)intPtr;
-							if (5 == 0)
-							{
-								break;
-							}
-							intPtr = (IntPtr)num3;
-							if (false)
-							{
-								continue;
-							}
-							goto IL_007b;
-						}
-						goto IL_006c;
-						IL_0068:
-						if (7 == 0)
-						{
-							continue;
-						}
-						num3 = 1;
-						goto IL_006c;
-						IL_007b:
-						if (num2 < num3)
-						{
-							byte b = array2[num];
-							SA_Proxy._007E_0088___001A(stringBuilder, b.ToString("x2"));
-							num2 = num;
-							goto IL_0068;
-						}
-						return SA_Proxy._007E_007F___0018(stringBuilder);
-						IL_006c:
-						num2 += num3;
-						if (0 == 0)
-						{
-							break;
-						}
-						goto IL_0068;
-					}
-					num = num2;
+					stringBuilder.Append(b.ToString("x2"));
 				}
-			}
-			finally
-			{
-				if (hMACSHA != null)
-				{
-					SA_Proxy._007E_0013___000F(hMACSHA);
-				}
+				return stringBuilder.ToString();
 			}
 		}
 	}

@@ -30,41 +30,15 @@ namespace Cvte.Windows.Data
 			get
 			{
 				VisibilityConverter visibilityConverter = _visibilityReverseConverter;
-				VisibilityConverter visibilityConverter2;
 				if (visibilityConverter == null)
 				{
-					if (0 == 0)
-					{
-						visibilityConverter2 = new VisibilityConverter();
-					}
-					if (2 != 0)
-					{
-						visibilityConverter2.Visible = Visibility.Collapsed;
-						goto IL_001d;
-					}
-					goto IL_0037;
+					VisibilityConverter visibilityConverter2 = new VisibilityConverter();
+					visibilityConverter2.Visible = Visibility.Collapsed;
+					visibilityConverter2.Collapsed = Visibility.Visible;
+					visibilityConverter2.Hidden = Visibility.Visible;
+					visibilityConverter = (_visibilityReverseConverter = visibilityConverter2);
 				}
-				goto IL_0041;
-				IL_0037:
-				if (2 == 0)
-				{
-					goto IL_001d;
-				}
-				visibilityConverter = (_visibilityReverseConverter = visibilityConverter2);
-				goto IL_0041;
-				IL_0041:
 				return visibilityConverter;
-				IL_001d:
-				do
-				{
-					if (0 == 0)
-					{
-						visibilityConverter2.Collapsed = Visibility.Visible;
-					}
-				}
-				while (3 == 0);
-				visibilityConverter2.Hidden = Visibility.Visible;
-				goto IL_0037;
 			}
 		}
 
@@ -75,18 +49,9 @@ namespace Cvte.Windows.Data
 				VisibilityConverter visibilityConverter = _hiddenWhenFalse;
 				if (visibilityConverter == null)
 				{
-					VisibilityConverter visibilityConverter2;
-					do
-					{
-						visibilityConverter2 = new VisibilityConverter();
-					}
-					while (false);
+					VisibilityConverter visibilityConverter2 = new VisibilityConverter();
 					visibilityConverter2.Visible = true;
-					object hidden = false;
-					if (0 == 0)
-					{
-						visibilityConverter2.Hidden = hidden;
-					}
+					visibilityConverter2.Hidden = false;
 					visibilityConverter = (_hiddenWhenFalse = visibilityConverter2);
 				}
 				return visibilityConverter;
@@ -100,18 +65,9 @@ namespace Cvte.Windows.Data
 				VisibilityConverter visibilityConverter = _collapsedWhenFalse;
 				if (visibilityConverter == null)
 				{
-					VisibilityConverter visibilityConverter2;
-					do
-					{
-						visibilityConverter2 = new VisibilityConverter();
-					}
-					while (false);
+					VisibilityConverter visibilityConverter2 = new VisibilityConverter();
 					visibilityConverter2.Visible = true;
-					object collapsed = false;
-					if (0 == 0)
-					{
-						visibilityConverter2.Collapsed = collapsed;
-					}
+					visibilityConverter2.Collapsed = false;
 					visibilityConverter = (_collapsedWhenFalse = visibilityConverter2);
 				}
 				return visibilityConverter;
@@ -125,18 +81,9 @@ namespace Cvte.Windows.Data
 				VisibilityConverter visibilityConverter = _hiddenWhenTrue;
 				if (visibilityConverter == null)
 				{
-					VisibilityConverter visibilityConverter2;
-					do
-					{
-						visibilityConverter2 = new VisibilityConverter();
-					}
-					while (false);
+					VisibilityConverter visibilityConverter2 = new VisibilityConverter();
 					visibilityConverter2.Visible = false;
-					object hidden = true;
-					if (0 == 0)
-					{
-						visibilityConverter2.Hidden = hidden;
-					}
+					visibilityConverter2.Hidden = true;
 					visibilityConverter = (_hiddenWhenTrue = visibilityConverter2);
 				}
 				return visibilityConverter;
@@ -150,18 +97,9 @@ namespace Cvte.Windows.Data
 				VisibilityConverter visibilityConverter = _collapsedWhenTrue;
 				if (visibilityConverter == null)
 				{
-					VisibilityConverter visibilityConverter2;
-					do
-					{
-						visibilityConverter2 = new VisibilityConverter();
-					}
-					while (false);
+					VisibilityConverter visibilityConverter2 = new VisibilityConverter();
 					visibilityConverter2.Visible = false;
-					object collapsed = true;
-					if (0 == 0)
-					{
-						visibilityConverter2.Collapsed = collapsed;
-					}
+					visibilityConverter2.Collapsed = true;
 					visibilityConverter = (_collapsedWhenTrue = visibilityConverter2);
 				}
 				return visibilityConverter;

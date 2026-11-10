@@ -38,250 +38,82 @@ namespace Cvte.Mathematics
 		public bool Contains(Point point)
 		{
 			double num = 1E-05;
-			do
+			if (Line.Contains(point) && point.X <= Math.Max(Point1.X, Point2.X) + num && point.X >= Math.Min(Point1.X, Point2.X) - num && point.Y <= Math.Max(Point1.Y, Point2.Y) + num)
 			{
-				if (!Line.Contains(point))
-				{
-					continue;
-				}
-				double num2 = point.X;
-				double val = Point1.X;
-				while (true)
-				{
-					Point point2 = Point2;
-					if (6 == 0)
-					{
-						continue;
-					}
-					if (!(num2 <= Math.Max(val, point2.X) + num))
-					{
-						break;
-					}
-					num2 = point.X;
-					if (true)
-					{
-						double num3 = Point1.X;
-						if (5 != 0)
-						{
-							double num4 = Point2.X;
-							if (0 == 0)
-							{
-								if (!(num2 >= Math.Min(num3, num4) - num))
-								{
-									break;
-								}
-								num2 = point.Y;
-								val = Point1.Y;
-								if (3 == 0)
-								{
-									continue;
-								}
-								num3 = Math.Max(val, Point2.Y);
-								num4 = num;
-							}
-							num3 += num4;
-						}
-						if (!(num2 <= num3))
-						{
-							break;
-						}
-						num2 = point.Y;
-					}
-					return num2 >= Math.Min(Point1.Y, Point2.Y) - num;
-				}
+				return point.Y >= Math.Min(Point1.Y, Point2.Y) - num;
 			}
-			while (false);
 			return false;
 		}
 
 		public static double AngleBetween(LineSegment lineSegment1, LineSegment lineSegment2)
 		{
-			if (0 == 0)
-			{
-				if (false || !lineSegment1.IsValid)
-				{
-					goto IL_000c;
-				}
-				if (!lineSegment2.IsValid)
-				{
-					goto IL_0022;
-				}
-			}
-			return Line.AngleBetween(lineSegment1.Line, lineSegment2.Line);
-			IL_0022:
-			if (0 == 0)
-			{
-				throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
-			}
-			goto IL_000c;
-			IL_000c:
-			if (7 != 0)
+			if (!lineSegment1.IsValid)
 			{
 				throw new ArgumentException("lineSegment1不是有意义的线段。", "lineSegment1");
 			}
-			goto IL_0022;
+			if (!lineSegment2.IsValid)
+			{
+				throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
+			}
+			return Line.AngleBetween(lineSegment1.Line, lineSegment2.Line);
 		}
 
 		public static Point? Intersect(LineSegment lineSegment1, LineSegment lineSegment2)
 		{
-			Point? result2;
-			while (0 == 0)
+			if (!lineSegment1.IsValid)
 			{
-				if (!lineSegment1.IsValid)
-				{
-					if (0 == 0)
-					{
-						throw new ArgumentException("lineSegment1不是有意义的线段。", "lineSegment1");
-					}
-				}
-				else if (lineSegment2.IsValid)
-				{
-					goto IL_003e;
-				}
-				if (0 == 0)
-				{
-					throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
-				}
-				goto IL_003e;
-				IL_003e:
-				while (5 != 0)
-				{
-					Point? result = Line.Intersect(lineSegment1.Line, lineSegment2.Line);
-					if (result.HasValue && lineSegment1.Contains(result.Value))
-					{
-						if (3 == 0)
-						{
-							continue;
-						}
-						if (lineSegment2.Contains(result.Value))
-						{
-							return result;
-						}
-					}
-					goto IL_0084;
-				}
-				continue;
-				IL_0084:
-				result2 = null;
-				break;
+				throw new ArgumentException("lineSegment1不是有意义的线段。", "lineSegment1");
 			}
-			return result2;
+			if (!lineSegment2.IsValid)
+			{
+				throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
+			}
+			Point? result = Line.Intersect(lineSegment1.Line, lineSegment2.Line);
+			if (result.HasValue && lineSegment1.Contains(result.Value) && lineSegment2.Contains(result.Value))
+			{
+				return result;
+			}
+			return null;
 		}
 
 		public bool AreParrallel(LineSegment lineSegment1, LineSegment lineSegment2)
 		{
-			bool flag;
-			if (0 == 0)
+			if (!lineSegment1.IsValid)
 			{
-				if (false || !lineSegment1.IsValid)
-				{
-					if (7 != 0)
-					{
-						throw new ArgumentException("lineSegment1不是有意义的线段。", "lineSegment1");
-					}
-					goto IL_0022;
-				}
-				flag = lineSegment2.IsValid;
-				goto IL_0020;
+				throw new ArgumentException("lineSegment1不是有意义的线段。", "lineSegment1");
 			}
-			goto IL_002f;
-			IL_0020:
-			if (!flag)
+			if (!lineSegment2.IsValid)
 			{
-				goto IL_0022;
+				throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
 			}
-			goto IL_002f;
-			IL_0022:
-			throw new ArgumentException("lineSegment2不是有意义的线段。", "lineSegment2");
-			IL_002f:
-			flag = Line.AreParallel(lineSegment1.Line, lineSegment2.Line);
-			if (0 == 0)
-			{
-				return flag;
-			}
-			goto IL_0020;
+			return Line.AreParallel(lineSegment1.Line, lineSegment2.Line);
 		}
 
 		public bool Equals(LineSegment segment)
 		{
-			while (true)
+			if (segment._point1 == _point1 && segment._point2 == _point2)
 			{
-				int num;
-				if (7 != 0)
-				{
-					if (false)
-					{
-						goto IL_003f;
-					}
-					if (segment._point1 == _point1)
-					{
-						num = ((segment._point2 == _point2) ? 1 : 0);
-						goto IL_0028;
-					}
-				}
-				goto IL_007b;
-				IL_007b:
-				num = ((segment._point1 == _point2) ? 1 : 0);
-				if (0 == 0)
-				{
-					if (num != 0)
-					{
-						goto IL_003f;
-					}
-					if (4 == 0)
-					{
-						continue;
-					}
-					num = 0;
-					if (num == 0)
-					{
-						return (byte)num != 0;
-					}
-				}
-				goto IL_0028;
-				IL_0028:
-				if (num != 0)
-				{
-					break;
-				}
-				goto IL_007b;
-				IL_003f:
+				return true;
+			}
+			if (segment._point1 == _point2)
+			{
 				return segment._point2 == _point1;
 			}
-			return true;
+			return false;
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is LineSegment))
+			if (obj is LineSegment)
 			{
-				return false;
+				return Equals((LineSegment)obj);
 			}
-			return Equals((LineSegment)obj);
+			return false;
 		}
 
 		public override int GetHashCode()
 		{
-			Point point = default(Point);
-			do
-			{
-				if (4 != 0)
-				{
-					point = _point1;
-				}
-			}
-			while (6 == 0);
-			int num = point.GetHashCode();
-			while (0 == 0)
-			{
-				point = _point2;
-				if (6 != 0)
-				{
-					num ^= point.GetHashCode();
-					break;
-				}
-			}
-			return num;
+			return _point1.GetHashCode() ^ _point2.GetHashCode();
 		}
 	}
 }

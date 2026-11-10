@@ -17,77 +17,26 @@ namespace Cvte.Linq
 			{
 				throw new ArgumentNullException("action");
 			}
-			IEnumerator<T> enumerator = source.GetEnumerator();
-			try
+			foreach (T item in source)
 			{
-				while (enumerator.MoveNext())
-				{
-					if (0 == 0 && 0 == 0)
-					{
-						T current = enumerator.Current;
-						action(current);
-					}
-				}
-			}
-			finally
-			{
-				while (true)
-				{
-					if (false || enumerator != null)
-					{
-						goto IL_005e;
-					}
-					goto IL_0067;
-					IL_0067:
-					if (3 != 0)
-					{
-						break;
-					}
-					goto IL_005e;
-					IL_005e:
-					if (false)
-					{
-						continue;
-					}
-					enumerator.Dispose();
-					goto IL_0067;
-				}
+				action(item);
 			}
 		}
 
 		public static void ForEach<T>([NotNull] this IEnumerable<T> source, [NotNull] Action<T, int> action)
 		{
-			int num = default(int);
 			if (source == null)
 			{
-				if (4 != 0)
-				{
-					throw new ArgumentNullException("source");
-				}
+				throw new ArgumentNullException("source");
 			}
-			else
+			if (action == null)
 			{
-				if (6 == 0 || action == null)
-				{
-					throw new ArgumentNullException("action");
-				}
-				num = 0;
+				throw new ArgumentNullException("action");
 			}
-			IEnumerator<T> enumerator = source.GetEnumerator();
-			try
+			int num = 0;
+			foreach (T item in source)
 			{
-				while (0 == 0 && enumerator.MoveNext())
-				{
-					T current = enumerator.Current;
-					action(current, num++);
-				}
-			}
-			finally
-			{
-				if (enumerator != null && 0 == 0 && 0 == 0)
-				{
-					enumerator.Dispose();
-				}
+				action(item, num++);
 			}
 		}
 
@@ -103,29 +52,18 @@ namespace Cvte.Linq
 				throw new ArgumentNullException("predicate");
 			}
 			*(int*)ptr = -1;
-			using (IEnumerator<T> enumerator = source.GetEnumerator())
+			foreach (T item in source)
 			{
-				while (enumerator.MoveNext())
+				(*(int*)ptr)++;
+				if (!predicate(item))
 				{
-					if (0 == 0)
-					{
-						T current = enumerator.Current;
-						(*(int*)ptr)++;
-						if (8 == 0)
-						{
-							goto IL_007c;
-						}
-						if (!predicate(current))
-						{
-							continue;
-						}
-					}
-					((int*)ptr)[1] = *(int*)ptr;
-					goto IL_007c;
+					continue;
 				}
+				((int*)ptr)[1] = *(int*)ptr;
+				goto IL_0062;
 			}
 			return -1;
-			IL_007c:
+			IL_0062:
 			return ((int*)ptr)[1];
 		}
 

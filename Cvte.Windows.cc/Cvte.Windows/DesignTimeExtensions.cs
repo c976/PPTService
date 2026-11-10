@@ -7,28 +7,13 @@ namespace Cvte.Windows
 	{
 		public static bool IsDesignTimeWindow(this DependencyObject window)
 		{
-			string fullName = default(string);
-			while (DesignerProperties.GetIsInDesignMode(window))
+			if (DesignerProperties.GetIsInDesignMode(window))
 			{
-				if (2 != 0)
+				string fullName = window.GetType().FullName;
+				if (object.Equals("Microsoft.Expression.WpfPlatform.InstanceBuilders.WindowInstance", fullName) || object.Equals("Microsoft.VisualStudio.DesignTools.WpfDesigner.InstanceBuilders.WindowInstance", fullName))
 				{
-					fullName = window.GetType().FullName;
-					if (7 == 0)
-					{
-						continue;
-					}
-					if (object.Equals("Microsoft.Expression.WpfPlatform.InstanceBuilders.WindowInstance", fullName))
-					{
-						goto IL_002d;
-					}
+					return true;
 				}
-				if (!object.Equals("Microsoft.VisualStudio.DesignTools.WpfDesigner.InstanceBuilders.WindowInstance", fullName))
-				{
-					break;
-				}
-				goto IL_002d;
-				IL_002d:
-				return true;
 			}
 			return false;
 		}

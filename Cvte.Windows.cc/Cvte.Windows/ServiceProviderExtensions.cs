@@ -9,41 +9,20 @@ namespace Cvte.Windows
 		[CanBeNull]
 		internal static object GetTargetObject([NotNull] this IServiceProvider serviceProvider)
 		{
-			do
+			if (serviceProvider == null)
 			{
-				if (serviceProvider == null)
-				{
-					continue;
-				}
-				while (4 != 0)
-				{
-					IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-					if (provideValueTarget == null)
-					{
-						if (-1 != 0)
-						{
-							return null;
-						}
-						continue;
-					}
-					return provideValueTarget.TargetObject;
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
-			while (false);
-			throw new ArgumentNullException("serviceProvider");
+			return (serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget)?.TargetObject;
 		}
 
 		[CanBeNull]
 		internal static T GetTargetObject<T>([NotNull] this IServiceProvider serviceProvider) where T : class
 		{
-			do
+			if (serviceProvider == null)
 			{
-				if (serviceProvider == null)
-				{
-					throw new ArgumentNullException("serviceProvider");
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
-			while (false);
 			IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
 			if (provideValueTarget != null)
 			{
@@ -55,41 +34,20 @@ namespace Cvte.Windows
 		[CanBeNull]
 		internal static object GetTargetProperty([NotNull] this IServiceProvider serviceProvider)
 		{
-			do
+			if (serviceProvider == null)
 			{
-				if (serviceProvider == null)
-				{
-					continue;
-				}
-				while (4 != 0)
-				{
-					IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
-					if (provideValueTarget == null)
-					{
-						if (-1 != 0)
-						{
-							return null;
-						}
-						continue;
-					}
-					return provideValueTarget.TargetProperty;
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
-			while (false);
-			throw new ArgumentNullException("serviceProvider");
+			return (serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget)?.TargetProperty;
 		}
 
 		[CanBeNull]
 		internal static T GetTargetProperty<T>([NotNull] this IServiceProvider serviceProvider) where T : class
 		{
-			do
+			if (serviceProvider == null)
 			{
-				if (serviceProvider == null)
-				{
-					throw new ArgumentNullException("serviceProvider");
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
-			while (false);
 			IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
 			if (provideValueTarget != null)
 			{

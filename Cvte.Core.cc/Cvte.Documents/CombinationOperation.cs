@@ -35,70 +35,20 @@ namespace Cvte.Documents
 
 		public override void Undo()
 		{
-			while (true)
+			_operations.Reverse().ForEach((IOperation o) =>
 			{
-				if (-1 == 0)
-				{
-					goto IL_0031;
-				}
-				_operations.Reverse().ForEach((IOperation o) =>
-				{
-					o.Undo();
-				});
-				goto IL_004c;
-				IL_0031:
-				if (0 == 0)
-				{
-					if (false)
-					{
-						continue;
-					}
-					if (5 != 0)
-					{
-						break;
-					}
-				}
-				goto IL_004c;
-				IL_004c:
-				base.Undo();
-				goto IL_0031;
-			}
+				o.Undo();
+			});
+			base.Undo();
 		}
 
 		public override string ToString()
 		{
-			StringBuilder stringBuilder = default(StringBuilder);
-			if (0 == 0 && -1 != 0)
-			{
-				stringBuilder = new StringBuilder();
-			}
+			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine("<---- CombinationOperation ---->");
-			IEnumerator<IOperation> enumerator = _operations.GetEnumerator();
-			try
+			foreach (IOperation operation in _operations)
 			{
-				if (0 == 0)
-				{
-					goto IL_0048;
-				}
-				goto IL_0052;
-				IL_0048:
-				if (enumerator.MoveNext())
-				{
-					goto IL_0052;
-				}
-				goto end_IL_0031;
-				IL_0052:
-				IOperation current = enumerator.Current;
-				stringBuilder.AppendLine(current.ToString());
-				goto IL_0048;
-				end_IL_0031:;
-			}
-			finally
-			{
-				if (5 == 0 || enumerator != null)
-				{
-					enumerator.Dispose();
-				}
+				stringBuilder.AppendLine(operation.ToString());
 			}
 			stringBuilder.AppendLine("<---------------------------->");
 			return stringBuilder.ToString();

@@ -99,56 +99,21 @@ namespace Cvte.Diagnostics
 			SetCursorPos((int)x, (int)y);
 		}
 
-		public unsafe static void MoveTo([NotNull] params double[] xAndYValues)
+		public static void MoveTo([NotNull] params double[] xAndYValues)
 		{
-			while (true)
+			if (xAndYValues == null)
 			{
-				IntPtr intPtr;
-				if (0 == 0)
-				{
-					if (xAndYValues == null)
-					{
-						throw new ArgumentNullException("xAndYValues");
-					}
-					intPtr = (IntPtr)(void*)xAndYValues.LongLength;
-					while (intPtr != (IntPtr)0)
-					{
-						intPtr = (IntPtr)(void*)xAndYValues.LongLength;
-						if (7 == 0)
-						{
-							continue;
-						}
-						goto IL_001a;
-					}
-					goto IL_0022;
-				}
-				goto IL_004c;
-				IL_004c:
-				if (5 != 0)
-				{
-					break;
-				}
-				goto IL_0022;
-				IL_001a:
-				if (0 == 0)
-				{
-					intPtr = (IntPtr)((int)(long)intPtr % 2);
-				}
-				if (intPtr != (IntPtr)0)
-				{
-					goto IL_0022;
-				}
+				throw new ArgumentNullException("xAndYValues");
+			}
+			if (xAndYValues.Length != 0 && xAndYValues.Length % 2 == 0)
+			{
 				for (int i = 0; i < xAndYValues.Length; i += 2)
 				{
 					MoveTo(xAndYValues[i], xAndYValues[i + 1]);
 				}
-				goto IL_004c;
-				IL_0022:
-				if (5 != 0)
-				{
-					throw new ArgumentException("xAndYValues 的个数必须是大于等于2的偶数");
-				}
+				return;
 			}
+			throw new ArgumentException("xAndYValues 的个数必须是大于等于2的偶数");
 		}
 
 		public static System.Windows.Point GetCurrentPosition()
@@ -170,47 +135,12 @@ namespace Cvte.Diagnostics
 
 		private static void Simulate(MouseEventFlag flags, double x, double y, bool moveMouseToOriginalPosition)
 		{
-			if (-1 == 0)
-			{
-				goto IL_0026;
-			}
 			System.Drawing.Point position = Cursor.Position;
-			double x2 = x;
-			if (false)
-			{
-				goto IL_002b;
-			}
-			double y2 = y;
-			goto IL_004f;
-			IL_002b:
-			y2 = position.Y;
-			if (5 == 0)
-			{
-				goto IL_004f;
-			}
-			MoveTo(x2, y2);
-			goto IL_003b;
-			IL_0026:
-			x2 = position.X;
-			goto IL_002b;
-			IL_004f:
-			MoveTo(x2, y2);
-			goto IL_0056;
-			IL_0056:
-			UIntPtr zero = UIntPtr.Zero;
-			if (0 == 0)
-			{
-				mouse_event(flags, 0, 0, 0u, zero);
-			}
+			MoveTo(x, y);
+			mouse_event(flags, 0, 0, 0u, UIntPtr.Zero);
 			if (moveMouseToOriginalPosition)
 			{
-				goto IL_0026;
-			}
-			goto IL_003b;
-			IL_003b:
-			if (false)
-			{
-				goto IL_0056;
+				MoveTo(position.X, position.Y);
 			}
 		}
 	}

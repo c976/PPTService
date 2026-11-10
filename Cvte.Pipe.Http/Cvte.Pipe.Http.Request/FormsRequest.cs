@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using Cvte.Pipe.Http.Internal;
+
 namespace Cvte.Pipe.Http.Request
 {
 	public abstract class FormsRequest : RequestBase
@@ -11,7 +13,7 @@ namespace Cvte.Pipe.Http.Request
 			PropertyInfo[] properties = GetType().GetProperties();
 			foreach (PropertyInfo propertyInfo in properties)
 			{
-				DataMemberAttribute dataMemberAttribute = SA_Attr<DataMemberAttribute>.Get(propertyInfo, false);
+				DataMemberAttribute dataMemberAttribute = AttributeHelper<DataMemberAttribute>.smethod_5(propertyInfo);
 				if (dataMemberAttribute != null)
 				{
 					string name = dataMemberAttribute.Name;

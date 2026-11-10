@@ -5,19 +5,19 @@ namespace Cvte.Pipe.Http.Request
 {
 	public class DownloadProgressChangedEventArgs : EventArgs
 	{
-		private long _0001;
+		private long long_0;
 
-		private long _0002;
+		private long long_1;
 
 		public long CurrentProgress
 		{
 			get
 			{
-				return _0001;
+				return long_0;
 			}
 			set
 			{
-				_0001 = value;
+				long_0 = value;
 			}
 		}
 
@@ -25,11 +25,11 @@ namespace Cvte.Pipe.Http.Request
 		{
 			get
 			{
-				return _0002;
+				return long_1;
 			}
 			set
 			{
-				_0002 = value;
+				long_1 = value;
 			}
 		}
 	}

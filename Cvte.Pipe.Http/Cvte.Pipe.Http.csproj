@@ -85,7 +85,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="-\-.cs" />
     <Compile Include="Cvte.Pipe.Http.Request\BasicGetRequest.cs" />
     <Compile Include="Cvte.Pipe.Http.Request\DownloadCompletedEventArgs.cs" />
     <Compile Include="Cvte.Pipe.Http.Request\DownloadErrorEventArgs.cs" />
@@ -113,6 +112,9 @@
     <Compile Include="Cvte.Pipe.Http\IHttpPipe.cs" />
     <Compile Include="Cvte.Pipe.Http\PostFileRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Internal\AttributeHelper.cs" />
+    <Compile Include="Internal\DataContractJsonHelper.cs" />
+    <Compile Include="Internal\Md5Helper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

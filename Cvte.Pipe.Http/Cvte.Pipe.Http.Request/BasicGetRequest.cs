@@ -3,6 +3,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using Cvte.Pipe.Http.Internal;
+
 namespace Cvte.Pipe.Http.Request
 {
 	public class BasicGetRequest : RequestBase
@@ -13,12 +15,30 @@ namespace Cvte.Pipe.Http.Request
 			PropertyInfo[] properties = GetType().GetProperties();
 			foreach (PropertyInfo propertyInfo in properties)
 			{
-				DataMemberAttribute dataMemberAttribute = SA_Attr<DataMemberAttribute>.Get(propertyInfo, false);
-				if (dataMemberAttribute != null)
+				DataMemberAttribute dataMemberAttribute = AttributeHelper<DataMemberAttribute>.smethod_5(propertyInfo);
+				if (dataMemberAttribute == null)
 				{
-					object value = propertyInfo.GetValue(this, null);
-					dictionary.Add(dataMemberAttribute.Name, value?.ToString() ?? "");
+					continue;
 				}
+				object value = propertyInfo.GetValue(this, null);
+				string name = dataMemberAttribute.Name;
+				object obj;
+				if (value == null)
+				{
+					obj = null;
+				}
+				else
+				{
+					obj = value.ToString();
+					if (obj != null)
+					{
+						goto IL_0053;
+					}
+				}
+				obj = "";
+				goto IL_0053;
+				IL_0053:
+				dictionary.Add(name, (string)obj);
 			}
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append(base.GetRequestUrl());

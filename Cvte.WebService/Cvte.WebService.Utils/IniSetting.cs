@@ -1,79 +1,59 @@
 using System;
 using System.IO;
-using _0002;
+using Cvte.WebService.Internal;
 
 namespace Cvte.WebService.Utils
 {
 	internal abstract class IniSetting
 	{
-		private readonly string m__0001;
+		private readonly string string_0;
 
-		private readonly string _0002;
+		private readonly string string_1;
 
-		protected IniSetting(string P_0, string P_1)
+		protected IniSetting(string string_2, string string_3)
 		{
-			_0002 = P_0;
-			this.m__0001 = P_1;
+			string_1 = string_2;
+			string_0 = string_3;
 		}
 
-		public dynamic _0001;
-		public _0001 _0001_M1<_0001>(string P_0, _0001 P_1, Func<string, _0001, _0001> P_2, string P_3, string P_4)
+		public T method_0<T>(string string_2, T gparam_0, Func<string, T, T> func_0, string string_3, string string_4)
 		{
-			string text = SA_Helpers.Str(P_3, P_0, _0002);
+			string text = NativeIniFile.smethod_1(string_3, string_2, string_1);
 			if (!string.IsNullOrEmpty(text))
 			{
-				return P_2(text, P_1);
+				return func_0(text, gparam_0);
 			}
-			return P_1;
+			return gparam_0;
 		}
 
-		public string _0001_M2(string P_0, string P_1, string P_2, string P_3)
+		public string method_1(string string_2, string string_3, string string_4, string string_5)
 		{
-			return _0001(P_0, P_1, (Func<string, string, string>)((Func<string, string, string>)((string text, string text2) => (!SA_Proxy._001D___0016(text)) ? text : text2)), P_2, P_3);
+			return method_0(string_2, string_3, (string text, string text2) => (!string.IsNullOrEmpty(text)) ? text : text2, string_4, string_5);
 		}
 
-		public string _0001_M3(string P_0, string P_1)
+		public string method_2(string string_2, string string_3)
 		{
-			return this._0001(P_0, P_1, this.m__0001, _0002);
+			return method_1(string_2, string_3, string_0, string_1);
 		}
 
-		public void _0001_M4<_0001>(string P_0, _0001 P_1, Func<_0001, string> P_2, string P_3, string P_4)
+		public void method_3<T>(string string_2, T gparam_0, Func<T, string> func_0, string string_3, string string_4)
 		{
-			DirectoryInfo parent = new DirectoryInfo(_0002).Parent;
-			if (false || parent != null)
+			DirectoryInfo parent = new DirectoryInfo(string_1).Parent;
+			if (parent != null && !parent.Exists)
 			{
-				while (!parent.Exists)
-				{
-					if (1 == 0)
-					{
-						continue;
-					}
-					Directory.CreateDirectory(parent.FullName);
-					break;
-				}
+				Directory.CreateDirectory(parent.FullName);
 			}
-			do
-			{
-				SA_Helpers.Str(P_3, P_0, P_2(P_1), _0002);
-			}
-			while (2 == 0);
+			NativeIniFile.smethod_0(string_3, string_2, func_0(gparam_0), string_1);
 		}
 
-		public void _0001_M5(string P_0, string P_1, string P_2, string P_3)
+		public void method_4(string string_2, string string_3, string string_4, string string_5)
 		{
-			do
-			{
-				if (-1 != 0)
-				{
-					_0001(P_0, P_1, (Func<string, string>)((Func<string, string>)((string result) => result)), P_2, P_3);
-				}
-			}
-			while (false || false || 5 == 0);
+			method_3(string_2, string_3, (string result) => result, string_4, string_5);
 		}
 
-		public void _0001_M6(string P_0, string P_1)
+		public void method_5(string string_2, string string_3)
 		{
-			this._0001(P_0, P_1, this.m__0001, _0002);
+			method_4(string_2, string_3, string_0, string_1);
 		}
 	}
 }

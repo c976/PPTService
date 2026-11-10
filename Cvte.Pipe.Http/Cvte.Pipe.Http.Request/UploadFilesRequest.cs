@@ -4,11 +4,13 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using Cvte.Pipe.Http.Internal;
+
 namespace Cvte.Pipe.Http.Request
 {
 	public class UploadFilesRequest : RequestBase
 	{
-		private IDictionary<string, string> _0001;
+		private IDictionary<string, string> idictionary_0;
 
 		public EventHandler<UploadProgressChangedEventArgs> UploadProgressChanged;
 
@@ -18,11 +20,11 @@ namespace Cvte.Pipe.Http.Request
 		{
 			get
 			{
-				return _0001;
+				return idictionary_0;
 			}
 			set
 			{
-				_0001 = value;
+				idictionary_0 = value;
 			}
 		}
 
@@ -41,11 +43,11 @@ namespace Cvte.Pipe.Http.Request
 		public virtual IDictionary<string, string> GetParams()
 		{
 			Dictionary<string, string> dictionary = new Dictionary<string, string>();
-			foreach (PropertyInfo item in from propertyInfo in GetType().GetProperties().ToList()
-				where SA_Attr<DataMemberAttribute>.Has(propertyInfo, false)
-				select propertyInfo)
+			foreach (PropertyInfo item in from propertyInfo_0 in GetType().GetProperties().ToList()
+				where AttributeHelper<DataMemberAttribute>.smethod_2(propertyInfo_0)
+				select propertyInfo_0)
 			{
-				string name = SA_Attr<DataMemberAttribute>.Get(item, false).Name;
+				string name = AttributeHelper<DataMemberAttribute>.smethod_5(item).Name;
 				if (!dictionary.ContainsKey(name))
 				{
 					string value = item.GetValue(this, null).ToString();
