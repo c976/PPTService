@@ -18,41 +18,49 @@
 ├── Cvte.Pipe.Http\             
 ├── Cvte.WebService\            
 ├── Cvte.Windows.cc\
-└── PPTService.Collection\
+├── PPTService.Collection\
+└── setup\
 ```
 
 ## 特殊修改
 
-### C# 6 编译支持处理
+> 除本节列出的处理外，源码尽量保持反编译 / 去混淆输出原样，不改写业务逻辑。
 
-- **COM Interop**：4 个事件接口（`EApplication_Event`、`MasterEvents_Event`、`PresEvents_Event`、`SldEvents_Event`）补上源接口 IID 的 `[Guid]`，与 `[ComImport]` 一同使用，解决 `CS0596`。
-- **ILSpy 元数据特性**：删除 610 处无法用 C# 表达的 `[NullableContext]` / `[Nullable]` / `[TupleElementNames]` / `[Embedded]`。
-- **C# 6 语法**：`stackalloc` 改为局部变量声明初始化；struct 内 lambda 通过局部变量捕获 display class；修正 goto 控制流导致的 `CS0165`；property setter 中 ILSpy 误写的 `text` 改回 `value`。
-- **缺失类型**：新增 `Cvte.Core.cc\Cvte.ComponentModel\DebuggingProperties.cs`，补齐 `Cvte.Net.dll` 的 TypeRef 指向但当前 `Cvte.Core.cc.dll` 已不定义的类型。
-- **IL 不可表达结构**：对仅返回类型不同的重载、与 enclosing type 同名的成员、泛型参数与包含类型同名等问题，采用重命名或条件编译排除，并同步修正调用点。
+### 反混淆与源码重建
 
-### 关于 SmartAssembly 混淆
-
-`Cvte.Pipe.Http` 与 `Cvte.WebService` 原程序集使用 SmartAssembly 混淆。其 `HouseOfCards` / `MemberRefsProxy` / `Strings` 依赖**元数据 token 与运行时方法句柄**动态解析成员和还原字符串。重新编译后 token 必然变化，因此这部分无法从反编译文本原样重建。
+原版 8 个程序集中有 4 个被 **SmartAssembly 7.5.1.4370** 混淆：`Cvte.Core.cc.dll`、`Cvte.Pipe.Http.dll`、`Cvte.WebService.dll`、`Cvte.Windows.cc.dll`。直接反编译会产出依赖元数据 token 的 `MemberRefsProxy` 空壳、被合并进同一个 `dynamic` 字段的多个属性，以及不可打印的类型名与命名空间。这样编译虽能通过，运行行为却不正确（二维码分享等路径会失败）。
 
 处理方式：
 
-- 原始不可编译的基础设施源码**完整保留**，但用条件编译包裹，不参与生成（这两个符号均未在任何项目中定义）：
+1. `de4dot -p sa` 反混淆，还原代理调用与加密字符串；
+2. `ilspycmd -p -lv CSharp6` 重新生成项目源码，沿用各 csproj 的 `LangVersion 6`，不改构建配置。
 
-  | 文件 | 符号 |
-  |---|---|
-  | `Cvte.Pipe.Http\-\-.cs` | `SA_ORIGINAL_DECOMPILED` |
-  | `Cvte.Pipe.Http\Cvte.Pipe.Http\HttpPipe.cs` | `SA_ORIGINAL_DISPLAY_CLASSES`（仅 5 个未引用的 display class） |
-  | `Cvte.WebService\-\-.cs` | `SA_ORIGINAL_DECOMPILED` |
-  | `Cvte.WebService\SmartAssembly.HouseOfCards\MemberRefsProxy.cs` | `SA_ORIGINAL_DECOMPILED` |
-  | `Cvte.WebService\SmartAssembly.HouseOfCards\Strings.cs` | `SA_ORIGINAL_DECOMPILED` |
+去混淆后的替身名按语义重命名：`ns0..ns9` 目录合并为 `Internal\`，命名空间统一为 `Cvte.<项目>.Internal`，11 个类型改为可读名（如 `PictureUploadRequest`、`AccountSettings`、`SignatureUrlEncoder`、`UserEntity`、`DataContractJsonHelper`）。de4dot 解密后失去调用者的 SA 字符串加密辅助类（`SmartAssembly.*`、8 个空 `AttributeN`、字符串解密表）已删除。
 
-- 生成编译兼容层替代：
-  - `Cvte.WebService\SA_Compat.cs`（156 行）：`SA_Proxy`（强返回类型 + `params object[]` 静态方法，避免 `dynamic` 引发的 `CS1977` / `CS1963` / `CS1973`）、`SA_Helpers`、`SA_Attr<T>`、实体 shim 类型。
-  - `Cvte.Pipe.Http\-\-.cs` 的 `#else` 分支：`SA_Attr<T>` / `SA_Json` / `SA_Md5`。
-  - `HttpPipe.cs` 的 `SA_Execute<SA_TReq, SA_TRes>`、`HttpUtility.cs` 的 `SA_HtmlCallback` 等重命名，避开标识符冲突。
+### 编译兼容处理
 
-> **限制：兼容层是编译级桩，不是运行时还原。** `SA_Proxy` 的 73 个方法中有 68 处返回 `default(...)` 或 `null`。因此「能够编译通过」不等于「运行行为与原程序集一致」：字符串解密、成员代理相关路径在运行时可能返回空值。若目标是获得可运行的程序，需要对这两个程序集另做去混淆处理（例如先用 de4dot 处理 SmartAssembly，再重新反编译），或直接引用原始 DLL。
+以下均为让反编译源码在 .NET Framework 4.5 / C# 6 下通过编译所必需的最小修补，不改变语义：
+
+| 类别 | 处理 |
+|---|---|
+| COM Interop | 4 个事件接口（`EApplication_Event`、`MasterEvents_Event`、`PresEvents_Event`、`SldEvents_Event`）补源接口 IID 的 `[Guid]`，配合 `[ComImport]` 解决 `CS0596` |
+| ILSpy 元数据特性 | 删除 C# 无法表达的 `[NullableContext]` / `[Nullable]` / `[TupleElementNames]` / `[Embedded]` |
+| C# 6 语法 | `stackalloc` 改为局部变量声明初始化；struct 内 lambda 不能捕获 `this` 成员（`CS1673`），在 `ConfiguratorExtensions.cs` 2 处先复制到局部变量；修正 goto 控制流导致的 `CS0165`；property setter 中误写的 `text` 改回 `value` |
+| IL 不可表达结构 | 仅返回类型不同的重载、与 enclosing type 同名的成员、泛型参数与包含类型同名等，采用重命名并同步修正调用点 |
+| ILSpy 误判 | `PictureUploadRequest` / `AttachmentUploadRequest` 的 `FileKey` 原 IL 是 `.override`，被反编译成显式接口实现，改回 `public override` |
+| 缺失类型 | 新增 `Cvte.Core.cc\Cvte.ComponentModel\DebuggingProperties.cs`：`Cvte.Net.dll` 有指向 `[Cvte.Core.cc]Cvte.ComponentModel.DebuggingProperties::get_IsDebug()` 的 TypeRef，但随包分发的 `Cvte.Core.cc.dll` 已不含该类型。|
+
+### 运行行为修正
+
+- LinqToDB 表名：`UserEntity` 是没有 `TableAttribute` 的实体，`GetTable<T>()` 默认以类名作表名。重命名后显式加 `[Table("Class26")]` 锁定原映射，避免 `User.db` 查表失败。
+- 进度环 100% 归零：`LoadingView.xaml.cs` 的资源键原写作 `StoryBoard.HiddenRootGridImmediatly`，而 XAML 真实键是 `...Immediately`（0 秒动画，`Completed` 回调结束 `PushFrame`）。键不匹配导致动画从不触发，只剩 `DispatcherTask.Start(30.0, …)` 的 30ms 兜底；期间 `ClearData()` 已把界面写成 `0%`，WPF 抢到一帧就看到「100%→0% 再关闭」，因此表现为概率性问题。这是原版代码问题，这是额外修复。
+
+### 已知差异与构建注意
+
+- 这 4 个类库是重新编译产物，与原版 DLL 二进制不同；`smethod_N` / `method_N` 等方法名仍是反编译残留，未做重命名。
+- `Cvte.Pipe.Http\Internal\Md5Helper.cs` 当前无引用，但属业务工具类，保留。
+- 主项目 `PPTService` 是老式 WPF 工程，请**用 Visual Studio 的 MSBuild 构建**；`dotnet build` 不生成 XAML 的 `.g.cs`，会报 52 个 `IComponentConnector` 相关 `CS0535`（工具差异，非源码错误）。
+- 曾怀疑重编译的 `Cvte.Core.cc.dll` 导致进度环归零，实测该现象是概率性竞态，与 DLL 版本无关，无需替换 DLL 或修改工程引用。
 
 ## 许可协议
 
