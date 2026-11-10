@@ -6,7 +6,6 @@ namespace Cvte.Composition
 {
 	public static class TypeDetectorExtensions
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1_0<SA_T0>
 		{
 			public Predicate<Type> typeFilter;

@@ -1,40 +1,34 @@
 using System;
-using System.Runtime.CompilerServices;
 
 namespace Cvte.Pipe.Http.Request
 {
 	public class GetRequestParameterAttribute : Attribute
 	{
-		[CompilerGenerated]
-		public dynamic _0001;
-
-		[CompilerGenerated]
+		// 原版是 int / string 两个独立字段，反编译被合并为 dynamic，这里拆开。
+		private int _order;
+		private string _format;
 
 		public int Order
 		{
-			[CompilerGenerated]
 			get
 			{
-				return this._0001;
+				return _order;
 			}
-			[CompilerGenerated]
 			set
 			{
-				this._0001 = value;
+				_order = value;
 			}
 		}
 
 		public string Format
 		{
-			[CompilerGenerated]
 			get
 			{
-				return _0001;
+				return _format;
 			}
-			[CompilerGenerated]
 			set
 			{
-				_0001 = value;
+				_format = value;
 			}
 		}
 	}

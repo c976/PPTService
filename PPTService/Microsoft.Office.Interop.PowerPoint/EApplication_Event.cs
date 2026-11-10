@@ -5,7 +5,6 @@ namespace Microsoft.Office.Interop.PowerPoint
 {
 	[ComImport]
 	[Guid("914934C2-5A91-11CF-8700-00AA0060263B")]
-	[CompilerGenerated]
 	[ComEventInterface(typeof(EApplication), typeof(EApplication))]
 	public interface EApplication_Event
 	{

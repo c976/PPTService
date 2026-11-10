@@ -9,17 +9,14 @@ namespace Cvte.Pipe.Http
 {
 	public class PostFileRequest : RequestBase
 	{
-		[CompilerGenerated]
 		private string _0001;
 
 		public string FilePath
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0001;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0001 = value;

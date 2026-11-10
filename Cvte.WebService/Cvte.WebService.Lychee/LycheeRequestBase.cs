@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
-using _0005;
-using _0008;
 using Cvte.Pipe.Http.Request;
 
 namespace Cvte.WebService.Lychee
@@ -25,66 +21,38 @@ namespace Cvte.WebService.Lychee
 		[DataMember(Name = "version")]
 		public int Version { get; set; }
 
-		public unsafe override byte[] GetRequestData()
+		public override byte[] GetRequestData()
 		{
-			Dictionary<string, string> dictionary = default(Dictionary<string, string>);
-			StringBuilder stringBuilder = default(StringBuilder);
-			if (2 != 0)
+			// 与反混淆后的原版一致：按反射属性顺序收集 [DataMember] 参数，
+			// 值逐字符 URL 编码后拼 key=value&...，再以 UTF-8 编码成请求体。
+			Dictionary<string, string> values = new Dictionary<string, string>();
+			foreach (PropertyInfo property in GetType().GetProperties())
 			{
-				dictionary = new Dictionary<string, string>();
-				PropertyInfo[] array = SA_Proxy._007E_008D___001F(SA_Proxy._008C___001E(this));
-				int num = default(int);
-				if (0 == 0)
+				DataMemberAttribute dataMember = LycheeSign.GetDataMember(property);
+				if (dataMember == null)
 				{
-					num = 0;
+					continue;
 				}
-				while (true)
-				{
-					int num2 = num;
-					IntPtr intPtr = (IntPtr)(void*)array.LongLength;
-					int num3;
-					do
-					{
-						num3 = (int)(long)intPtr;
-						intPtr = (IntPtr)num3;
-					}
-					while (1 == 0);
-					if (num2 >= num3)
-					{
-						break;
-					}
-					PropertyInfo propertyInfo = array[num];
-					DataMemberAttribute dataMemberAttribute = SA_Attr<DataMemberAttribute>._0001(propertyInfo, false);
-					if (dataMemberAttribute != null)
-					{
-						object obj = SA_Proxy._007E_008E___007F(propertyInfo, this, null);
-						dictionary.Add(SA_Proxy._007E_0081___0018(dataMemberAttribute), ((obj != null) ? SA_Proxy._007E_007F___0018(obj) : null) ?? "");
-					}
-					num++;
-				}
-				stringBuilder = new StringBuilder();
+				object value = property.GetValue(this, null);
+				values.Add(dataMember.Name, (value == null) ? "" : (value.ToString() ?? ""));
 			}
-			if (dictionary.Any())
+
+			StringBuilder builder = new StringBuilder();
+			bool first = true;
+			foreach (KeyValuePair<string, string> item in values)
 			{
-				bool flag = true;
-				foreach (KeyValuePair<string, string> item in dictionary)
+				string text = LycheeSign.UrlEncode(item.Value, Encoding.UTF8);
+				if (first)
 				{
-					string text = SA_Helpers.Str(item.Value, SA_Proxy._0003___0003());
-					if (0 == 0)
-					{
-						if (flag || 7 == 0)
-						{
-							SA_Proxy._007E_0088___001A(stringBuilder, SA_Proxy._008F___0080(item.Key, "=", text));
-							flag = false;
-						}
-						else
-						{
-							SA_Proxy._007E_0088___001A(stringBuilder, SA_Proxy._0090___0081("&", item.Key, "=", text));
-						}
-					}
+					builder.Append(item.Key + "=" + text);
+					first = false;
+				}
+				else
+				{
+					builder.Append("&" + item.Key + "=" + text);
 				}
 			}
-			return SA_Proxy._007E_0005___0004(SA_Proxy._0003___0003(), SA_Proxy._007E_007F___0018(stringBuilder));
+			return Encoding.UTF8.GetBytes(builder.ToString());
 		}
 	}
 }

@@ -11,10 +11,8 @@ namespace Cvte.Windows
 	{
 		private static readonly Lazy<MonitorCollection> AllDevicesLazy;
 
-		[CompilerGenerated]
 		private static Func<MonitorCollection> CS_0024_003C_003E9__CachedAnonymousMethodDelegate8;
 
-		[CompilerGenerated]
 		private static EventHandler CS_0024_003C_003E9__CachedAnonymousMethodDelegate9;
 
 		public static MonitorCollection Devices => AllDevicesLazy.Value;

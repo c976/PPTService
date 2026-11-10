@@ -63,17 +63,18 @@ namespace PPTService
 				LoadProgressBar.Value = _progress;
 				LoadProgressTextBlock.Text = _progress + "%";
 			}
-			if (_progress >= 100)
+		if (_progress >= 100)
+		{
+			_timer.Stop();
+			// 进度跑满后直接关闭：不再 ClearData 把圆环归零（原版会先显示 0% 再关闭）。
+			// 资源键原代码拼作 Immediatly，与 XAML 的 Immediately 不匹配，淡出动画从未触发。
+			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
+			LoadingScreen<LoadingView>.Current.Hide();
+			DispatcherTask.Start(30.0, () =>
 			{
-				_timer.Stop();
-				Progress = 0;
-				ClearData();
-				(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
-				DispatcherTask.Start(30.0, () =>
-				{
-					_frame.Continue = false;
-				});
-			}
+				_frame.Continue = false;
+			});
+		}
 		}
 
 		public void Start()
@@ -89,7 +90,7 @@ namespace PPTService
 
 		public void Continue()
 		{
-			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
+			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
 		}
 
 		private void CancelButton_OnClick(object sender, RoutedEventArgs e)
@@ -103,7 +104,7 @@ namespace PPTService
 		{
 			Opacity = 0.0;
 			ClearData();
-			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediatly"] as Storyboard)?.Begin();
+			(RootGrid.Resources["StoryBoard.HiddenRootGridImmediately"] as Storyboard)?.Begin();
 			DispatcherTask.Start(500.0, () =>
 			{
 				_frame.Continue = false;

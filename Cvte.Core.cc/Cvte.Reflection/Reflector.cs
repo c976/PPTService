@@ -11,7 +11,6 @@ namespace Cvte.Reflection
 {
 	public static class Reflector
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass5_0
 		{
 			public string propertyName;
@@ -22,7 +21,6 @@ namespace Cvte.Reflection
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass15_0
 		{
 			public string methodName;
@@ -35,7 +33,6 @@ namespace Cvte.Reflection
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003CGetAllTypesInHierarchy_003Ed__18 : IEnumerable<Type>, IEnumerator<Type>, IEnumerable, IDisposable, IEnumerator
 		{
 			private int _003C_003E1__state;

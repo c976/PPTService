@@ -14,7 +14,6 @@ namespace Cvte.WebService.Feedback
 {
 	public class FeedbackService
 	{
-		[CompilerGenerated]
 		private sealed class SA_C4
 		{
 			public dynamic _0001;

@@ -8,7 +8,6 @@ namespace Cvte.Pipe.Http.Request
 {
 	public class UploadFilesRequest : RequestBase
 	{
-		[CompilerGenerated]
 		private IDictionary<string, string> _0001;
 
 		public EventHandler<UploadProgressChangedEventArgs> UploadProgressChanged;
@@ -17,12 +16,10 @@ namespace Cvte.Pipe.Http.Request
 
 		public IDictionary<string, string> KeyFilePathMapping
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0001;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0001 = value;

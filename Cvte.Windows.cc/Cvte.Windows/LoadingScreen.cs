@@ -13,7 +13,6 @@ namespace Cvte.Windows
 {
 	public class LoadingScreen<SA_T0> : IDisposable where SA_T0 : Visual
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass4
 		{
 			public LoadingScreen<SA_T0> _003C_003E4__this;

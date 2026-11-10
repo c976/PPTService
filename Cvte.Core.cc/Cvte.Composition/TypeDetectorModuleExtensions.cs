@@ -20,7 +20,6 @@ namespace Cvte.Composition
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1_0
 		{
 			public TypeDetectorData data;

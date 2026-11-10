@@ -11,7 +11,6 @@ namespace Cvte.Net.WebServices.Files.Download
 	
 	internal class UnitFileDownloadUtilityProxy
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass2_0
 		{
 			
@@ -25,7 +24,6 @@ namespace Cvte.Net.WebServices.Files.Download
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass3_0
 		{
 			

@@ -8,7 +8,6 @@ namespace Cvte
 {
 	public class AppInfo
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass10_0
 		{
 			public string key;

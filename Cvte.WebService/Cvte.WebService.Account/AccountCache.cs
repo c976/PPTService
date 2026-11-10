@@ -13,7 +13,6 @@ namespace Cvte.WebService.Account
 {
 	internal class AccountCache : IAccountCache
 	{
-		[CompilerGenerated]
 		private sealed class SA_C2
 		{
 			public dynamic _0001;
@@ -41,7 +40,6 @@ namespace Cvte.WebService.Account
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0002
 		{
 			public dynamic _0001;
@@ -60,7 +58,6 @@ namespace Cvte.WebService.Account
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0003
 		{
 			public dynamic _0001;

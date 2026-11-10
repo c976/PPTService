@@ -12,7 +12,6 @@ namespace Cvte.Pipe.Http
 	{
 		// SA_COMPAT: unused compiler-generated display classes preserved below.
 #if SA_ORIGINAL_DISPLAY_CLASSES
-		[CompilerGenerated]
 		private sealed class SA_C1<_0001, _0002> where _0001 : RequestBase where _0002 : ResponseBase, new()
 		{
 			public dynamic _0001;
@@ -23,7 +22,6 @@ namespace Cvte.Pipe.Http
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0002<_0001, _0002> where _0001 : RequestBase where _0002 : ResponseBase, new()
 		{
 			public dynamic _0001;
@@ -34,7 +32,6 @@ namespace Cvte.Pipe.Http
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0003<_0001, _0002> where _0001 : UploadFileRequest where _0002 : ResponseBase, new()
 		{
 			public dynamic _0001;
@@ -45,7 +42,6 @@ namespace Cvte.Pipe.Http
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0004<_0001, _0002> where _0001 : UploadFilesRequest where _0002 : ResponseBase, new()
 		{
 			public dynamic _0001;
@@ -56,7 +52,6 @@ namespace Cvte.Pipe.Http
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0005<_0001, _0002> where _0001 : DownloadFileRequest where _0002 : ResponseBase, new()
 		{
 			public dynamic _0001;
@@ -68,17 +63,14 @@ namespace Cvte.Pipe.Http
 			}
 		}
 #endif
-		[CompilerGenerated]
 		private bool m__0001;
 
 		public bool DebugMode
 		{
-			[CompilerGenerated]
 			get
 			{
 				return this.m__0001;
 			}
-			[CompilerGenerated]
 			set
 			{
 				this.m__0001 = value;

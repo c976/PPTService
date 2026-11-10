@@ -4,29 +4,22 @@ namespace Cvte.WebService.Feedback
 {
 	public class UserInfo
 	{
-		[CompilerGenerated]
 		private string _0001;
 
-		[CompilerGenerated]
 		private string _0002;
 
-		[CompilerGenerated]
 		private string _0003;
 
-		[CompilerGenerated]
 		private string _0004;
 
-		[CompilerGenerated]
 		private string _0005;
 
 		public string UserId
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0001;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0001 = value;
@@ -35,12 +28,10 @@ namespace Cvte.WebService.Feedback
 
 		public string Email
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0002;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0002 = value;
@@ -49,12 +40,10 @@ namespace Cvte.WebService.Feedback
 
 		public string Wenxin
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0003;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0003 = value;
@@ -63,12 +52,10 @@ namespace Cvte.WebService.Feedback
 
 		public string Mobile
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0004;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0004 = value;
@@ -77,12 +64,10 @@ namespace Cvte.WebService.Feedback
 
 		public string Device
 		{
-			[CompilerGenerated]
 			get
 			{
 				return _0005;
 			}
-			[CompilerGenerated]
 			set
 			{
 				_0005 = value;

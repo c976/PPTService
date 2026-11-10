@@ -12,7 +12,6 @@ namespace Cvte
 	public sealed class NdpInfo
 	{
 		[Serializable]
-		[CompilerGenerated]
 		private sealed class _003C_003Ec
 		{
 			public static readonly _003C_003Ec _003C_003E9 = new _003C_003Ec();

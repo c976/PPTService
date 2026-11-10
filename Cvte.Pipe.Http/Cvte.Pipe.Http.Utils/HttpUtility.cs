@@ -12,7 +12,6 @@ namespace Cvte.Pipe.Http.Utils
 	{
 		public delegate void SA_HtmlCallback(string html);
 
-		[CompilerGenerated]
 		private sealed class _0002
 		{
 			public dynamic _0001;
@@ -68,7 +67,6 @@ namespace Cvte.Pipe.Http.Utils
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0003
 		{
 			public dynamic _0001;
@@ -80,7 +78,6 @@ namespace Cvte.Pipe.Http.Utils
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _0004
 		{
 			public dynamic _0001;

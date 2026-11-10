@@ -6,15 +6,12 @@ namespace Cvte.Documents
 {
 	public abstract class NotifyOperation : IOperation, INotifyOperation
 	{
-		[CompilerGenerated]
 		private EventHandler m_RedoExcuted;
 
-		[CompilerGenerated]
 		private EventHandler m_UndoExcuted;
 
 		public event EventHandler RedoExcuted
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler eventHandler;
@@ -56,7 +53,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler eventHandler;
@@ -102,7 +98,6 @@ namespace Cvte.Documents
 
 		public event EventHandler UndoExcuted
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler eventHandler;
@@ -144,7 +139,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler eventHandler;

@@ -2,7 +2,6 @@ using Microsoft.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices
 {
-	[CompilerGenerated]
 	
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
 	internal sealed class NullableContextAttribute : Attribute

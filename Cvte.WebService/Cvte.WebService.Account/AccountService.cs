@@ -14,17 +14,13 @@ namespace Cvte.WebService.Account
 	{
 		private class SA_C3
 		{
-			[CompilerGenerated]
 			private string m__0001;
 
-			[CompilerGenerated]
 			private string m__0002;
 
-			[CompilerGenerated]
 			private string m__0003;
 
 			[SpecialName]
-			[CompilerGenerated]
 			public dynamic _0001;
 			public string _0001_M1()
 			{
@@ -32,35 +28,30 @@ namespace Cvte.WebService.Account
 			}
 
 			[SpecialName]
-			[CompilerGenerated]
 			public void _0001_M2(string P_0)
 			{
 				this.m__0001 = P_0;
 			}
 
 			[SpecialName]
-			[CompilerGenerated]
 			public string _0002()
 			{
 				return this.m__0002;
 			}
 
 			[SpecialName]
-			[CompilerGenerated]
 			public void _0002(string P_0)
 			{
 				this.m__0002 = P_0;
 			}
 
 			[SpecialName]
-			[CompilerGenerated]
 			public string _0003()
 			{
 				return this.m__0003;
 			}
 
 			[SpecialName]
-			[CompilerGenerated]
 			public void _0003(string P_0)
 			{
 				this.m__0003 = P_0;
@@ -90,7 +81,6 @@ namespace Cvte.WebService.Account
 
 		private string _000F;
 
-		[CompilerGenerated]
 		public string this[string key]
 		{
 			get
@@ -232,7 +222,6 @@ namespace Cvte.WebService.Account
 
 		public event EventHandler UserLogined
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler eventHandler = this.m__0001;
@@ -259,7 +248,6 @@ namespace Cvte.WebService.Account
 					}
 				}
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler eventHandler = this.m__0001;
@@ -290,7 +278,6 @@ namespace Cvte.WebService.Account
 
 		public event EventHandler UserLogout
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler eventHandler = this.m__0002;
@@ -317,7 +304,6 @@ namespace Cvte.WebService.Account
 					}
 				}
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler eventHandler = this.m__0002;

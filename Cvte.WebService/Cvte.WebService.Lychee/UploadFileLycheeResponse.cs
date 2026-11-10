@@ -9,6 +9,6 @@ namespace Cvte.WebService.Lychee
 		[DataMember(Name = "ret")]
 		public string Code { get; set; }
 
-		public override bool Succeed => SA_Proxy._008B___001D(Code, "ok");
+		public override bool Succeed => Code == "ok";
 	}
 }

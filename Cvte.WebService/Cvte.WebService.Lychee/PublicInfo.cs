@@ -1,72 +1,36 @@
-using System.Runtime.CompilerServices;
-
 namespace Cvte.WebService.Lychee
 {
 	public class PublicInfo
 	{
-		[CompilerGenerated]
-		public dynamic _0001;
-
-		[CompilerGenerated]
-		private string _0002;
-
-		[CompilerGenerated]
-		private string _0003;
+		// 原版 Title / Scale 是两个独立字段，反编译被合并成一个 dynamic，
+		// 导致先赋 Title 再赋 Scale 后 Title 读出 double，请求构造时抛绑定异常。
+		private string _title;
+		private string _author;
+		private double _scale;
+		private string _device;
 
 		public string Title
 		{
-			[CompilerGenerated]
-			get
-			{
-				return this._0001;
-			}
-			[CompilerGenerated]
-			set
-			{
-				this._0001 = value;
-			}
+			get { return _title; }
+			set { _title = value; }
 		}
 
 		public string Author
 		{
-			[CompilerGenerated]
-			get
-			{
-				return _0002;
-			}
-			[CompilerGenerated]
-			set
-			{
-				_0002 = value;
-			}
+			get { return _author; }
+			set { _author = value; }
 		}
 
 		public double Scale
 		{
-			[CompilerGenerated]
-			get
-			{
-				return _0001;
-			}
-			[CompilerGenerated]
-			set
-			{
-				_0001 = value;
-			}
+			get { return _scale; }
+			set { _scale = value; }
 		}
 
 		public string Device
 		{
-			[CompilerGenerated]
-			get
-			{
-				return _0003;
-			}
-			[CompilerGenerated]
-			set
-			{
-				_0003 = value;
-			}
+			get { return _device; }
+			set { _device = value; }
 		}
 	}
 }

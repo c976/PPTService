@@ -15,7 +15,6 @@ namespace Cvte.Configuration
 	public class Configurator
 	{
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CReadConfigsAsync_003Ed__28 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;
@@ -156,7 +155,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CSaveConfigsAsync_003Ed__29 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;
@@ -255,7 +253,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetAsync_003Ed__30 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;
@@ -353,7 +350,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CSetAsync_003Ed__31 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;
@@ -476,7 +472,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetArrayAsync_003Ed__32 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;
@@ -578,7 +573,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CSetArrayAsync_003Ed__33 : IAsyncStateMachine
 		{
 			public int _003C_003E1__state;

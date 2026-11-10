@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 
 namespace PPTService.Properties
 {
-	[CompilerGenerated]
 	[GeneratedCode("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
 	internal sealed class Settings : ApplicationSettingsBase
 	{

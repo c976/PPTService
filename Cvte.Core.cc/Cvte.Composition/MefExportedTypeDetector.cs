@@ -29,7 +29,6 @@ namespace Cvte.Composition
 			}
 		}
 
-		[CompilerGenerated]
 		private EventHandler<NewTypesDetectedEventArgs> m_NewTypesDetected;
 
 		private readonly HashSet<Assembly> _processedAssemblies;
@@ -40,7 +39,6 @@ namespace Cvte.Composition
 
 		public event EventHandler<NewTypesDetectedEventArgs> NewTypesDetected
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler<NewTypesDetectedEventArgs> eventHandler;
@@ -82,7 +80,6 @@ namespace Cvte.Composition
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler<NewTypesDetectedEventArgs> eventHandler;

@@ -445,120 +445,99 @@ namespace _0002
 {
 	internal class _0002
 	{
-		[CompilerGenerated]
 		private string m__0001;
 
-		[CompilerGenerated]
 		private string m__0002;
 
-		[CompilerGenerated]
 		private string m__0003;
 
-		[CompilerGenerated]
 		private string m__0004;
 
-		[CompilerGenerated]
 		private string m__0005;
 
-		[CompilerGenerated]
 		private string m__0006;
 
-		[CompilerGenerated]
 		private long? m__0001;
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0001()
 		{
 			return this.m__0001;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0001(string P_0)
 		{
 			this.m__0001 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0002()
 		{
 			return this.m__0002;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0002(string P_0)
 		{
 			this.m__0002 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0003()
 		{
 			return this.m__0003;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0003(string P_0)
 		{
 			this.m__0003 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0004()
 		{
 			return this.m__0004;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0004(string P_0)
 		{
 			this.m__0004 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0005()
 		{
 			return this.m__0005;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0005(string P_0)
 		{
 			this.m__0005 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public string _0006()
 		{
 			return this.m__0006;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0006(string P_0)
 		{
 			this.m__0006 = P_0;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public long? _0001()
 		{
 			return this.m__0001;
 		}
 
 		[SpecialName]
-		[CompilerGenerated]
 		public void _0001(long? P_0)
 		{
 			this.m__0001 = P_0;

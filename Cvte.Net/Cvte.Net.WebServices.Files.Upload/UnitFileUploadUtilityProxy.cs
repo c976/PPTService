@@ -14,7 +14,6 @@ namespace Cvte.Net.WebServices.Files.Upload
 	
 	internal class UnitFileUploadUtilityProxy
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass2_0
 		{
 			
@@ -38,7 +37,6 @@ namespace Cvte.Net.WebServices.Files.Upload
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass3_0
 		{
 			
@@ -69,7 +67,6 @@ namespace Cvte.Net.WebServices.Files.Upload
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass4_0
 		{
 			
@@ -97,7 +94,6 @@ namespace Cvte.Net.WebServices.Files.Upload
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass5_0
 		{
 			

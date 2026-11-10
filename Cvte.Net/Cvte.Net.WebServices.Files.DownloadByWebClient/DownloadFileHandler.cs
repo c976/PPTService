@@ -16,7 +16,6 @@ namespace Cvte.Net.WebServices.Files.DownloadByWebClient
 	
 	internal class DownloadFileHandler
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1_0
 		{
 			public CancellationToken cancellationToken;
@@ -41,7 +40,6 @@ namespace Cvte.Net.WebServices.Files.DownloadByWebClient
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1_1
 		{
 			

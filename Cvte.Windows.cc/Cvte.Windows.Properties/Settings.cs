@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 
 namespace Cvte.Windows.Properties
 {
-	[CompilerGenerated]
 	[GeneratedCode("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "12.0.0.0")]
 	internal sealed class Settings : ApplicationSettingsBase
 	{

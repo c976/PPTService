@@ -8,19 +8,14 @@ namespace Cvte.Documents
 {
 	public class UndoRedoProvider : MarshalByRefObject, IUndoRedoProvider
 	{
-		[CompilerGenerated]
 		private EventHandler<OperationEventArgs> m_UndoExecuting;
 
-		[CompilerGenerated]
 		private EventHandler<OperationEventArgs> m_RedoExecuting;
 
-		[CompilerGenerated]
 		private EventHandler<OperationEventArgs> m_UndoExecuted;
 
-		[CompilerGenerated]
 		private EventHandler<OperationEventArgs> m_RedoExecuted;
 
-		[CompilerGenerated]
 		private EventHandler m_UndoRedoEnableChanged;
 
 		private bool _isUndoRedoing;
@@ -41,7 +36,6 @@ namespace Cvte.Documents
 
 		public event EventHandler<OperationEventArgs> UndoExecuting
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -83,7 +77,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -129,7 +122,6 @@ namespace Cvte.Documents
 
 		public event EventHandler<OperationEventArgs> RedoExecuting
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -171,7 +163,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -217,7 +208,6 @@ namespace Cvte.Documents
 
 		public event EventHandler<OperationEventArgs> UndoExecuted
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -259,7 +249,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -305,7 +294,6 @@ namespace Cvte.Documents
 
 		public event EventHandler<OperationEventArgs> RedoExecuted
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -347,7 +335,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler<OperationEventArgs> eventHandler;
@@ -393,7 +380,6 @@ namespace Cvte.Documents
 
 		public event EventHandler UndoRedoEnableChanged
 		{
-			[CompilerGenerated]
 			add
 			{
 				EventHandler eventHandler;
@@ -435,7 +421,6 @@ namespace Cvte.Documents
 				}
 				goto IL_0038;
 			}
-			[CompilerGenerated]
 			remove
 			{
 				EventHandler eventHandler;

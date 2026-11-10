@@ -9,7 +9,6 @@ namespace Cvte.Net.Http.HostBackup
 	
 	internal class HttpUtilityProxy
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass6_0
 		{
 			
@@ -35,7 +34,6 @@ namespace Cvte.Net.Http.HostBackup
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass7_0
 		{
 			

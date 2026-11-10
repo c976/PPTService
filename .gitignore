@@ -3,6 +3,8 @@
 */[Oo]bj/
 !lib/**
 !setup/**
+.vs
+.suo
 
 # NSIS 编译产物（setup 下的安装包）
 setup/*.exe

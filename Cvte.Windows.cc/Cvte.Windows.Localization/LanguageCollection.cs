@@ -11,7 +11,6 @@ namespace Cvte.Windows.Localization
 	[DebuggerDisplay("Default={Default.Culture}, Current={Current.Culture}, Count={Count}")]
 	public class LanguageCollection : ICollection<Language>, IEnumerable<Language>, IEnumerable
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1
 		{
 			public string name;
@@ -22,7 +21,6 @@ namespace Cvte.Windows.Localization
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass4
 		{
 			public CultureInfo culture;

@@ -12,7 +12,6 @@ namespace Cvte.Configuration
 	public static class ConfiguratorExtensions
 	{
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetAsync_003Ed__0<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;
@@ -95,7 +94,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetAsync_003Ed__1<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;
@@ -198,7 +196,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CSetAsync_003Ed__2<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;
@@ -283,7 +280,6 @@ namespace Cvte.Configuration
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass3_0<SA_T0> where SA_T0 : struct
 		{
 			public TypeConverter td;
@@ -295,7 +291,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetArrayAsync_003Ed__3<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;
@@ -411,7 +406,6 @@ namespace Cvte.Configuration
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass4_0<SA_T0> where SA_T0 : struct
 		{
 			public TypeConverter td;
@@ -428,7 +422,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CGetArrayAsync_003Ed__4<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;
@@ -516,7 +509,6 @@ namespace Cvte.Configuration
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass5_0<SA_T0> where SA_T0 : struct
 		{
 			public TypeConverter td;
@@ -528,7 +520,6 @@ namespace Cvte.Configuration
 		}
 
 		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
 		private struct _003CSetArrayAsync_003Ed__5<SA_T0> : IAsyncStateMachine where SA_T0 : struct
 		{
 			public int _003C_003E1__state;

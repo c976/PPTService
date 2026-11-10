@@ -8,7 +8,6 @@ namespace Cvte.Windows
 {
 	public static class XamlDomExtensions
 	{
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass1<SA_T0> where SA_T0 : DependencyObject
 		{
 			public Predicate<SA_T0> predicate;
@@ -27,7 +26,6 @@ namespace Cvte.Windows
 			}
 		}
 
-		[CompilerGenerated]
 		private sealed class _003C_003Ec__DisplayClass5<SA_T0> where SA_T0 : DependencyObject
 		{
 			public Predicate<SA_T0> predicate;

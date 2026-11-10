@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 namespace Cvte.Windows.Properties
 {
 	[DebuggerNonUserCode]
-	[CompilerGenerated]
 	[GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
 	internal class Resources
 	{
