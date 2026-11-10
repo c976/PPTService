@@ -51,7 +51,7 @@
 ### 运行行为修正
 
 - LinqToDB 表名：`UserEntity` 是没有 `TableAttribute` 的实体，`GetTable<T>()` 默认以类名作表名。重命名后显式加 `[Table("Class26")]` 锁定原映射，避免 `User.db` 查表失败。
-- PPT 打开时进度环 100% 归零：`LoadingView.xaml.cs` 的资源键原写作 `StoryBoard.HiddenRootGridImmediatly`，而 XAML 真实键是 `...Immediately`（0 秒动画，`Completed` 回调结束 `PushFrame`）。键不匹配导致动画从不触发，只剩 `DispatcherTask.Start(30.0, …)` 的 30ms 兜底；期间 `ClearData()` 已把界面写成 `0%`，WPF 抢到一帧就看到「100%→0% 再关闭」，因此表现为概率性问题。这是原版代码问题，这是额外修复。
+- PPT打开放映加载界面100%到0%问题：`LoadingView.xaml.cs` 沿用原版的 `StoryBoard.HiddenRootGridImmediatly`，XAML 真实键为 `...Immediately`。补齐拼写虽可消除偶发的「100%→0%」显示瑕疵，但实测会引入概率性卡在 99% 的卡死，故未修复。
 
 ## 许可协议
 
