@@ -54,23 +54,9 @@
 
         <GroupBox Grid.Row="3" Header="翻页按钮位置" Margin="0,0,0,8">
           <StackPanel Margin="4">
-            <RadioButton Name="RbAuto" GroupName="PageMode" Content="默认（按程序自动：WPS 两边 / Office 底部）" Margin="2" />
-            <RadioButton Name="RbCustom" GroupName="PageMode" Content="自定义" Margin="2" />
-            <StackPanel Name="CustomPanel" Margin="16,4,0,0"
-                        IsEnabled="{Binding ElementName=RbCustom, Path=IsChecked}">
-              <StackPanel Orientation="Horizontal" Margin="2">
-                <TextBlock Text="WPS：" Width="48" VerticalAlignment="Center" />
-                <RadioButton Name="RbWpsBoth" GroupName="WpsPos" Content="两边" Margin="4,0" />
-                <RadioButton Name="RbWpsLeft" GroupName="WpsPos" Content="仅左" Margin="4,0" />
-                <RadioButton Name="RbWpsRight" GroupName="WpsPos" Content="仅右" Margin="4,0" />
-              </StackPanel>
-              <StackPanel Orientation="Horizontal" Margin="2">
-                <TextBlock Text="Office：" Width="48" VerticalAlignment="Center" />
-                <RadioButton Name="RbOfficeBoth" GroupName="OfficePos" Content="两边" Margin="4,0" />
-                <RadioButton Name="RbOfficeLeft" GroupName="OfficePos" Content="仅左" Margin="4,0" />
-                <RadioButton Name="RbOfficeRight" GroupName="OfficePos" Content="仅右" Margin="4,0" />
-              </StackPanel>
-            </StackPanel>
+            <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（按程序原逻辑：WPS 两边 / Office 底部）" Margin="2" />
+            <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部（左右下角）" Margin="2" />
+            <RadioButton Name="RbBoth" GroupName="PagePos" Content="两边（左右居中）" Margin="2" />
           </StackPanel>
         </GroupBox>
 

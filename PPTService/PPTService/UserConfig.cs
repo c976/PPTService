@@ -33,31 +33,21 @@ namespace PPTService
         public bool ShowQrCode { get; set; }
 
         /// <summary>
-        /// 翻页按钮位置模式：Auto（默认，按程序原逻辑：WPS 两边 / Office 底部）或 Custom（按下方分应用设置）。
+        /// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
+        /// Bottom（强制底部两侧角）/ Both（强制左右两边）。
         /// </summary>
-        public string PageTurningMode { get; set; }
-
-        /// <summary>
-        /// 自定义模式下 WPS 的翻页位置：Both（两边）/ Left（仅左）/ Right（仅右）。
-        /// </summary>
-        public string WpsPageTurningPosition { get; set; }
-
-        /// <summary>
-        /// 自定义模式下 Office 的翻页位置：Both / Left / Right。
-        /// </summary>
-        public string OfficePageTurningPosition { get; set; }
-
-        // 兼容旧版单值配置（LeftBottom / RightBottom / Both），仅用于迁移读取。
         public string PageTurningPosition { get; set; }
+
+        // 兼容旧版配置字段（Auto/Custom/Wps/Office），反序列化时忽略，不再使用。
+        public string PageTurningMode { get; set; }
+        public string WpsPageTurningPosition { get; set; }
+        public string OfficePageTurningPosition { get; set; }
 
         public UserConfig()
         {
             ToolbarButtons = new List<ToolbarButtonSetting>();
             ShowQrCode = true;
-            PageTurningMode = "Auto";
-            WpsPageTurningPosition = "Both";
-            OfficePageTurningPosition = "Both";
-            PageTurningPosition = "Both";
+            PageTurningPosition = "Default";
         }
     }
 
@@ -101,15 +91,10 @@ namespace PPTService
                     cfg = CreateDefault();
                     Save(cfg);
                 }
-                // 旧版单值翻页配置迁移到「自定义」模式
-                if (string.IsNullOrEmpty(cfg.PageTurningMode)
-                    && !string.IsNullOrEmpty(cfg.PageTurningPosition)
-                    && cfg.PageTurningPosition != "Both")
+                // 规范化翻页位置取值，仅允许 Default / Bottom / Both。
+                if (cfg.PageTurningPosition != "Bottom" && cfg.PageTurningPosition != "Both")
                 {
-                    cfg.PageTurningMode = "Custom";
-                    string mapped = MapLegacyPosition(cfg.PageTurningPosition);
-                    cfg.WpsPageTurningPosition = mapped;
-                    cfg.OfficePageTurningPosition = mapped;
+                    cfg.PageTurningPosition = "Default";
                 }
                 _current = cfg;
                 return cfg;
@@ -129,9 +114,7 @@ namespace PPTService
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
                 ShowQrCode = true,
-                PageTurningMode = "Auto",
-                WpsPageTurningPosition = "Both",
-                OfficePageTurningPosition = "Both"
+                PageTurningPosition = "Default"
             };
         }
 
@@ -170,57 +153,25 @@ namespace PPTService
             {
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
             }
-            ApplyPageTurning(cfg);
+            ViewHelper.MainWindow?.ApplyPageTurningLayout();
         }
 
-        private static void ApplyPageTurning(UserConfig cfg)
+        /// <summary>
+        /// 解析翻页按钮实际布局：Sides（左右两边）/ Bottom（底部两侧角）。
+        /// Default 沿用程序原逻辑（Office 2016+ 底部，WPS/旧版 两边）。
+        /// </summary>
+        public static string GetPageTurningLayout()
         {
-            string position = ResolvePosition(cfg);
-            bool showLeft = position == "Both" || position == "Left";
-            bool showRight = position == "Both" || position == "Right";
-            SetVisible(ViewHelper.LeftBottomArea, showLeft);
-            SetVisible(ViewHelper.RightBottomArea, showRight);
-            SetVisible(ViewHelper.LeftArea, showLeft);
-            SetVisible(ViewHelper.RightArea, showRight);
-        }
-
-        private static string ResolvePosition(UserConfig cfg)
-        {
-            if (cfg.PageTurningMode == "Custom")
+            UserConfig cfg = Load();
+            if (cfg.PageTurningPosition == "Bottom")
             {
-                string pos = PptVersionManager.IsWps
-                    ? (cfg.WpsPageTurningPosition ?? "Both")
-                    : (cfg.OfficePageTurningPosition ?? "Both");
-                return pos;
+                return "Bottom";
             }
-            if (string.IsNullOrEmpty(cfg.PageTurningMode)
-                && !string.IsNullOrEmpty(cfg.PageTurningPosition))
+            if (cfg.PageTurningPosition == "Both")
             {
-                return MapLegacyPosition(cfg.PageTurningPosition);
+                return "Sides";
             }
-            // Auto：按程序原逻辑（2016+/WPS 两边底部角，旧 Office 底部中央），两套布局都显示两边
-            return "Both";
-        }
-
-        private static string MapLegacyPosition(string value)
-        {
-            if (value == "LeftBottom")
-            {
-                return "Left";
-            }
-            if (value == "RightBottom")
-            {
-                return "Right";
-            }
-            return "Both";
-        }
-
-        private static void SetVisible(UIElement area, bool visible)
-        {
-            if (area != null)
-            {
-                area.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            }
+            return PptVersionManager.IsOffice2016OrLater ? "Bottom" : "Sides";
         }
     }
 }

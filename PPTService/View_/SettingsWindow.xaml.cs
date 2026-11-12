@@ -32,34 +32,17 @@ namespace PPTService
             }
             ToolbarListBox.ItemsSource = _items;
             QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
-            if (cfg.PageTurningMode == "Custom")
+            if (cfg.PageTurningPosition == "Bottom")
             {
-                RbCustom.IsChecked = true;
-                SetPositionRadios(cfg.WpsPageTurningPosition, true);
-                SetPositionRadios(cfg.OfficePageTurningPosition, false);
+                RbBottom.IsChecked = true;
+            }
+            else if (cfg.PageTurningPosition == "Both")
+            {
+                RbBoth.IsChecked = true;
             }
             else
             {
-                RbAuto.IsChecked = true;
-            }
-        }
-
-        private void SetPositionRadios(string position, bool isWps)
-        {
-            RadioButton both = isWps ? RbWpsBoth : RbOfficeBoth;
-            RadioButton left = isWps ? RbWpsLeft : RbOfficeLeft;
-            RadioButton right = isWps ? RbWpsRight : RbOfficeRight;
-            if (position == "Left")
-            {
-                left.IsChecked = true;
-            }
-            else if (position == "Right")
-            {
-                right.IsChecked = true;
-            }
-            else
-            {
-                both.IsChecked = true;
+                RbDefault.IsChecked = true;
             }
         }
 
@@ -195,32 +178,19 @@ namespace PPTService
                 cfg.ToolbarButtons.Add(new ToolbarButtonSetting { Id = vm.Id, Visible = vm.IsVisible });
             }
             cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
-            if (RbCustom.IsChecked == true)
+            if (RbBottom.IsChecked == true)
             {
-                cfg.PageTurningMode = "Custom";
-                cfg.WpsPageTurningPosition = ResolvePosition(true);
-                cfg.OfficePageTurningPosition = ResolvePosition(false);
+                cfg.PageTurningPosition = "Bottom";
+            }
+            else if (RbBoth.IsChecked == true)
+            {
+                cfg.PageTurningPosition = "Both";
             }
             else
             {
-                cfg.PageTurningMode = "Auto";
+                cfg.PageTurningPosition = "Default";
             }
             return cfg;
-        }
-
-        private string ResolvePosition(bool isWps)
-        {
-            RadioButton left = isWps ? RbWpsLeft : RbOfficeLeft;
-            RadioButton right = isWps ? RbWpsRight : RbOfficeRight;
-            if (left.IsChecked == true)
-            {
-                return "Left";
-            }
-            if (right.IsChecked == true)
-            {
-                return "Right";
-            }
-            return "Both";
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
@@ -252,9 +222,7 @@ namespace PPTService
                 _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
             }
             QrCodeCheckBox.IsChecked = def.ShowQrCode;
-            RbAuto.IsChecked = true;
-            RbWpsBoth.IsChecked = true;
-            RbOfficeBoth.IsChecked = true;
+            RbDefault.IsChecked = true;
         }
     }
 

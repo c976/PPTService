@@ -94,7 +94,48 @@ namespace PPTService
 
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e)
 		{
-			if (PptVersionManager.IsOffice2016OrLater)
+			// 翻页按钮位置交由用户配置决定（默认沿用程序原逻辑），运行时切换也复用此方法。
+			ApplyPageTurningLayout();
+			BottomCenterButtonGrid.Children.Add(ViewHelper.BottomArea);
+			Width = SystemParameters.PrimaryScreenWidth;
+			Height = SystemParameters.PrimaryScreenHeight;
+			SubscribeSelectionChangedEvent();
+			_gesture = new Gesture();
+			_gesture.ChangeGestureScope();
+			WindowsApi.SetPopupParameter();
+			PptOperator.Instance.ShowBegin += _pptOperatorShowBegin;
+			PptOperator.Instance.ShowEnd += _pptOperatorShowEnd;
+			PptOperator.Instance.NextSlide += PptOperatorNextSlide;
+			// 应用用户配置：工具栏按钮显隐/顺序、翻页按钮位置
+			UserConfigManager.ApplyCurrent();
+		}
+
+		/// <summary>
+		/// 按用户配置决定翻页按钮放在「两边」还是「底部」，并把缩略图导航面板对齐到对应位置。
+		/// 仅将当前生效的那一对翻页控件加入可视树，避免网格透明度动画同时影响两套控件。
+		/// </summary>
+		public void ApplyPageTurningLayout()
+		{
+			bool useBottom = UserConfigManager.GetPageTurningLayout() == "Bottom";
+
+			if (LeftCenterButtonGrid.Children.Contains(ViewHelper.LeftArea))
+			{
+				LeftCenterButtonGrid.Children.Remove(ViewHelper.LeftArea);
+			}
+			if (RightCenterButtonGrid.Children.Contains(ViewHelper.RightArea))
+			{
+				RightCenterButtonGrid.Children.Remove(ViewHelper.RightArea);
+			}
+			if (LeftBottomButtonGrid.Children.Contains(ViewHelper.LeftBottomArea))
+			{
+				LeftBottomButtonGrid.Children.Remove(ViewHelper.LeftBottomArea);
+			}
+			if (RightBottomButtonGrid.Children.Contains(ViewHelper.RightBottomArea))
+			{
+				RightBottomButtonGrid.Children.Remove(ViewHelper.RightBottomArea);
+			}
+
+			if (useBottom)
 			{
 				LeftBottomButtonGrid.Children.Add(ViewHelper.LeftBottomArea);
 				RightBottomButtonGrid.Children.Add(ViewHelper.RightBottomArea);
@@ -112,18 +153,6 @@ namespace PPTService
 				LeftSlideManagerViewGrid.VerticalAlignment = VerticalAlignment.Center;
 				RightSlideManagerViewGrid.VerticalAlignment = VerticalAlignment.Center;
 			}
-			BottomCenterButtonGrid.Children.Add(ViewHelper.BottomArea);
-			Width = SystemParameters.PrimaryScreenWidth;
-			Height = SystemParameters.PrimaryScreenHeight;
-			SubscribeSelectionChangedEvent();
-			_gesture = new Gesture();
-			_gesture.ChangeGestureScope();
-			WindowsApi.SetPopupParameter();
-			PptOperator.Instance.ShowBegin += _pptOperatorShowBegin;
-			PptOperator.Instance.ShowEnd += _pptOperatorShowEnd;
-			PptOperator.Instance.NextSlide += PptOperatorNextSlide;
-			// 应用用户配置：工具栏按钮显隐/顺序、翻页按钮位置
-			UserConfigManager.ApplyCurrent();
 		}
 
 		private void MainWindow_LocationChanged(object sender, EventArgs e)
