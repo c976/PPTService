@@ -331,15 +331,39 @@ namespace PPTService
 			{
 				return;
 			}
-			// 创建二维码（分享）按钮显隐：同时折叠外层 ShareGrid（其宽度固定 100），
-			// 否则只隐藏按钮会在左侧留下空白，工具栏无法随之收缩。
-			if (ShareGrid != null)
+			// 左侧「设置 + 创建二维码（分享）」按钮组：
+			// 设置按钮常驻；二维码按钮按 ShowQrCode 显隐。与中央工具栏一致——
+			// 动态重建 ShareGrid 列定义并据可见按钮数自适应宽度，避免隐藏二维码后
+			// 整个左侧被隐藏（设置按钮也消失）或留下空白。
+			List<UIElement> leftVisible = new List<UIElement>();
+			if (SettingsButton != null)
 			{
-				ShareGrid.Visibility = config.ShowQrCode ? Visibility.Visible : Visibility.Collapsed;
+				leftVisible.Add(SettingsButton);
 			}
 			if (ShareButton != null)
 			{
-				ShareButton.Visibility = config.ShowQrCode ? Visibility.Visible : Visibility.Collapsed;
+				if (config.ShowQrCode)
+				{
+					leftVisible.Add(ShareButton);
+				}
+				else
+				{
+					ShareButton.Visibility = Visibility.Collapsed;
+				}
+			}
+			if (ShareGrid != null)
+			{
+				ShareGrid.ColumnDefinitions.Clear();
+				for (int i = 0; i < leftVisible.Count; i++)
+				{
+					ShareGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50.0) });
+					Grid.SetColumn(leftVisible[i], i);
+					leftVisible[i].Visibility = Visibility.Visible;
+				}
+			}
+			if (LeftBackgroundBorder != null)
+			{
+				LeftBackgroundBorder.SetValue(Grid.ColumnSpanProperty, leftVisible.Count == 0 ? 1 : leftVisible.Count);
 			}
 			if (config.ToolbarButtons == null)
 			{

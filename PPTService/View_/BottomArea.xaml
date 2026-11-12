@@ -52,9 +52,6 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShareGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="60" />
-            </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
                 <ObjectKeyFrame.Value>
@@ -98,9 +95,6 @@
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ShareGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="200" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -147,13 +141,13 @@
         <GoToStateAction StateName="Adaptive3800" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
       </pptService:AdaptiveTrigger>
     </i:Interaction.Triggers>
-    <Grid Name="ShareGrid" Column="0" Width="100">
+    <Grid Name="ShareGrid" Column="0">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition />
-        <ColumnDefinition />
+        <ColumnDefinition Width="50" />
+        <ColumnDefinition Width="50" />
       </Grid.ColumnDefinitions>
       <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
-      <pptService:ImageButton Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.RecommendationNormal}" PressedSource="{StaticResource ImageSource.RecommendationPressed}" />
+      <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.RecommendationNormal}" PressedSource="{StaticResource ImageSource.RecommendationPressed}" />
       <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
     </Grid>
     <Grid Column="1" Width="4" />
