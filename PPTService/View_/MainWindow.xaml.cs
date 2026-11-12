@@ -122,6 +122,8 @@ namespace PPTService
 			PptOperator.Instance.ShowBegin += _pptOperatorShowBegin;
 			PptOperator.Instance.ShowEnd += _pptOperatorShowEnd;
 			PptOperator.Instance.NextSlide += PptOperatorNextSlide;
+			// 应用用户配置：工具栏按钮显隐/顺序、翻页按钮位置
+			UserConfigManager.ApplyCurrent();
 		}
 
 		private void MainWindow_LocationChanged(object sender, EventArgs e)

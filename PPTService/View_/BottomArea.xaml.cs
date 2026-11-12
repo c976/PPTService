@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Windows;
@@ -308,15 +309,57 @@ namespace PPTService
 			PptSharer.Share(PptOperator.Instance.PptFilePath);
 		}
 
-		private void Recommendation_OnClick(object sender, RoutedEventArgs e)
+		private void Settings_OnClick(object sender, RoutedEventArgs e)
 		{
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionRecommendation);
-			// 原「希沃白板5推荐下载」页面已移除，此按钮改为显示当前构建版本号（含 git 短 hash）
-			MessageBox.Show(ViewHelper.MainWindow,
-				"当前版本：" + GitVersionInfo.InformationalVersion,
-				"PPT小工具",
-				MessageBoxButton.OK,
-				MessageBoxImage.Information);
+			// 原「关于/版本」按钮改为打开设置窗口（含版本信息显示）
+			SettingsWindow settingsWindow = new SettingsWindow
+			{
+				Owner = ViewHelper.MainWindow
+			};
+			settingsWindow.ShowDialog();
+		}
+
+		/// <summary>
+		/// 依据用户配置重排/显隐工具栏中央的 5 个功能按钮（选择/画笔/橡皮/放大镜/小黑板）。
+		/// </summary>
+		public void ApplyToolbarConfig(UserConfig config)
+		{
+			if (config == null || config.ToolbarButtons == null)
+			{
+				return;
+			}
+			Dictionary<string, UIElement> map = new Dictionary<string, UIElement>
+			{
+				{ "Select", SelectCheckBox },
+				{ "Pen", PenButton },
+				{ "Rubber", RubberCheckBox },
+				{ "Magnifier", MagnifierButton },
+				{ "InnerBoard", InnerBoardCheckBox }
+			};
+			List<UIElement> visible = new List<UIElement>();
+			foreach (ToolbarButtonSetting button in config.ToolbarButtons)
+			{
+				if (map.TryGetValue(button.Id, out UIElement element))
+				{
+					if (button.Visible)
+					{
+						visible.Add(element);
+					}
+					else
+					{
+						element.Visibility = Visibility.Collapsed;
+					}
+				}
+			}
+			BottomCenterButtonGrid.ColumnDefinitions.Clear();
+			for (int i = 0; i < visible.Count; i++)
+			{
+				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition());
+				Grid.SetColumn(visible[i], i);
+				visible[i].Visibility = Visibility.Visible;
+			}
+			BackgroundBorder.SetValue(Grid.ColumnSpanProperty, visible.Count == 0 ? 1 : visible.Count);
 		}
 
 	}

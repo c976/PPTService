@@ -1,0 +1,57 @@
+﻿<Window x:Class="PPTService.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置" Width="420" Height="470" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" Background="#F5F5F5" FontFamily="微软雅黑">
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" Name="VersionTextBlock" FontSize="12" Foreground="Gray"
+               HorizontalAlignment="Right" Margin="0,0,0,8" />
+
+    <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，使用 ▲▼ 调整顺序）" Margin="0,0,0,8">
+      <ListBox Name="ToolbarListBox" Margin="4" BorderThickness="0" Background="Transparent">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid Margin="2">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <CheckBox Grid.Column="0" IsChecked="{Binding IsVisible, Mode=TwoWay}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="6,0" />
+              <Button Grid.Column="2" Content="▲" Width="30" Margin="2,0" Click="MoveUp_Click" Tag="{Binding}" />
+              <Button Grid.Column="3" Content="▼" Width="30" Margin="2,0" Click="MoveDown_Click" Tag="{Binding}" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </GroupBox>
+
+    <GroupBox Grid.Row="2" Header="翻页按钮位置" Margin="0,0,0,8">
+      <StackPanel Margin="4">
+        <RadioButton Name="RbLeft" GroupName="PagePos" Content="左下角" Margin="2" />
+        <RadioButton Name="RbRight" GroupName="PagePos" Content="右下角" Margin="2" />
+        <RadioButton Name="RbBoth" GroupName="PagePos" Content="两边（默认）" Margin="2" />
+      </StackPanel>
+    </GroupBox>
+
+    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+      <Button Name="ResetButton" Content="恢复默认" Width="80" Margin="0,0,8,0" Click="Reset_Click" />
+      <Button Name="ApplyButton" Content="应用" Width="70" Margin="0,0,8,0" Click="Apply_Click" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button Name="OkButton" Content="确定" Width="70" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
+      <Button Name="CancelButton" Content="取消" Width="70" IsCancel="True" Click="Cancel_Click" />
+    </StackPanel>
+  </Grid>
+</Window>

@@ -233,6 +233,10 @@
     <Compile Include="View_\UpdateWindow.xaml.cs">
       <DependentUpon>UpdateWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View_\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PPTService\UserConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Images_\images.xaml">
@@ -344,6 +348,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <LogicalName>view_/updatewindow.xaml</LogicalName>
+    </Page>
+    <Page Include="View_\SettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <LogicalName>view_/settingswindow.xaml</LogicalName>
     </Page>
   </ItemGroup>
   <ItemGroup>
