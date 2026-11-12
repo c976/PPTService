@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B6E1C4D2-7A35-4F89-9C10-3D5E8A2F1B74}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>PPTService.Core</RootNamespace>
+    <AssemblyName>PPTService.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <LangVersion>6</LangVersion>
+    <!-- 与主程序同版本：禁用 VS 快速更新检查，避免本 dll 被跳过导致版本落后一次构建 -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>true</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions"><HintPath>..\lib\Microsoft.Expression.Interactions.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>..\lib\Newtonsoft.Json.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
+    <Reference Include="System.ValueTuple"><HintPath>..\lib\System.ValueTuple.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
+    <Reference Include="System.Windows.Interactivity"><HintPath>..\lib\System.Windows.Interactivity.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
+    <Reference Include="linq2db"><HintPath>..\lib\linq2db.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ComponentModel\DebuggingProperties.cs" />
+    <Compile Include="Configuration\Configurator.cs" />
+    <Compile Include="Configuration\ConfiguratorExtensions.cs" />
+    <Compile Include="Core\NdpInfo.cs" />
+    <Compile Include="Diagnostics.Annotations\CanBeNullAttribute.cs" />
+    <Compile Include="Diagnostics.Annotations\NotNullAttribute.cs" />
+    <Compile Include="Mcu\Analyzer.cs" />
+    <Compile Include="Mcu\Digcf.cs" />
+    <Compile Include="Mcu\HiddAttributes.cs" />
+    <Compile Include="Mcu\HidpCaps.cs" />
+    <Compile Include="Mcu\Mcu.cs" />
+    <Compile Include="Mcu\McuCommand.cs" />
+    <Compile Include="Mcu\Usb.cs" />
+    <Compile Include="Mcu\WindowsApi.cs" />
+    <Compile Include="Net.Exceptions\FileNotConsistentException.cs" />
+    <Compile Include="Net.FileExtension.MimeType\DefaultFileExtensionMimeTypeBuilder.cs" />
+    <Compile Include="Net.FileExtension.MimeType\FileMimeTypeBuilder.cs" />
+    <Compile Include="Net.FileExtension.MimeType\FileMimeTypeBuilderComparer.cs" />
+    <Compile Include="Net.FileExtension.MimeType\FileMimeTypeFactory.cs" />
+    <Compile Include="Net.FileExtension.MimeType\IFileMimeTypeBuilder.cs" />
+    <Compile Include="Net.FileExtension.MimeType\IFileMimeTypeFactory.cs" />
+    <Compile Include="Net.FileExtension\FileExtensionFactory.cs" />
+    <Compile Include="Net.Http.HostBackup\HttpHostBackupUtils.cs" />
+    <Compile Include="Net.Http.HostBackup\HttpRequestHostBackupContext.cs" />
+    <Compile Include="Net.Http.HostBackup\HttpUtilityProxy.cs" />
+    <Compile Include="Net.Http.HostBackup\IHttpRequestHostBackupFilter.cs" />
+    <Compile Include="Net.Http.HostBackup\IHttpRequestHostBackupHandler.cs" />
+    <Compile Include="Net.Http\DownloadFileRequest.cs" />
+    <Compile Include="Net.Http\DownloadProgress.cs" />
+    <Compile Include="Net.Http\FormsRequest.cs" />
+    <Compile Include="Net.Http\HttpRequest.cs" />
+    <Compile Include="Net.Http\HttpRequestExtensions.cs" />
+    <Compile Include="Net.Http\HttpResponse.cs" />
+    <Compile Include="Net.Http\IHttpRequestAsyncFilter.cs" />
+    <Compile Include="Net.Http\IHttpRequestFilter.cs" />
+    <Compile Include="Net.Http\IHttpRequestTraceable.cs" />
+    <Compile Include="Net.Http\IHttpResponseFilter.cs" />
+    <Compile Include="Net.Http\IgnoreMemberWhenNullAttribute.cs" />
+    <Compile Include="Net.Http\JsonRequest.cs" />
+    <Compile Include="Net.Http\JsonResponse.cs" />
+    <Compile Include="Net.Http\RequestAttribute.cs" />
+    <Compile Include="Net.Http\RequestMethods.cs" />
+    <Compile Include="Net.Http\RestfulMemberAttribute.cs" />
+    <Compile Include="Net.Http\RestfulRequest.cs" />
+    <Compile Include="Net.Http\UploadFileRequest.cs" />
+    <Compile Include="Net.Http\UploadProgress.cs" />
+    <Compile Include="Net.WebServices.EventReport.Models\Event.cs" />
+    <Compile Include="Net.WebServices.EventReport.Models\EventParamDictionary.cs" />
+    <Compile Include="Net.WebServices.EventReport.Models\PostEventRequest.cs" />
+    <Compile Include="Net.WebServices.EventReport.Models\PostEventRequestWrapper.cs" />
+    <Compile Include="Net.WebServices.EventReport.Models\PostEventResponse.cs" />
+    <Compile Include="Net.WebServices.EventReport.Utils\EventReportStaticFactory.cs" />
+    <Compile Include="Net.WebServices.EventReport.Utils\IEventReportStaticPropertyProvider.cs" />
+    <Compile Include="Net.WebServices.EventReport.Utils\PostEventHelper.cs" />
+    <Compile Include="Net.WebServices.EventReport\EventReporter.cs" />
+    <Compile Include="Net.WebServices.EventReport\IEventCommonPropertiesProvider.cs" />
+    <Compile Include="Net.WebServices.EventReport\IEventReporter.cs" />
+    <Compile Include="Net.WebServices.EventReport\InnerEventReporter.cs" />
+    <Compile Include="Net.WebServices.EventReport\PostEventDataCache.cs" />
+    <Compile Include="Net.WebServices.EventReport\PostEventRequestBuilder.cs" />
+    <Compile Include="Net.WebServices.EventReport\PostEventWebService.cs" />
+    <Compile Include="Net.WebServices.Exceptions\ParseException.cs" />
+    <Compile Include="Net.WebServices.Feedback\FileInfo.cs" />
+    <Compile Include="Net.WebServices.Files.Download\UnitFileDownloadUtility.cs" />
+    <Compile Include="Net.WebServices.Files.Download\UnitFileDownloadUtilityProxy.cs" />
+    <Compile Include="Net.WebServices.Files.Upload\UnitFileUploadUtility.cs" />
+    <Compile Include="Net.WebServices.Files.Upload\UnitFileUploadUtility2.cs" />
+    <Compile Include="Net.WebServices.Files.Upload\UnitFileUploadUtilityProxy.cs" />
+    <Compile Include="Net.WebServices.Files.Utils\CommonFileHelper.cs" />
+    <Compile Include="Net.WebServices.Files.Utils\SpliceFileHelper.cs" />
+    <Compile Include="Net.WebServices.Filters\RequestTraceFilter.cs" />
+    <Compile Include="Net.WebServices.Lychee\ApplyTokenContent.cs" />
+    <Compile Include="Net.WebServices.Lychee\ApplyTokenRequest.cs" />
+    <Compile Include="Net.WebServices.Lychee\ApplyTokenResponse.cs" />
+    <Compile Include="Net.WebServices.Lychee\LycheeHttpRequest.cs" />
+    <Compile Include="Net.WebServices.Lychee\LycheeHttpResponse.cs" />
+    <Compile Include="Net.WebServices.Lychee\PublicInfo.cs" />
+    <Compile Include="Net.WebServices.Lychee\UploadFileLycheeRequest.cs" />
+    <Compile Include="Net.WebServices.Lychee\UploadFileLycheeResponse.cs" />
+    <Compile Include="Net.WebServices.Monitors\IApiMonitor.cs" />
+    <Compile Include="Net.WebServices.Monitors\IApiMonitorResponse.cs" />
+    <Compile Include="Net.WebServices.Myou\DictionaryExtensions.cs" />
+    <Compile Include="Net.WebServices.Myou\SessionIdProvider.cs" />
+    <Compile Include="Net.WebServices\ApiMonitorSettings.cs" />
+    <Compile Include="Net.WebServices\IWebService.cs" />
+    <Compile Include="Net.WebServices\WebService.cs" />
+    <Compile Include="Net.WebServices\WebServiceRequestHandler.cs" />
+    <Compile Include="Net.WebServices\WebServiceSettings.cs" />
+    <Compile Include="Net\AsyncExtension.cs" />
+    <Compile Include="Net\EnvironmentUtility.cs" />
+    <Compile Include="Net\HttpRequestUtility.cs" />
+    <Compile Include="Net\HttpUtility.cs" />
+    <Compile Include="Net\HttpWebResponseWrapper.cs" />
+    <Compile Include="Net\HttpsUtility.cs" />
+    <Compile Include="Net\SecurityUtility.cs" />
+    <Compile Include="Net\UrlEncodeUtility.cs" />
+    <Compile Include="Pipe.Http.Internal\AttributeHelper.cs" />
+    <Compile Include="Pipe.Http.Internal\DataContractJsonHelper.cs" />
+    <Compile Include="Pipe.Http.Request\DownloadErrorEventArgs.cs" />
+    <Compile Include="Pipe.Http.Request\DownloadFileRequest.cs" />
+    <Compile Include="Pipe.Http.Request\FormsRequest.cs" />
+    <Compile Include="Pipe.Http.Request\JsonRequest.cs" />
+    <Compile Include="Pipe.Http.Request\ReqeustAttribute.cs" />
+    <Compile Include="Pipe.Http.Request\ReqeustType.cs" />
+    <Compile Include="Pipe.Http.Request\RequestBase.cs" />
+    <Compile Include="Pipe.Http.Request\UploadCompletedEventArgs.cs" />
+    <Compile Include="Pipe.Http.Request\UploadFileRequest.cs" />
+    <Compile Include="Pipe.Http.Request\UploadFilesRequest.cs" />
+    <Compile Include="Pipe.Http.Request\UploadProgressChangedEventArgs.cs" />
+    <Compile Include="Pipe.Http.Response\ErrorCode.cs" />
+    <Compile Include="Pipe.Http.Response\JsonResponse.cs" />
+    <Compile Include="Pipe.Http.Response\ResponseBase.cs" />
+    <Compile Include="Pipe.Http.Utils\HttpUtility.cs" />
+    <Compile Include="Pipe.Http\BasicHttpPipe.cs" />
+    <Compile Include="Pipe.Http\HttpPipe.cs" />
+    <Compile Include="Pipe.Http\IHttpPipe.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 在构建时生成；仓库内保留 unknown 默认副本，脱离 git 也能直接编译 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
+    <Compile Include="WebService.Feedback\FileInfo.cs" />
+    <Compile Include="WebService.Internal\NativeIniFile.cs" />
+    <Compile Include="WebService.Internal\PropertyAttributeHelper.cs" />
+    <Compile Include="WebService.Internal\SignatureUrlEncoder.cs" />
+    <Compile Include="WebService.Lychee\ApplyTokenContent.cs" />
+    <Compile Include="WebService.Lychee\ApplyTokenRequest.cs" />
+    <Compile Include="WebService.Lychee\ApplyTokenResponse.cs" />
+    <Compile Include="WebService.Lychee\BasicContent.cs" />
+    <Compile Include="WebService.Lychee\CompleteRequest.cs" />
+    <Compile Include="WebService.Lychee\CompleteResponse.cs" />
+    <Compile Include="WebService.Lychee\LycheeRequestBase.cs" />
+    <Compile Include="WebService.Lychee\LycheeResponseBase.cs" />
+    <Compile Include="WebService.Lychee\LycheeService.cs" />
+    <Compile Include="WebService.Lychee\PublicInfo.cs" />
+    <Compile Include="WebService.Lychee\StartRequest.cs" />
+    <Compile Include="WebService.Lychee\StartResponse.cs" />
+    <Compile Include="WebService.Lychee\UpdatePasswordRequest.cs" />
+    <Compile Include="WebService.Lychee\UpdatePasswordResponse.cs" />
+    <Compile Include="WebService.Lychee\UploadFileLycheeRequest.cs" />
+    <Compile Include="WebService.Lychee\UploadFileLycheeResponse.cs" />
+    <Compile Include="WebService.Utils\IniSetting.cs" />
+    <Compile Include="Windows.Controls\AnimatedGifImage.cs" />
+    <Compile Include="Windows.Localization.Markup\LangConverterFunc.cs" />
+    <Compile Include="Windows.Localization\LanguageKeyNotFoundEventArgs.cs" />
+    <Compile Include="Windows.Localization\LanguageKeyNotFoundEventHandler.cs" />
+    <Compile Include="Windows.Properties\Resources.cs" />
+    <Compile Include="Windows.Properties\Settings.cs" />
+    <Compile Include="Windows.Threading\DispatcherExtensions.cs" />
+    <Compile Include="Windows.Threading\DispatcherTask.cs" />
+    <Compile Include="Windows\Dpi.cs" />
+    <Compile Include="Windows\DpiChangedEventArgs.cs" />
+    <Compile Include="Windows\DpiChangedEventHandler.cs" />
+    <Compile Include="Windows\LoadingScreen.cs" />
+    <Compile Include="Windows\WindowLocationWatcher.cs" />
+    <Compile Include="lindexi.src\MacAddress.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- 与主程序共用同一套版本号 / git hash 生成逻辑（每个项目写自己的 GitVersionInfo.g.cs） -->
+  <Import Project="..\Version.targets" />
+</Project>

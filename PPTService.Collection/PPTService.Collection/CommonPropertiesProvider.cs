@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Management;
 using System.Security.Cryptography;
 using System.Text;
-using Cvte.Net.WebServices.EventReport;
+using PPTService.Core.Net.WebServices.EventReport;
 
 namespace PPTService.Collection
 {

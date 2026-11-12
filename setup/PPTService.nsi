@@ -31,7 +31,8 @@ SetCompressorDictSize 32
 ; -----------------------------------------------------------------------------
 !define PRODUCT_NAME          "PPT小工具"
 !define PRODUCT_NAME_EN       "PPTService"
-!define PRODUCT_VERSION       "1.0.0.795"
+; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
+!include "${__FILEDIR__}\Version.nsh"
 !define PRODUCT_PUBLISHER     "Seewo"
 !define PRODUCT_WEB_SITE      "www.seewo.com"
 !define PRODUCT_GUID          "{958764e5-bbb2-43c1-1234-8d454abd130a}"

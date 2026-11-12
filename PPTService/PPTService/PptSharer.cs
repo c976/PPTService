@@ -5,8 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows;
-using Cvte.WebService.Lychee;
-using Cvte.Windows;
+using PPTService.Core.WebService.Lychee;
+using PPTService.Core.Windows;
 using PPTService.Collection;
 
 namespace PPTService

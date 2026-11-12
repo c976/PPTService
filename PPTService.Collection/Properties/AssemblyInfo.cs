@@ -5,8 +5,10 @@ using System.Runtime.Versioning;
 
 [assembly: AssemblyCompany("PPTService.Collection")]
 [assembly: AssemblyConfiguration("Release")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0")]
 [assembly: AssemblyProduct("PPTService.Collection")]
 [assembly: AssemblyTitle("PPTService.Collection")]
-[assembly: AssemblyVersion("1.0.0.0")]
+// 与主程序同源：Version.targets 生成的 GitVersionInfo.g.cs（含 git 短 hash）
+[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
+[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]

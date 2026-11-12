@@ -311,15 +311,12 @@ namespace PPTService
 		private void Recommendation_OnClick(object sender, RoutedEventArgs e)
 		{
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionRecommendation);
-			RecommendationWindow recommendationWindow = new RecommendationWindow
-			{
-				Owner = ViewHelper.MainWindow,
-				Width = ViewHelper.MainWindow.Width,
-				Height = ViewHelper.MainWindow.Height
-			};
-			ViewHelper.StopMainWindowUpdateTimerAndMouseGesture();
-			recommendationWindow.ShowDialog();
-			ViewHelper.BeginMainWindowUpdateTimerAndMouseGesture();
+			// 原「希沃白板5推荐下载」页面已移除，此按钮改为显示当前构建版本号（含 git 短 hash）
+			MessageBox.Show(ViewHelper.MainWindow,
+				"当前版本：" + GitVersionInfo.InformationalVersion,
+				"PPT小工具",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
 		}
 
 	}

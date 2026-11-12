@@ -130,7 +130,7 @@
     </StackPanel>
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0 0 0 120">
       <Image Source="{StaticResource Image.Seewo}" Stretch="None" SnapsToDevicePixels="True" UseLayoutRounding="True" />
-      <TextBlock Text="视睿科技版权所有，未经许可禁止商用" Margin="0 20 0 0" FontSize="20" Foreground="#80FFFFFF" />
+      <TextBlock Name="VersionTextBlock" Margin="0 20 0 0" FontSize="20" Foreground="#80FFFFFF" HorizontalAlignment="Center" />
     </StackPanel>
   </Grid>
 </UserControl>

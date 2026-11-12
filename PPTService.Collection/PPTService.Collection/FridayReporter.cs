@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Cvte.Net.WebServices.EventReport;
+using PPTService.Core.Net.WebServices.EventReport;
 
 namespace PPTService.Collection
 {

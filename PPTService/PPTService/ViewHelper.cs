@@ -1,5 +1,5 @@
 using System;
-using Cvte.Windows;
+using PPTService.Core.Windows;
 
 namespace PPTService
 {

@@ -75,14 +75,44 @@ jobs:
         cd setup
         call build.cmd
 
-    - name: Publish to latest release via gh CLI
+    # 读取本次构建实际使用的产品版本号，作为 Release 的 tag。
+    # 二次开发副本：MSBuild 生成的 setup\Version.nsh；原版仓库回退到 PPTService.nsi 里的 !define。
+    - name: Read product version
+      id: product_version
+      shell: pwsh
+      run: |
+        $versionFile = './setup/Version.nsh'
+        if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTService.nsi' }
+        $content = Get-Content -Path $versionFile -Raw
+        if ($content -match '(?m)^\s*!define\s+PRODUCT_VERSION\s+"([^"]+)"') {
+          $version = $Matches[1]
+        } else {
+          throw "Cannot find PRODUCT_VERSION in $versionFile"
+        }
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version"
+        Write-Host "Release tag will be: $version"
+
+    # tag 使用版本号（如 1.0.0.799）；同一版本重跑时覆盖已有 Release 的附件，不再使用 latest 滚动 tag。
+    - name: Publish release tagged with product version
       if: github.ref == 'refs/heads/master'
       env:
         GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.product_version.outputs.version }}
       shell: pwsh
       run: |
+        $tag = $env:RELEASE_TAG
+        $asset = './setup/PPTServiceSetup.exe'
+        $notes = "Auto-generated build of $tag`nCommit: $($env:GITHUB_SHA)`nBranch: $($env:GITHUB_REF_NAME)"
+
+        # 迁移：删掉旧的 latest 滚动发布（若存在）
         gh release delete latest --yes --cleanup-tag 2>$null
-        gh release create latest "./setup/PPTServiceSetup.exe" `
-          --title "Latest Build" `
-          --notes "Auto-generated build from master branch." `
-          --latest
+
+        $null = gh release view $tag --json tagName 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "Release $tag already exists - replacing the installer asset."
+          gh release upload $tag $asset --clobber
+          gh release edit $tag --notes $notes
+        } else {
+          gh release create $tag $asset --title "PPTService $tag" --notes $notes --latest
+        }
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

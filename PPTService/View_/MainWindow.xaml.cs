@@ -12,7 +12,7 @@ using System.Windows.Markup;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Cvte.Windows;
+using PPTService.Core.Windows;
 using Microsoft.Office.Interop.PowerPoint;
 using PPTService.Collection;
 

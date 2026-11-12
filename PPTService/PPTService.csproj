@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <LangVersion>6</LangVersion>
+    <!-- 版本号每次编译都变：禁用 VS 快速更新检查，保证每次 Build 都真正进入 MSBuild -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <WarningLevel>4</WarningLevel>
@@ -89,29 +91,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cvte.Core.cc\Cvte.Core.cc.csproj">
-      <Project>{49C46853-3E2C-5BA9-843C-77C0C54A327C}</Project>
-      <Name>Cvte.Core.cc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cvte.Mcu\Cvte.Mcu.csproj">
-      <Project>{F97A442C-0CD3-59AE-8B85-991F2C50F98B}</Project>
-      <Name>Cvte.Mcu</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cvte.Net\Cvte.Net.csproj">
-      <Project>{ED4DE2E8-30FB-5553-83D9-3DBE19C52BA7}</Project>
-      <Name>Cvte.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cvte.Pipe.Http\Cvte.Pipe.Http.csproj">
-      <Project>{C2822F88-C548-5A49-80B5-495125927465}</Project>
-      <Name>Cvte.Pipe.Http</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cvte.WebService\Cvte.WebService.csproj">
-      <Project>{0386A414-CED0-54CD-A54A-96580CBD065D}</Project>
-      <Name>Cvte.WebService</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Cvte.Windows.cc\Cvte.Windows.cc.csproj">
-      <Project>{008F2DB7-E20B-5E93-BC6F-C4338BBD9010}</Project>
-      <Name>Cvte.Windows.cc</Name>
+    <ProjectReference Include="..\PPTService.Core\PPTService.Core.csproj">
+      <Project>{B6E1C4D2-7A35-4F89-9C10-3D5E8A2F1B74}</Project>
+      <Name>PPTService.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\PPTService.Collection\PPTService.Collection.csproj">
       <Project>{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}</Project>
@@ -213,6 +195,8 @@
     <Compile Include="PPTService\WindowStateHelper.cs" />
     <Compile Include="PPTService\WindowsApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 的 GenerateVersionInfo 目标在构建时生成；仓库内保留默认（unknown）副本，供非 git 环境直接编译 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="View_\BottomArea.xaml.cs">
       <DependentUpon>BottomArea.xaml</DependentUpon>
     </Compile>
@@ -239,9 +223,6 @@
     </Compile>
     <Compile Include="View_\QrWindow.xaml.cs">
       <DependentUpon>QrWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View_\RecommendationWindow.xaml.cs">
-      <DependentUpon>RecommendationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View_\RightArea.xaml.cs">
       <DependentUpon>RightArea.xaml</DependentUpon>
@@ -349,11 +330,6 @@
       <SubType>Designer</SubType>
       <LogicalName>view_/qrwindow.xaml</LogicalName>
     </Page>
-    <Page Include="View_\RecommendationWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <LogicalName>view_/recommendationwindow.xaml</LogicalName>
-    </Page>
     <Page Include="View_\RightArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -396,4 +372,12 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <!-- 版本号 / git 短 hash / NSIS 版本头文件统一由仓库根 Version.targets 生成。
+       本文件所在的 PPTService 项目是版本所有者：负责写 setup\Version.nsh，
+       并在构建成功后把 build.number +1 供下一次构建使用。 -->
+  <PropertyGroup>
+    <IsVersionOwner>true</IsVersionOwner>
+  </PropertyGroup>
+  <Import Project="..\Version.targets" />
 </Project>
