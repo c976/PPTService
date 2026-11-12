@@ -331,7 +331,12 @@ namespace PPTService
 			{
 				return;
 			}
-			// 创建二维码（分享）按钮显隐
+			// 创建二维码（分享）按钮显隐：同时折叠外层 ShareGrid（其宽度固定 100），
+			// 否则只隐藏按钮会在左侧留下空白，工具栏无法随之收缩。
+			if (ShareGrid != null)
+			{
+				ShareGrid.Visibility = config.ShowQrCode ? Visibility.Visible : Visibility.Collapsed;
+			}
 			if (ShareButton != null)
 			{
 				ShareButton.Visibility = config.ShowQrCode ? Visibility.Visible : Visibility.Collapsed;
