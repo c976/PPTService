@@ -237,7 +237,7 @@
         </ContentControl.Content>
       </Button>
       <CheckBox Name="RubberCheckBox" Grid.Column="2" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.RubberNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.RubberSelected}" Click="Rubber_OnClick" />
-      <pptService:ImageButton Name="MagnifierButton" Click="Magnifier_Click" Grid.Column="3" NormalSource="{StaticResource ImageSource.MagnifierNormal}" PressedSource="{StaticResource ImageSource.MagnifierSelected}" />
+      <pptService:ImageButton x:Name="MagnifierButton" Click="Magnifier_Click" Grid.Column="3" NormalSource="{StaticResource ImageSource.MagnifierNormal}" PressedSource="{StaticResource ImageSource.MagnifierSelected}" />
       <CheckBox Name="InnerBoardCheckBox" Grid.Column="4" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.PlateNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.PlateSelected}" Click="InnerBoard_Click" />
       <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="150" Height="50" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
         <Grid Background="#00FFFFFF">
