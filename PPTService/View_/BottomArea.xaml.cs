@@ -337,21 +337,22 @@ namespace PPTService
 				{ "Magnifier", MagnifierButton },
 				{ "InnerBoard", InnerBoardCheckBox }
 			};
-			List<UIElement> visible = new List<UIElement>();
-			foreach (ToolbarButtonSetting button in config.ToolbarButtons)
+		List<UIElement> visible = new List<UIElement>();
+		UIElement element;
+		foreach (ToolbarButtonSetting button in config.ToolbarButtons)
+		{
+			if (map.TryGetValue(button.Id, out element))
 			{
-				if (map.TryGetValue(button.Id, out UIElement element))
+				if (button.Visible)
 				{
-					if (button.Visible)
-					{
-						visible.Add(element);
-					}
-					else
-					{
-						element.Visibility = Visibility.Collapsed;
-					}
+					visible.Add(element);
+				}
+				else
+				{
+					element.Visibility = Visibility.Collapsed;
 				}
 			}
+		}
 			BottomCenterButtonGrid.ColumnDefinitions.Clear();
 			for (int i = 0; i < visible.Count; i++)
 			{
