@@ -164,7 +164,8 @@ namespace PPTService
             {
                 dep = VisualTreeHelper.GetParent(dep);
             }
-            if (dep is ListBoxItem item)
+            ListBoxItem item = dep as ListBoxItem;
+            if (item != null)
             {
                 return item.DataContext as ToolbarItemVm;
             }
