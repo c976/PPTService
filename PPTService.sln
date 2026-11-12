@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Core", "PPTServi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Collection", "PPTService.Collection\PPTService.Collection.csproj", "{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Ink", "PPTService.Ink\PPTService.Ink.csproj", "{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
