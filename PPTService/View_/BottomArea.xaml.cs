@@ -321,11 +321,22 @@ namespace PPTService
 		}
 
 		/// <summary>
-		/// 依据用户配置重排/显隐工具栏中央的 5 个功能按钮（选择/画笔/橡皮/放大镜/小黑板）。
+		/// 依据用户配置重排/显隐工具栏中央功能按钮（选择/画笔/橡皮/放大镜/板中板），
+		/// 以及左侧「创建二维码（分享）」按钮的显隐。中心区每列固定 50，宽度随可见按钮数自适应，
+		/// 避免隐藏按钮后剩余图标（如放大镜）被拉宽变形。
 		/// </summary>
 		public void ApplyToolbarConfig(UserConfig config)
 		{
-			if (config == null || config.ToolbarButtons == null)
+			if (config == null)
+			{
+				return;
+			}
+			// 创建二维码（分享）按钮显隐
+			if (ShareButton != null)
+			{
+				ShareButton.Visibility = config.ShowQrCode ? Visibility.Visible : Visibility.Collapsed;
+			}
+			if (config.ToolbarButtons == null)
 			{
 				return;
 			}
@@ -356,7 +367,7 @@ namespace PPTService
 			BottomCenterButtonGrid.ColumnDefinitions.Clear();
 			for (int i = 0; i < visible.Count; i++)
 			{
-				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition());
+				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50.0) });
 				Grid.SetColumn(visible[i], i);
 				visible[i].Visibility = Visibility.Visible;
 			}

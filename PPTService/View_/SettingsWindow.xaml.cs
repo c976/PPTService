@@ -3,12 +3,17 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace PPTService
 {
     public partial class SettingsWindow : Window
     {
         private ObservableCollection<ToolbarItemVm> _items;
+
+        private ToolbarItemVm _dragItem;
+        private Point _dragStartPoint;
 
         public SettingsWindow()
         {
@@ -26,17 +31,35 @@ namespace PPTService
                 _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
             }
             ToolbarListBox.ItemsSource = _items;
-            if (cfg.PageTurningPosition == "LeftBottom")
+            QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
+            if (cfg.PageTurningMode == "Custom")
             {
-                RbLeft.IsChecked = true;
-            }
-            else if (cfg.PageTurningPosition == "RightBottom")
-            {
-                RbRight.IsChecked = true;
+                RbCustom.IsChecked = true;
+                SetPositionRadios(cfg.WpsPageTurningPosition, true);
+                SetPositionRadios(cfg.OfficePageTurningPosition, false);
             }
             else
             {
-                RbBoth.IsChecked = true;
+                RbAuto.IsChecked = true;
+            }
+        }
+
+        private void SetPositionRadios(string position, bool isWps)
+        {
+            RadioButton both = isWps ? RbWpsBoth : RbOfficeBoth;
+            RadioButton left = isWps ? RbWpsLeft : RbOfficeLeft;
+            RadioButton right = isWps ? RbWpsRight : RbOfficeRight;
+            if (position == "Left")
+            {
+                left.IsChecked = true;
+            }
+            else if (position == "Right")
+            {
+                right.IsChecked = true;
+            }
+            else
+            {
+                both.IsChecked = true;
             }
         }
 
@@ -48,7 +71,7 @@ namespace PPTService
                 case "Pen": return "画笔";
                 case "Rubber": return "橡皮";
                 case "Magnifier": return "放大镜";
-                case "InnerBoard": return "小黑板";
+                case "InnerBoard": return "板中板";
                 default: return id;
             }
         }
@@ -81,6 +104,88 @@ namespace PPTService
             }
         }
 
+        #region 拖拽排序
+
+        private void ToolbarListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (IsInteractiveChild(e.OriginalSource as DependencyObject))
+            {
+                return;
+            }
+            _dragItem = GetItemFromSource(e.OriginalSource) ?? (ToolbarListBox.SelectedItem as ToolbarItemVm);
+            _dragStartPoint = e.GetPosition(null);
+        }
+
+        private void ToolbarListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_dragItem == null)
+            {
+                return;
+            }
+            if (e.LeftButton != MouseButtonState.Pressed)
+            {
+                _dragItem = null;
+                return;
+            }
+            Point pos = e.GetPosition(null);
+            if (Math.Abs(pos.X - _dragStartPoint.X) > 5 || Math.Abs(pos.Y - _dragStartPoint.Y) > 5)
+            {
+                DragDrop.DoDragDrop(ToolbarListBox, _dragItem, DragDropEffects.Move);
+                _dragItem = null;
+            }
+        }
+
+        private void ToolbarListBox_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+        }
+
+        private void ToolbarListBox_Drop(object sender, DragEventArgs e)
+        {
+            ToolbarItemVm target = GetItemFromSource(e.OriginalSource);
+            if (_dragItem != null && target != null && target != _dragItem)
+            {
+                int oldIndex = _items.IndexOf(_dragItem);
+                int newIndex = _items.IndexOf(target);
+                if (oldIndex >= 0 && newIndex >= 0)
+                {
+                    _items.Move(oldIndex, newIndex);
+                }
+            }
+            _dragItem = null;
+            e.Handled = true;
+        }
+
+        private ToolbarItemVm GetItemFromSource(object originalSource)
+        {
+            DependencyObject dep = originalSource as DependencyObject;
+            while (dep != null && !(dep is ListBoxItem))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            if (dep is ListBoxItem item)
+            {
+                return item.DataContext as ToolbarItemVm;
+            }
+            return null;
+        }
+
+        private static bool IsInteractiveChild(DependencyObject dep)
+        {
+            while (dep != null)
+            {
+                if (dep is CheckBox || dep is Button)
+                {
+                    return true;
+                }
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            return false;
+        }
+
+        #endregion
+
         private UserConfig BuildConfig()
         {
             UserConfig cfg = new UserConfig();
@@ -88,19 +193,33 @@ namespace PPTService
             {
                 cfg.ToolbarButtons.Add(new ToolbarButtonSetting { Id = vm.Id, Visible = vm.IsVisible });
             }
-            if (RbLeft.IsChecked == true)
+            cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
+            if (RbCustom.IsChecked == true)
             {
-                cfg.PageTurningPosition = "LeftBottom";
-            }
-            else if (RbRight.IsChecked == true)
-            {
-                cfg.PageTurningPosition = "RightBottom";
+                cfg.PageTurningMode = "Custom";
+                cfg.WpsPageTurningPosition = ResolvePosition(true);
+                cfg.OfficePageTurningPosition = ResolvePosition(false);
             }
             else
             {
-                cfg.PageTurningPosition = "Both";
+                cfg.PageTurningMode = "Auto";
             }
             return cfg;
+        }
+
+        private string ResolvePosition(bool isWps)
+        {
+            RadioButton left = isWps ? RbWpsLeft : RbOfficeLeft;
+            RadioButton right = isWps ? RbWpsRight : RbOfficeRight;
+            if (left.IsChecked == true)
+            {
+                return "Left";
+            }
+            if (right.IsChecked == true)
+            {
+                return "Right";
+            }
+            return "Both";
         }
 
         private void Apply_Click(object sender, RoutedEventArgs e)
@@ -131,7 +250,10 @@ namespace PPTService
             {
                 _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
             }
-            RbBoth.IsChecked = true;
+            QrCodeCheckBox.IsChecked = def.ShowQrCode;
+            RbAuto.IsChecked = true;
+            RbWpsBoth.IsChecked = true;
+            RbOfficeBoth.IsChecked = true;
         }
     }
 

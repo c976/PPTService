@@ -43,9 +43,6 @@
       <VisualStateGroup x:Name="AdaptiveStates">
         <VisualState x:Name="Adaptive0">
           <Storyboard>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BottomCenterButtonGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="150" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
@@ -93,9 +90,6 @@
         <VisualState x:Name="Adaptive1440" />
         <VisualState x:Name="Adaptive3800">
           <Storyboard>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BottomCenterButtonGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="500" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
@@ -160,16 +154,16 @@
       </Grid.ColumnDefinitions>
       <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
       <pptService:ImageButton Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.RecommendationNormal}" PressedSource="{StaticResource ImageSource.RecommendationPressed}" />
-      <pptService:ImageButton Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
+      <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
     </Grid>
     <Grid Column="1" Width="4" />
-    <Grid Name="BottomCenterButtonGrid" Column="2" Width="250" Background="#00FFFFFF" Focusable="False" HorizontalAlignment="Center">
+    <Grid Name="BottomCenterButtonGrid" Column="2" Background="#00FFFFFF" Focusable="False" HorizontalAlignment="Center">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition />
-        <ColumnDefinition />
-        <ColumnDefinition />
-        <ColumnDefinition />
-        <ColumnDefinition />
+        <ColumnDefinition Width="50" />
+        <ColumnDefinition Width="50" />
+        <ColumnDefinition Width="50" />
+        <ColumnDefinition Width="50" />
+        <ColumnDefinition Width="50" />
       </Grid.ColumnDefinitions>
       <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
       <CheckBox Name="SelectCheckBox" Grid.Column="0" IsChecked="True" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.SelectNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.SelectSelected}" Click="Select_OnClick" />

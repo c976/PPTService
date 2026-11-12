@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using Newtonsoft.Json;
+using PPTService.Collection;
 
 namespace PPTService
 {
@@ -21,19 +22,41 @@ namespace PPTService
     public class UserConfig
     {
         /// <summary>
-        /// 工具栏功能按钮列表，顺序即显示顺序；Visible 控制显隐。
-        /// 仅包含这 5 个功能按钮：Select / Pen / Rubber / Magnifier / InnerBoard。
+        /// 工具栏中央功能按钮列表，顺序即显示顺序；Visible 控制显隐。
+        /// 仅包含这 5 个功能按钮：Select / Pen / Rubber / Magnifier / InnerBoard（板中板）。
         /// </summary>
         public List<ToolbarButtonSetting> ToolbarButtons { get; set; }
 
         /// <summary>
-        /// 翻页按钮位置：LeftBottom（左下角）/ RightBottom（右下角）/ Both（两边，默认）。
+        /// 是否显示「创建二维码（分享）」按钮（位于工具栏左侧 ShareGrid）。
         /// </summary>
+        public bool ShowQrCode { get; set; }
+
+        /// <summary>
+        /// 翻页按钮位置模式：Auto（默认，按程序原逻辑：WPS 两边 / Office 底部）或 Custom（按下方分应用设置）。
+        /// </summary>
+        public string PageTurningMode { get; set; }
+
+        /// <summary>
+        /// 自定义模式下 WPS 的翻页位置：Both（两边）/ Left（仅左）/ Right（仅右）。
+        /// </summary>
+        public string WpsPageTurningPosition { get; set; }
+
+        /// <summary>
+        /// 自定义模式下 Office 的翻页位置：Both / Left / Right。
+        /// </summary>
+        public string OfficePageTurningPosition { get; set; }
+
+        // 兼容旧版单值配置（LeftBottom / RightBottom / Both），仅用于迁移读取。
         public string PageTurningPosition { get; set; }
 
         public UserConfig()
         {
             ToolbarButtons = new List<ToolbarButtonSetting>();
+            ShowQrCode = true;
+            PageTurningMode = "Auto";
+            WpsPageTurningPosition = "Both";
+            OfficePageTurningPosition = "Both";
             PageTurningPosition = "Both";
         }
     }
@@ -78,6 +101,16 @@ namespace PPTService
                     cfg = CreateDefault();
                     Save(cfg);
                 }
+                // 旧版单值翻页配置迁移到「自定义」模式
+                if (string.IsNullOrEmpty(cfg.PageTurningMode)
+                    && !string.IsNullOrEmpty(cfg.PageTurningPosition)
+                    && cfg.PageTurningPosition != "Both")
+                {
+                    cfg.PageTurningMode = "Custom";
+                    string mapped = MapLegacyPosition(cfg.PageTurningPosition);
+                    cfg.WpsPageTurningPosition = mapped;
+                    cfg.OfficePageTurningPosition = mapped;
+                }
                 _current = cfg;
                 return cfg;
             }
@@ -95,7 +128,10 @@ namespace PPTService
                     new ToolbarButtonSetting { Id = "Magnifier", Visible = true },
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
-                PageTurningPosition = "Both"
+                ShowQrCode = true,
+                PageTurningMode = "Auto",
+                WpsPageTurningPosition = "Both",
+                OfficePageTurningPosition = "Both"
             };
         }
 
@@ -125,7 +161,7 @@ namespace PPTService
         }
 
         /// <summary>
-        /// 将当前配置下发到界面：工具栏按钮显隐/顺序、翻页按钮位置。
+        /// 将当前配置下发到界面：工具栏按钮显隐/顺序、创建二维码按钮显隐、翻页按钮位置。
         /// </summary>
         public static void ApplyCurrent()
         {
@@ -134,38 +170,56 @@ namespace PPTService
             {
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
             }
-            if (cfg.PageTurningPosition == "LeftBottom")
+            ApplyPageTurning(cfg);
+        }
+
+        private static void ApplyPageTurning(UserConfig cfg)
+        {
+            string position = ResolvePosition(cfg);
+            bool showLeft = position == "Both" || position == "Left";
+            bool showRight = position == "Both" || position == "Right";
+            SetVisible(ViewHelper.LeftBottomArea, showLeft);
+            SetVisible(ViewHelper.RightBottomArea, showRight);
+            SetVisible(ViewHelper.LeftArea, showLeft);
+            SetVisible(ViewHelper.RightArea, showRight);
+        }
+
+        private static string ResolvePosition(UserConfig cfg)
+        {
+            if (cfg.PageTurningMode == "Custom")
             {
-                if (ViewHelper.LeftBottomArea != null)
-                {
-                    ViewHelper.LeftBottomArea.Visibility = Visibility.Visible;
-                }
-                if (ViewHelper.RightBottomArea != null)
-                {
-                    ViewHelper.RightBottomArea.Visibility = Visibility.Collapsed;
-                }
+                string pos = PptVersionManager.IsWps
+                    ? (cfg.WpsPageTurningPosition ?? "Both")
+                    : (cfg.OfficePageTurningPosition ?? "Both");
+                return pos;
             }
-            else if (cfg.PageTurningPosition == "RightBottom")
+            if (string.IsNullOrEmpty(cfg.PageTurningMode)
+                && !string.IsNullOrEmpty(cfg.PageTurningPosition))
             {
-                if (ViewHelper.RightBottomArea != null)
-                {
-                    ViewHelper.RightBottomArea.Visibility = Visibility.Visible;
-                }
-                if (ViewHelper.LeftBottomArea != null)
-                {
-                    ViewHelper.LeftBottomArea.Visibility = Visibility.Collapsed;
-                }
+                return MapLegacyPosition(cfg.PageTurningPosition);
             }
-            else
+            // Auto：按程序原逻辑（2016+/WPS 两边底部角，旧 Office 底部中央），两套布局都显示两边
+            return "Both";
+        }
+
+        private static string MapLegacyPosition(string value)
+        {
+            if (value == "LeftBottom")
             {
-                if (ViewHelper.LeftBottomArea != null)
-                {
-                    ViewHelper.LeftBottomArea.Visibility = Visibility.Visible;
-                }
-                if (ViewHelper.RightBottomArea != null)
-                {
-                    ViewHelper.RightBottomArea.Visibility = Visibility.Visible;
-                }
+                return "Left";
+            }
+            if (value == "RightBottom")
+            {
+                return "Right";
+            }
+            return "Both";
+        }
+
+        private static void SetVisible(UIElement area, bool visible)
+        {
+            if (area != null)
+            {
+                area.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             }
         }
     }
