@@ -97,6 +97,8 @@ namespace PPTService
 			// 翻页按钮位置交由用户配置决定（默认沿用程序原逻辑），运行时切换也复用此方法。
 			ApplyPageTurningLayout();
 			BottomCenterButtonGrid.Children.Add(ViewHelper.BottomArea);
+			AnnotationController.Attach(this);
+			AnnotationController.SetEnabled(UserConfigManager.Load().UseSelfAnnotation);
 			Width = SystemParameters.PrimaryScreenWidth;
 			Height = SystemParameters.PrimaryScreenHeight;
 			SubscribeSelectionChangedEvent();
@@ -186,6 +188,8 @@ namespace PPTService
 					SetLeftRightOpacity();
 					IsExiting = false;
 					Opacity = 1.0;
+					AnnotationController.SetEnabled(UserConfigManager.Load().UseSelfAnnotation);
+					AnnotationController.ShowPage(PptOperator.Instance.CurrentShowPosition);
 				});
 				SyntacticSugar.CurrentDispatcherBeginInvoke(AnalyzePpt);
 			});
@@ -204,6 +208,8 @@ namespace PPTService
 				{
 					UpdatePageIndex();
 				}
+				// 自实现批注跟随 PPT 翻页切换对应页笔迹
+				AnnotationController.ShowPage(PptOperator.Instance.CurrentShowPosition);
 			});
 		}
 
@@ -462,6 +468,8 @@ namespace PPTService
 						MouseHelper.Instance.Stop();
 						ViewHelper.BottomArea.UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
 						ViewHelper.InnerBoardWindow.HiddenAndClearInkCanvas();
+						// 放映结束：隐藏批注窗口（下次放映开始时按配置重新显示）。
+						AnnotationController.Hide();
 						PlayHiddenLeftSlideManagerViewStoryboard();
 						PlayHiddenRightSlideManagerViewStoryboard();
 						_releaseTimer.Stop();
@@ -651,6 +659,9 @@ namespace PPTService
 						UpdateWindowOpacity();
 						UpdateGestureAndMouseLineTrackState();
 						WindowStateHelper.UpdateWindowRect(this);
+						// 批注窗口是独立的 Topmost 窗口，激活后可能被抬到工具栏之上，
+						// 借主窗口的定时更新把它持续压回工具栏之下。
+						AnnotationController.KeepBelowToolbar();
 						if (Opacity > 0.0)
 						{
 							WindowStateHelper.MakeAppAbovePpt(this);

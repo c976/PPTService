@@ -434,8 +434,8 @@
       </Storyboard>
     </ResourceDictionary>
   </FrameworkElement.Resources>
-  <Grid Name="RootGrid" FocusManager.IsFocusScope="True" Margin="6 1 6 6">
-    <Grid.RowDefinitions>
+    <Grid Name="RootGrid" FocusManager.IsFocusScope="True" Margin="6 1 6 6">
+      <Grid.RowDefinitions>
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>

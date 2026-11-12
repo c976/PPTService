@@ -55,6 +55,16 @@ namespace PPTService
 
 		private void Select_OnClick(object sender, RoutedEventArgs e)
 		{
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				// 鼠标模式：批注窗口穿透，点击落到 PPT。
+				// 不走 SetPptPointerType，避免把放映窗口提到前台而盖住批注层。
+				AnnotationController.SetMode(AnnotationController.Mode.Mouse);
+				PptOperator.Instance.PointerType = PpSlideShowPointerType.ppSlideShowPointerNone;
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionSelect);
+				return;
+			}
 			if (IsInnerBoardWindowShowing)
 			{
 				ViewHelper.InnerBoardWindow.SetNone();
@@ -76,6 +86,25 @@ namespace PPTService
 
 		private void Rubber_OnClick(object sender, RoutedEventArgs e)
 		{
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				// 手势橡皮：拖动擦除经过的笔迹；再次点击橡皮则清屏
+				// （对应桌面批注橡皮弹窗里「滑杆清屏」的行为）。
+				if (AnnotationController.IsEnabled &&
+					AnnotationController.CurrentMode == AnnotationController.Mode.Eraser)
+				{
+					AnnotationController.ClearCurrentPage();
+				}
+				else
+				{
+					AnnotationController.SetMode(AnnotationController.Mode.Eraser);
+				}
+				SelectCheckBox.IsChecked = false;
+				RubberCheckBox.IsChecked = true;
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionRubber);
+				return;
+			}
 			if (IsInnerBoardWindowShowing)
 			{
 				SelectCheckBox.IsChecked = false;
@@ -137,6 +166,17 @@ namespace PPTService
 			RadioButton radioButton = e.OriginalSource as RadioButton;
 			if (radioButton != null)
 			{
+				if (UserConfigManager.Load().UseSelfAnnotation)
+				{
+					// 自实现批注：直接用调色板颜色设置覆盖层笔迹颜色（压感笔迹）
+					SolidColorBrush brush = radioButton.Background as SolidColorBrush;
+					if (brush != null)
+					{
+						AnnotationController.SetColor(brush.Color);
+					}
+					ColorDiskPopup.IsOpen = false;
+					return;
+				}
 				SetPenColor(radioButton.Background.ToString());
 				ColorDiskPopup.IsOpen = false;
 				if (!IsInnerBoardWindowShowing)
@@ -169,6 +209,17 @@ namespace PPTService
 
 		public void PenClick()
 		{
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				// 画笔模式：用选中颜色在覆盖层上绘制（启用压感）
+				AnnotationController.SetMode(AnnotationController.Mode.Pen);
+				SelectCheckBox.IsChecked = false;
+				RubberCheckBox.IsChecked = false;
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
+				ColorDiskPopup.IsOpen = true;
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
+				return;
+			}
 			SelectCheckBox.IsChecked = false;
 			if (SelectedPenImage.Visibility == Visibility.Collapsed)
 			{

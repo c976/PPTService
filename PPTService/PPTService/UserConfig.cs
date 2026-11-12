@@ -33,6 +33,13 @@ namespace PPTService
         public bool ShowQrCode { get; set; }
 
         /// <summary>
+        /// 批注方式：false（默认）= 使用 Office 原生批注；
+        /// true = 使用 PPTService.Ink 里的原版桌面批注白板窗口（压感软笔 / 手势橡皮，
+        /// 独立透明窗口、鼠标模式穿透、逐页笔迹），适配希沃设备。
+        /// </summary>
+        public bool UseSelfAnnotation { get; set; }
+
+        /// <summary>
         /// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
         /// Bottom（强制底部两侧角）/ Both（强制左右两边）。
         /// </summary>
@@ -114,7 +121,8 @@ namespace PPTService
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
                 ShowQrCode = true,
-                PageTurningPosition = "Default"
+                PageTurningPosition = "Default",
+                UseSelfAnnotation = false
             };
         }
 
@@ -153,6 +161,7 @@ namespace PPTService
             {
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
             }
+            AnnotationController.SetEnabled(cfg.UseSelfAnnotation);
             ViewHelper.MainWindow?.ApplyPageTurningLayout();
         }
 

@@ -15,6 +15,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
@@ -48,11 +49,18 @@
           </ListBox>
         </GroupBox>
 
-        <GroupBox Grid.Row="2" Header="其它功能" Margin="0,0,0,8">
+        <GroupBox Grid.Row="2" Header="批注方式" Margin="0,0,0,8">
+          <StackPanel Margin="4">
+            <RadioButton Name="RbOfficeAnno" GroupName="AnnoMode" Content="Office 原生批注（由 PowerPoint/WPS 自身提供）" Margin="2" />
+            <RadioButton Name="RbSelfAnno" GroupName="AnnoMode" Content="自实现批注（桌面批注原版白板：压感笔迹、手势橡皮、翻页同步，希沃设备推荐）" Margin="2" />
+          </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="其它功能" Margin="0,0,0,8">
           <CheckBox Name="QrCodeCheckBox" Content="显示「创建二维码（分享）」按钮" Margin="4" />
         </GroupBox>
 
-        <GroupBox Grid.Row="3" Header="翻页按钮位置" Margin="0,0,0,8">
+        <GroupBox Grid.Row="4" Header="翻页按钮位置" Margin="0,0,0,8">
           <StackPanel Margin="4">
             <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（按程序原逻辑：WPS 两边 / Office 底部）" Margin="2" />
             <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部（左右下角）" Margin="2" />
@@ -60,12 +68,12 @@
           </StackPanel>
         </GroupBox>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
           <Button Name="ResetButton" Content="恢复默认" Width="80" Margin="0,0,8,0" Click="Reset_Click" />
           <Button Name="ApplyButton" Content="应用" Width="70" Margin="0,0,8,0" Click="Apply_Click" />
         </StackPanel>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
           <Button Name="OkButton" Content="确定" Width="70" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
           <Button Name="CancelButton" Content="取消" Width="70" IsCancel="True" Click="Cancel_Click" />
         </StackPanel>
