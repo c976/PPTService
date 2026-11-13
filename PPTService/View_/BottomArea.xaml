@@ -147,7 +147,7 @@
         <ColumnDefinition Width="50" />
       </Grid.ColumnDefinitions>
       <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
-      <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.RecommendationNormal}" PressedSource="{StaticResource ImageSource.RecommendationPressed}" />
+      <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.SettingsNormal}" PressedSource="{StaticResource ImageSource.SettingsPressed}" />
       <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
     </Grid>
     <Grid Column="1" Width="4" />

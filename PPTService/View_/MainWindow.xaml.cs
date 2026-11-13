@@ -116,13 +116,17 @@ namespace PPTService
 
 		private const int WmNcHitTest = 0x0084;
 		private const int HtClient = 1;
+		private bool _hitTestHooked;
 
 		private void MainWindow_SourceInitialized(object sender, EventArgs e)
 		{
-			HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
-			if (source != null)
+			// 用 HwndSource.FromHwnd + EnsureHandle 取源比 PresentationSource.FromVisual 更稳，
+			// 避免在部分初始化时序下拿不到源、钩子没挂上，导致笔 / 橡皮模式仍穿透（收不到输入）。
+			HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).EnsureHandle());
+			if (source != null && !_hitTestHooked)
 			{
 				source.AddHook(WndProc);
+				_hitTestHooked = true;
 			}
 		}
 

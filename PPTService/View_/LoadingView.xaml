@@ -129,7 +129,7 @@
       <Button Name="CancelButton" Style="{StaticResource Style.CancelButton}" Width="100" Height="38" FontSize="16" Margin="0 15 0 0" Click="CancelButton_OnClick" />
     </StackPanel>
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0 0 0 120">
-      <Image Source="{StaticResource Image.Seewo}" Stretch="None" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+      <Image Source="{StaticResource Image.PptServiceText}" Stretch="None" SnapsToDevicePixels="True" UseLayoutRounding="True" />
       <TextBlock Name="VersionTextBlock" Margin="0 20 0 0" FontSize="20" Foreground="#80FFFFFF" HorizontalAlignment="Center" />
     </StackPanel>
   </Grid>

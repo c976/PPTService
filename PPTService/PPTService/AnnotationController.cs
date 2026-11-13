@@ -36,6 +36,12 @@ namespace PPTService
 
 		public static bool IsEnabled { get; private set; }
 
+		/// <summary>当前笔迹颜色（自实现批注的真值来源；Office 指针类型为 None 时 PptOperator.PointerColor 不可信）。</summary>
+		public static Color CurrentColor
+		{
+			get { return _color; }
+		}
+
 		public static Mode CurrentMode
 		{
 			get { return _currentMode; }

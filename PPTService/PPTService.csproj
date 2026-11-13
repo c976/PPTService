@@ -399,17 +399,14 @@
     <Resource Include="Images_\closebuttonpressed.png">
       <LogicalName>images_/closebuttonpressed.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\downloaden5.png">
-      <LogicalName>images_/downloaden5.png</LogicalName>
-    </Resource>
     <Resource Include="Images_\pptservice.ico">
       <LogicalName>images_/pptservice.ico</LogicalName>
     </Resource>
     <Resource Include="Images_\rightarrow.png">
       <LogicalName>images_/rightarrow.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\seewo.png">
-      <LogicalName>images_/seewo.png</LogicalName>
+    <Resource Include="Images_\pptservicetext.png">
+      <LogicalName>images_/pptservicetext.png</LogicalName>
     </Resource>
   </ItemGroup>
   <ItemGroup>

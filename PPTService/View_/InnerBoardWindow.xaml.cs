@@ -138,6 +138,22 @@ namespace PPTService
 
 		private void UpdateState()
 		{
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				// 自实现批注：Office 指针类型为 None、PptOperator.PointerColor 不可信（读到黑色），
+				// 板中板直接同步 AnnotationController 的当前笔色，避免「一开板中板笔就被强制黑色」。
+				switch (PptOperator.Instance.PointerType)
+				{
+				case PpSlideShowPointerType.ppSlideShowPointerEraser:
+					SetRubber();
+					break;
+				default:
+					SetPen(AnnotationController.CurrentColor);
+					break;
+				}
+				return;
+			}
+			// 以下为原 Office 批注路径，保持不变。
 			switch (PptOperator.Instance.PointerType)
 			{
 			case PpSlideShowPointerType.ppSlideShowPointerPen:
@@ -148,12 +164,7 @@ namespace PPTService
 				SetRubber();
 				break;
 			default:
-				// 自实现批注下不走 PenClick（会去改 Office 指针类型并弹颜色盘），
-				// 板中板自己进入画笔模式即可。
-				if (!UserConfigManager.Load().UseSelfAnnotation)
-				{
-					ViewHelper.BottomArea.PenClick();
-				}
+				ViewHelper.BottomArea.PenClick();
 				SetPen(PptOperator.Instance.PointerColor);
 				break;
 			}
