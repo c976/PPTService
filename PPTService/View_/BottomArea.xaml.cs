@@ -207,17 +207,20 @@ namespace PPTService
 			RadioButton radioButton = e.OriginalSource as RadioButton;
 			if (radioButton != null)
 			{
-				if (IsSelfAnnotationActive)
+			if (IsSelfAnnotationActive)
+			{
+				// 自实现批注：直接用调色板颜色设置覆盖层笔迹颜色（压感笔迹）
+				SolidColorBrush brush = radioButton.Background as SolidColorBrush;
+				if (brush != null)
 				{
-					// 自实现批注：直接用调色板颜色设置覆盖层笔迹颜色（压感笔迹）
-					SolidColorBrush brush = radioButton.Background as SolidColorBrush;
-					if (brush != null)
-					{
-						AnnotationController.SetColor(brush.Color);
-					}
-					ColorDiskPopup.IsOpen = false;
-					return;
+					AnnotationController.SetColor(brush.Color);
+					// 同步刷新工具栏画笔图标颜色：否则要等下一次点击「笔」触发
+					// UpdateButtonState 才会从 PptOperator.PointerColor 重新取色，图标颜色滞后。
+					PenBrush = new SolidColorBrush(brush.Color);
 				}
+				ColorDiskPopup.IsOpen = false;
+				return;
+			}
 				SetPenColor(radioButton.Background.ToString());
 				ColorDiskPopup.IsOpen = false;
 				if (!IsInnerBoardWindowShowing)
