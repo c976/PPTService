@@ -12,6 +12,7 @@ using System.Windows.Markup;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Windows.Interop;
 using PPTService.Core.Windows;
 using Microsoft.Office.Interop.PowerPoint;
 using PPTService.Collection;
@@ -75,6 +76,7 @@ namespace PPTService
 			};
 			_releaseTimer.Tick += ReleaseTimerTick;
 			Loaded += MainWindow_Loaded;
+			SourceInitialized += MainWindow_SourceInitialized;
 			PreviewKeyDown += MainWindow_KeyDown;
 			SizeChanged += MainWindow_SizeChanged;
 			LocationChanged += MainWindow_LocationChanged;
@@ -110,6 +112,36 @@ namespace PPTService
 			PptOperator.Instance.NextSlide += PptOperatorNextSlide;
 			// 应用用户配置：工具栏按钮显隐/顺序、翻页按钮位置
 			UserConfigManager.ApplyCurrent();
+		}
+
+		private const int WmNcHitTest = 0x0084;
+		private const int HtClient = 1;
+
+		private void MainWindow_SourceInitialized(object sender, EventArgs e)
+		{
+			HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+			if (source != null)
+			{
+				source.AddHook(WndProc);
+			}
+		}
+
+		private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+		{
+			// 批注「捕获 / 穿透」控制（替代旧版独立窗口的 WS_EX_TRANSPARENT 切换）：
+			// MainWindow 是 AllowsTransparency 分层窗口，alpha=0 像素默认会穿透到下方 PPT。
+			// 笔 / 橡皮模式下，强制返回 HTCLIENT，让分层窗口把整窗输入（触控 / 压感笔 / 橡皮 / 鼠标）
+			// 交给 WPF 路由 —— 落在 Board 上即进入笔迹管线，落在工具栏按钮上仍正常点击；
+			// 选择（鼠标）模式与未启用批注时不干预，分层窗口默认穿透（工具栏 alpha>0 仍捕获）。
+			if (msg == WmNcHitTest
+				&& AnnotationController.IsEnabled
+				&& (AnnotationController.CurrentMode == AnnotationController.Mode.Pen
+					|| AnnotationController.CurrentMode == AnnotationController.Mode.Eraser))
+			{
+				handled = true;
+				return new IntPtr(HtClient);
+			}
+			return IntPtr.Zero;
 		}
 
 		/// <summary>

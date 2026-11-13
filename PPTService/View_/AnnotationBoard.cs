@@ -28,16 +28,15 @@ namespace PPTService
 		// 与 DefaultDesktopBoardModesProvider.PenMode 的 Lazy 单例用法保持一致。
 		private readonly Mode _penMode = new MouseEnabledPenWritingMode();
 
-		// 笔 / 橡皮模式下承载笔迹的「捕获背景」。
+		// 输入捕获说明（关键）：
 		// MainWindow 是 AllowsTransparency 的分层窗口（Style.Window：Background="#00FFFFFF"，alpha=0），
-		// 分层窗口的 alpha=0 像素会直接「穿透」到下方 PPT，因此嵌入其中的 Board 即便
-		// IsHitTestVisible=true，其空白区域（alpha=0）仍会把所有输入（鼠标 / 触控 / 压感笔 / 橡皮）
-		// 漏给 PPT，Board 收不到 —— 这正是合并后「批注 / 橡皮无效」的根因。
-		// 原独立 AnnotationWindow 用「窗口级 WS_EX_TRANSPARENT 切换」来捕获输入；合并进分层
-		// MainWindow 后，改用「元素级 alpha=1 背景」：alpha=1 对分层窗口而言已是「实心」像素，
-		// 会捕获输入交给 Board，而视觉上近乎全透明（PPT 仍可见），等效于原版非 DWM 分支的
-		// "#01000000" 捕获态。选择模式用回 alpha=0 背景，恢复穿透到 PPT。
-		private static readonly Brush CaptureBackground = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
+		// 分层窗口的 alpha=0 像素默认会「穿透」到下方 PPT —— 这正是合并后「笔 / 橡皮无效」的根因：
+		// Board 哪怕 IsHitTestVisible=true，其空白区（alpha=0）仍把所有输入漏给 PPT。
+		// 原独立 AnnotationWindow 用「窗口级 WS_EX_TRANSPARENT 切换」来捕获；合并进单窗口后，
+		// 改成在 MainWindow 挂 WM_NCHITTEST 钩子：笔 / 橡皮模式直接返回 HTCLIENT，
+		// 让分层窗口在该区域按「实心」处理、把输入交给 Board（触控 / 压感笔 / 橡皮 / 鼠标全收），
+		// 而 Board 背景始终纯透明（alpha=0），PPT 完全透出、不带任何色偏。
+		// 选择（鼠标）模式不挂此钩子，分层窗口 alpha=0 默认穿透到 PPT，工具栏按钮（alpha>0）仍可点。
 
 		public Board InkBoard { get; }
 
@@ -65,9 +64,9 @@ namespace PPTService
 
 		public void GotoSelect()
 		{
-			// 鼠标（选择）模式：Board 不命中、背景回到 alpha=0，点击穿透到下方 PPT
-			// （工具栏按钮仍在其上可点）。分层窗口 alpha=0 像素穿透，等效于原版
-			// WS_EX_TRANSPARENT 穿透；选择模式下不应在 Board 上捕获任何输入。
+			// 鼠标（选择）模式：Board 不命中，点击穿透到下方 PPT（工具栏按钮仍在其上可点）。
+			// 分层窗口 alpha=0 像素默认穿透，等效于原版 WS_EX_TRANSPARENT 穿透；
+			// 选择模式下不应在 Board 上捕获任何输入。
 			InkBoard.IsHitTestVisible = false;
 			InkBoard.Background = Brushes.Transparent;
 		}
@@ -75,17 +74,16 @@ namespace PPTService
 		public void GotoInk()
 		{
 			InkBoard.Mode = _penMode;
+			// 笔模式：Board 命中可见，MainWindow 的 WM_NCHITTEST 钩子（笔 / 橡皮模式返回 HTCLIENT）
+			// 让分层窗口把输入交给 Board；背景保持纯透明，PPT 透出无偏色。
 			InkBoard.IsHitTestVisible = true;
-			// alpha=1 背景让分层 MainWindow 在该区域捕获输入（视觉仍近乎透明，PPT 可见），
-			// 触摸 / 压感笔 / 橡皮 / 鼠标均可落到 Board 的笔迹管线。
-			InkBoard.Background = CaptureBackground;
 		}
 
 		public void GotoEraser()
 		{
 			InkBoard.Mode = _modesProvider.EraserMode;
+			// 橡皮模式：与笔模式同理，共享同一条 DynamicRenderer 管线，WM_NCHITTEST 钩子捕获输入。
 			InkBoard.IsHitTestVisible = true;
-			InkBoard.Background = CaptureBackground;
 		}
 
 		public void CleanInk()
