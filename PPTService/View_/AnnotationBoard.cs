@@ -33,10 +33,14 @@ namespace PPTService
 		// 分层窗口的 alpha=0 像素默认会「穿透」到下方 PPT —— 这正是合并后「笔 / 橡皮无效」的根因：
 		// Board 哪怕 IsHitTestVisible=true，其空白区（alpha=0）仍把所有输入漏给 PPT。
 		// 原独立 AnnotationWindow 用「窗口级 WS_EX_TRANSPARENT 切换」来捕获；合并进单窗口后，
-		// 改成在 MainWindow 挂 WM_NCHITTEST 钩子：笔 / 橡皮模式直接返回 HTCLIENT，
-		// 让分层窗口在该区域按「实心」处理、把输入交给 Board（触控 / 压感笔 / 橡皮 / 鼠标全收），
-		// 而 Board 背景始终纯透明（alpha=0），PPT 完全透出、不带任何色偏。
-		// 选择（鼠标）模式不挂此钩子，分层窗口 alpha=0 默认穿透到 PPT，工具栏按钮（alpha>0）仍可点。
+		// 笔 / 橡皮模式下把 Board 背景设为「alpha=1 的近透明黑」（CaptureBackground）：
+		// 对分层窗口而言 alpha>0 即「实心像素」，会捕获输入交给 Board，
+		// 视觉上近乎全透明（PPT 仍可见，仅极淡色偏），触控 / 压感笔 / 橡皮 / 鼠标均可落到笔迹管线；
+		// 选择（鼠标）模式用回 alpha=0 背景，恢复穿透到 PPT，工具栏按钮（alpha>0）仍可点。
+		//
+		// 注：曾用 MainWindow 的 WM_NCHITTEST 钩子（笔 / 橡皮模式返回 HTCLIENT）尝试捕获，
+		// 但触控 / 压感笔在部分设备上层窗口的命中测试会绕过该消息而失效，故回退到 alpha 方案。
+		private static readonly Brush CaptureBackground = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
 
 		public Board InkBoard { get; }
 
@@ -74,16 +78,18 @@ namespace PPTService
 		public void GotoInk()
 		{
 			InkBoard.Mode = _penMode;
-			// 笔模式：Board 命中可见，MainWindow 的 WM_NCHITTEST 钩子（笔 / 橡皮模式返回 HTCLIENT）
-			// 让分层窗口把输入交给 Board；背景保持纯透明，PPT 透出无偏色。
+			// 笔模式：alpha=1 背景让分层 MainWindow 在该区域捕获输入（视觉仍近乎透明，PPT 可见），
+			// 触摸 / 压感笔 / 橡皮 / 鼠标均可落到 Board 的笔迹管线。
 			InkBoard.IsHitTestVisible = true;
+			InkBoard.Background = CaptureBackground;
 		}
 
 		public void GotoEraser()
 		{
 			InkBoard.Mode = _modesProvider.EraserMode;
-			// 橡皮模式：与笔模式同理，共享同一条 DynamicRenderer 管线，WM_NCHITTEST 钩子捕获输入。
+			// 橡皮模式：与笔模式同理，共享同一条 DynamicRenderer 管线，alpha=1 背景捕获输入。
 			InkBoard.IsHitTestVisible = true;
+			InkBoard.Background = CaptureBackground;
 		}
 
 		public void CleanInk()

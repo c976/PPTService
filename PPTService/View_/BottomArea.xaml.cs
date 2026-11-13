@@ -32,8 +32,9 @@ namespace PPTService
 
 		/// <summary>
 		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
-		/// 板中板打开期间批注窗口设为鼠标穿透，避免抢走输入；
-		/// 关闭后恢复打开前的笔/橡皮/鼠标模式。
+		/// 板中板打开期间主批注层设为鼠标穿透，避免抢走输入；但工具栏视觉上默认切到「画笔」
+		/// 并同步当前笔色，让用户在工具栏看到当前颜色（进入板中板即默认画笔模式）。
+		/// 关闭后恢复打开前的笔/橡皮/鼠标模式与工具栏视觉。
 		/// </summary>
 		public void OnInnerBoardShowingChanged(bool showing)
 		{
@@ -49,11 +50,32 @@ namespace PPTService
 			if (showing)
 			{
 				_modeBeforeInnerBoard = AnnotationController.CurrentMode;
+				// 主批注层穿透，避免与板中板抢输入。
 				AnnotationController.SetMode(AnnotationController.Mode.Mouse);
+				// 工具栏默认切到画笔并同步当前笔色（进入板中板即画笔模式）。
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
+				PenBrush = new SolidColorBrush(AnnotationController.CurrentColor);
 			}
 			else
 			{
 				AnnotationController.SetMode(_modeBeforeInnerBoard);
+				// 恢复打开前的工具栏视觉状态。
+				UpdateButtonState(ModeToPointerType(_modeBeforeInnerBoard));
+				// 笔色同步回主批注层的当前颜色（板中板期间改的是它自己的笔色，不应污染工具栏）。
+				PenBrush = new SolidColorBrush(AnnotationController.CurrentColor);
+			}
+		}
+
+		private static PpSlideShowPointerType ModeToPointerType(AnnotationController.Mode mode)
+		{
+			switch (mode)
+			{
+			case AnnotationController.Mode.Pen:
+				return PpSlideShowPointerType.ppSlideShowPointerPen;
+			case AnnotationController.Mode.Eraser:
+				return PpSlideShowPointerType.ppSlideShowPointerEraser;
+			default:
+				return PpSlideShowPointerType.ppSlideShowPointerNone;
 			}
 		}
 
