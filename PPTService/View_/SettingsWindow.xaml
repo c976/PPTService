@@ -51,8 +51,11 @@
 
         <GroupBox Grid.Row="2" Header="批注方式" Margin="0,0,0,8">
           <StackPanel Margin="4">
-            <RadioButton Name="RbOfficeAnno" GroupName="AnnoMode" Content="Office 原生批注（由 PowerPoint/WPS 自身提供）" Margin="2" />
-            <RadioButton Name="RbSelfAnno" GroupName="AnnoMode" Content="自实现批注（桌面批注原版白板：压感笔迹、手势橡皮、翻页同步，希沃设备推荐）" Margin="2" />
+            <CheckBox Name="EnableSelfAnnotationCheckBox"
+                      Content="启用自实现批注功能（压感笔迹 / 手势橡皮）"
+                      Margin="2" />
+            <TextBlock Text="不勾选时使用 Office / WPS 原生批注；关闭后可随时重新开启。"
+                       Margin="20,4,2,2" FontSize="11" Foreground="Gray" TextWrapping="Wrap" />
           </StackPanel>
         </GroupBox>
 

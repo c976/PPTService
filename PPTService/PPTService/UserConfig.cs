@@ -72,6 +72,9 @@ namespace PPTService
         private static readonly object SyncRoot = new object();
         private static UserConfig _current;
 
+        /// <summary>用户是否在设置里显式改过批注方式；改过之后 /debug 不再强制默认开启。</summary>
+        private static bool _annotationUserOverride;
+
         public static UserConfig Load()
         {
             lock (SyncRoot)
@@ -104,8 +107,8 @@ namespace PPTService
                     cfg.PageTurningPosition = "Default";
                 }
                 // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
-                // 不写回 UserConfig.json，不影响正常启动。用户在设置里改选 Office 批注后以用户选择为准。
-                if (DebugMode.IsEnabled)
+                // 不写回 UserConfig.json，不影响正常启动。用户在设置里改过后以用户选择为准。
+                if (DebugMode.IsEnabled && !_annotationUserOverride)
                 {
                     cfg.UseSelfAnnotation = true;
                 }
@@ -140,6 +143,7 @@ namespace PPTService
             }
             lock (SyncRoot)
             {
+                _annotationUserOverride = true;
                 _current = cfg;
                 try
                 {

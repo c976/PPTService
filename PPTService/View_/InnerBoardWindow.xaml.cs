@@ -92,6 +92,8 @@ namespace PPTService
 			if (IsShowing)
 			{
 				IsShowing = false;
+				// 通过 LowMaskButton 关闭时不经过 InnerBoard_Click，这里同步工具栏归属。
+				ViewHelper.BottomArea.OnInnerBoardShowingChanged(false);
 				ViewHelper.BottomArea.InnerBoardCheckBox.IsChecked = false;
 				ViewHelper.MainWindow.LowMaskButton.Visibility = Visibility.Collapsed;
 				(Resources["HiddenStoryBoard"] as Storyboard)?.Begin();
@@ -146,7 +148,12 @@ namespace PPTService
 				SetRubber();
 				break;
 			default:
-				ViewHelper.BottomArea.PenClick();
+				// 自实现批注下不走 PenClick（会去改 Office 指针类型并弹颜色盘），
+				// 板中板自己进入画笔模式即可。
+				if (!UserConfigManager.Load().UseSelfAnnotation)
+				{
+					ViewHelper.BottomArea.PenClick();
+				}
 				SetPen(PptOperator.Instance.PointerColor);
 				break;
 			}

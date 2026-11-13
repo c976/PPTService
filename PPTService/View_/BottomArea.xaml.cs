@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
@@ -17,6 +17,45 @@ namespace PPTService
 		public static readonly DependencyProperty PenBrushProperty = DependencyProperty.Register("PenBrush", typeof(Brush), typeof(BottomArea), new PropertyMetadata(Brushes.Red));
 
 		public bool IsInnerBoardWindowShowing { get; set; }
+
+		/// <summary>
+		/// 自实现批注是否接管工具栏按钮：设置为自实现批注，且板中板未打开。
+		/// 板中板是独立白板，打开时按钮必须走原版 InkCanvas 逻辑，
+		/// 否则点橡皮会被批注层抢走，板中板仍停留在画笔模式。
+		/// </summary>
+		public bool IsSelfAnnotationActive
+		{
+			get { return UserConfigManager.Load().UseSelfAnnotation && !IsInnerBoardWindowShowing; }
+		}
+
+		private AnnotationController.Mode _modeBeforeInnerBoard;
+
+		/// <summary>
+		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
+		/// 板中板打开期间批注窗口设为鼠标穿透，避免抢走输入；
+		/// 关闭后恢复打开前的笔/橡皮/鼠标模式。
+		/// </summary>
+		public void OnInnerBoardShowingChanged(bool showing)
+		{
+			if (IsInnerBoardWindowShowing == showing)
+			{
+				return;
+			}
+			IsInnerBoardWindowShowing = showing;
+			if (!UserConfigManager.Load().UseSelfAnnotation)
+			{
+				return;
+			}
+			if (showing)
+			{
+				_modeBeforeInnerBoard = AnnotationController.CurrentMode;
+				AnnotationController.SetMode(AnnotationController.Mode.Mouse);
+			}
+			else
+			{
+				AnnotationController.SetMode(_modeBeforeInnerBoard);
+			}
+		}
 
 		public bool IsNeedStopMouseLineTrack
 		{
@@ -55,7 +94,7 @@ namespace PPTService
 
 		private void Select_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (UserConfigManager.Load().UseSelfAnnotation)
+			if (IsSelfAnnotationActive)
 			{
 				// 鼠标模式：批注窗口穿透，点击落到 PPT。
 				// 不走 SetPptPointerType，避免把放映窗口提到前台而盖住批注层。
@@ -86,7 +125,7 @@ namespace PPTService
 
 		private void Rubber_OnClick(object sender, RoutedEventArgs e)
 		{
-			if (UserConfigManager.Load().UseSelfAnnotation)
+			if (IsSelfAnnotationActive)
 			{
 				// 手势橡皮：拖动擦除经过的笔迹；再次点击橡皮则清屏
 				// （对应桌面批注橡皮弹窗里「滑杆清屏」的行为）。
@@ -131,6 +170,7 @@ namespace PPTService
 		{
 			if (InnerBoardCheckBox.IsChecked == true)
 			{
+				OnInnerBoardShowingChanged(true);
 				SelectCheckBox.IsChecked = false;
 				ViewHelper.InnerBoardWindow.Left = ViewHelper.MainWindow.Left;
 				ViewHelper.InnerBoardWindow.Top = ViewHelper.MainWindow.Top;
@@ -142,6 +182,7 @@ namespace PPTService
 			}
 			else
 			{
+				OnInnerBoardShowingChanged(false);
 				ViewHelper.InnerBoardWindow.HiddenWindow();
 				ViewHelper.MainWindow.LowMaskButton.Visibility = Visibility.Collapsed;
 				FridayReporter.ReportEventImmediately(EventID.BottomRegionCloseInnerBoard);
@@ -166,7 +207,7 @@ namespace PPTService
 			RadioButton radioButton = e.OriginalSource as RadioButton;
 			if (radioButton != null)
 			{
-				if (UserConfigManager.Load().UseSelfAnnotation)
+				if (IsSelfAnnotationActive)
 				{
 					// 自实现批注：直接用调色板颜色设置覆盖层笔迹颜色（压感笔迹）
 					SolidColorBrush brush = radioButton.Background as SolidColorBrush;
@@ -209,7 +250,7 @@ namespace PPTService
 
 		public void PenClick()
 		{
-			if (UserConfigManager.Load().UseSelfAnnotation)
+			if (IsSelfAnnotationActive)
 			{
 				// 画笔模式：用选中颜色在覆盖层上绘制（启用压感）
 				AnnotationController.SetMode(AnnotationController.Mode.Pen);

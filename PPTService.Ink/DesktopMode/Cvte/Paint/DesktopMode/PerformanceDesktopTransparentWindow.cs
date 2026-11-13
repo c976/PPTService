@@ -93,7 +93,7 @@ namespace Cvte.Paint.DesktopMode
 			}
 			else
 			{
-				Background = BrushCreator.GetOrCreate("#0100000");
+				Background = BrushCreator.GetOrCreate("#01000000");
 			}
 		}
 	}

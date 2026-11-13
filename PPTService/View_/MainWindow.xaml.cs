@@ -338,8 +338,14 @@ namespace PPTService
 
 		private void UpdateButtonState()
 		{
-			PptOperator.Instance.UpdatePointerColor();
 			ViewHelper.BottomArea.IsInnerBoardWindowShowing = ViewHelper.InnerBoardWindow.IsShowing;
+			if (ViewHelper.BottomArea.IsSelfAnnotationActive)
+			{
+				// 自实现批注下按钮状态由工具栏自己维护；Office 指针类型已不再代表当前模式，
+				// 若继续用它刷新，300ms 定时器会把笔/橡皮立刻重置回「鼠标」。
+				return;
+			}
+			PptOperator.Instance.UpdatePointerColor();
 			if (!ViewHelper.InnerBoardWindow.IsShowing)
 			{
 				ViewHelper.BottomArea.UpdateButtonState(PptOperator.Instance.PointerType);
@@ -665,6 +671,15 @@ namespace PPTService
 			{
 				return;
 			}
+			// 自实现批注下，书写期间绝不做 PowerPoint COM 调用或跨窗口 z 序调整。
+			// 原逻辑每 300ms 调一次 PptOperator.UpdatePointerColor() / PointerType（COM），
+			// 在 Office 放映 + 触控时会与 WPF 触笔线程互锁，表现为「画第一笔就卡死」，
+			// 真机日志则表现为每 0.3 秒刷一条 ColorFormat COMException。
+			// 翻页仍由 PptOperator.NextSlide 事件驱动，不依赖本定时器。
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				return;
+			}
 			SyntacticSugar.TryCatchAction(() =>
 			{
 				if (IsNeedUpdateTimer)
@@ -675,9 +690,6 @@ namespace PPTService
 						UpdateWindowOpacity();
 						UpdateGestureAndMouseLineTrackState();
 						WindowStateHelper.UpdateWindowRect(this);
-						// 批注窗口是独立的 Topmost 窗口，激活后可能被抬到工具栏之上，
-						// 借主窗口的定时更新把它持续压回工具栏之下。
-						AnnotationController.KeepBelowToolbar();
 						if (Opacity > 0.0)
 						{
 							WindowStateHelper.MakeAppAbovePpt(this);

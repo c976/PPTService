@@ -29,14 +29,20 @@ namespace PPTService
         private const uint SwpNomove = 0x0002;
         private const uint SwpNoactivate = 0x0010;
 
+        private const uint GwHwndPrev = 3;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
             int x, int y, int cx, int cy, uint uFlags);
 
+        private static bool _isPlacing;
         private static AnnotationWindow _window;
         private static Window _toolbarWindow;
         private static int _currentPageIndex = 1;
-        private static Color _color = Color.FromRgb(242, 24, 24);
+        private static Color _color = Colors.Red;
 
         public static bool IsEnabled { get; private set; }
 
@@ -52,7 +58,8 @@ namespace PPTService
             {
                 return;
             }
-            _toolbarWindow.Activated += delegate { KeepBelowToolbar(); };
+            // 不要在 Activated 里调整 z 序：书写时窗口会反复被激活，
+            // SetWindowPos 与 WPF 触笔线程互锁会导致「画第一笔就卡死」。
             _toolbarWindow.Closed += delegate { Close(); };
             try
             {
@@ -146,6 +153,7 @@ namespace PPTService
             {
                 // 放映未开始，忽略。
             }
+            PptOperator.Instance.PointerColor = _color;
             AnnotationWindow window = EnsureWindow();
             if (!window.IsVisible)
             {
@@ -185,21 +193,26 @@ namespace PPTService
             if (mode == Mode.Mouse)
             {
                 _window.GotoSelect();
+                _window.SetHitThrough(true);
             }
             else if (mode == Mode.Pen)
             {
                 _window.GotoInk();
+                _window.SetHitThrough(false);
             }
             else
             {
                 _window.GotoEraser();
+                _window.SetHitThrough(false);
             }
-            KeepBelowToolbar();
         }
 
         public static void SetColor(Color color)
         {
             _color = color;
+            // 定时器在自实现批注下不再调 PptOperator.UpdatePointerColor()（COM），
+            // 这里手动同步普通属性，保证颜色盘与板中板画笔颜色正确。
+            PptOperator.Instance.PointerColor = color;
             if (_window != null && !_window.IsClosing)
             {
                 _window.SetInkColor(color);
@@ -236,18 +249,31 @@ namespace PPTService
         /// </summary>
         public static void KeepBelowToolbar()
         {
-            if (_window == null || _toolbarWindow == null)
+            if (_isPlacing || _window == null || _toolbarWindow == null)
             {
                 return;
             }
-            IntPtr hwnd = new WindowInteropHelper(_window).Handle;
-            IntPtr toolbar = new WindowInteropHelper(_toolbarWindow).Handle;
-            if (hwnd == IntPtr.Zero || toolbar == IntPtr.Zero || hwnd == toolbar)
+            _isPlacing = true;
+            try
             {
-                return;
+                IntPtr hwnd = new WindowInteropHelper(_window).Handle;
+                IntPtr toolbar = new WindowInteropHelper(_toolbarWindow).Handle;
+                if (hwnd == IntPtr.Zero || toolbar == IntPtr.Zero || hwnd == toolbar)
+                {
+                    return;
+                }
+                // z 序已经正确时不再调用 SetWindowPos，避免书写期间反复触发跨窗口调用。
+                if (GetWindow(hwnd, GwHwndPrev) == toolbar)
+                {
+                    return;
+                }
+                SetWindowPos(hwnd, toolbar, 0, 0, 0, 0,
+                    SwpNomove | SwpNosize | SwpNoactivate);
             }
-            SetWindowPos(hwnd, toolbar, 0, 0, 0, 0,
-                SwpNomove | SwpNosize | SwpNoactivate);
+            finally
+            {
+                _isPlacing = false;
+            }
         }
     }
 }
