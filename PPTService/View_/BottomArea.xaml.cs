@@ -357,6 +357,11 @@ namespace PPTService
 
 		private void Share_OnClick(object sender, RoutedEventArgs e)
 		{
+			// 模拟放映没有真实 PPT 文件，避免触发二维码上传逻辑。
+			if (DebugMode.IsEnabled)
+			{
+				return;
+			}
 			PptSharer.Share(PptOperator.Instance.PptFilePath);
 		}
 

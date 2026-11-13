@@ -35,15 +35,34 @@ namespace PPTService
 
 		private readonly DispatcherTimer _clearEmptyPowerPointTimer = new DispatcherTimer();
 
+		// /debug 模拟放映状态（不接触任何 Office COM 对象）
+		private int _debugPage = 1;
+		private int _slidesCount;
+		private string _pptFilePath;
+		private List<Slide> _slides = new List<Slide>();
+		private PpSlideShowRangeType _showRangeType;
+
 		public bool IsShowing { get; set; }
 
 		public Color PointerColor { get; set; }
 
-		public int SlidesCount { get; private set; }
+		public int SlidesCount
+		{
+			get { return DebugMode.IsEnabled ? DebugMode.SlidesCount : _slidesCount; }
+			private set { _slidesCount = value; }
+		}
 
-		public string PptFilePath { get; private set; }
+		public string PptFilePath
+		{
+			get { return DebugMode.IsEnabled ? "debug://simulated-slideshow" : _pptFilePath; }
+			private set { _pptFilePath = value; }
+		}
 
-		public List<Slide> Slides { get; private set; }
+		public List<Slide> Slides
+		{
+			get { return _slides; }
+			private set { _slides = value ?? new List<Slide>(); }
+		}
 
 		public static PptOperator Instance { get; set; }
 
@@ -51,7 +70,11 @@ namespace PPTService
 
 		public IntPtr SlideShowWindowIntPtr { get; private set; }
 
-		public PpSlideShowRangeType ShowRangeType { get; private set; }
+		public PpSlideShowRangeType ShowRangeType
+		{
+			get { return DebugMode.IsEnabled ? PpSlideShowRangeType.ppShowAll : _showRangeType; }
+			private set { _showRangeType = value; }
+		}
 
 		public PpSlideShowPointerType PointerType
 		{
@@ -80,6 +103,10 @@ namespace PPTService
 		{
 			get
 			{
+				if (DebugMode.IsEnabled)
+				{
+					return _debugPage;
+				}
 				try
 				{
 					return _slideShowWindow.View.CurrentShowPosition;
@@ -91,11 +118,13 @@ namespace PPTService
 			}
 		}
 
-		public int EndingSlide => Presentation.SlideShowSettings.EndingSlide;
+		public int EndingSlide => DebugMode.IsEnabled ? DebugMode.SlidesCount : Presentation.SlideShowSettings.EndingSlide;
 
-		public int StartingSlide => Presentation.SlideShowSettings.StartingSlide;
+		public int StartingSlide => DebugMode.IsEnabled ? 1 : Presentation.SlideShowSettings.StartingSlide;
 
-		public PpSlideShowType? PptShowType => Presentation.SlideShowSettings.ShowType;
+		public PpSlideShowType? PptShowType => DebugMode.IsEnabled
+			? (PpSlideShowType?)PpSlideShowType.ppShowTypeSpeaker
+			: Presentation.SlideShowSettings.ShowType;
 
 		public event EventHandler ShowBegin;
 
@@ -120,6 +149,11 @@ namespace PPTService
 
 		public void PreviousPage()
 		{
+			if (DebugMode.IsEnabled)
+			{
+				DebugSetPage(_debugPage - 1);
+				return;
+			}
 			if (_stopwatch.ElapsedMilliseconds < MinPageTurningTimerSpan)
 			{
 				return;
@@ -135,6 +169,11 @@ namespace PPTService
 
 		public void NextPage()
 		{
+			if (DebugMode.IsEnabled)
+			{
+				DebugSetPage(_debugPage + 1);
+				return;
+			}
 			if (_stopwatch.ElapsedMilliseconds < MinPageTurningTimerSpan)
 			{
 				return;
@@ -150,6 +189,12 @@ namespace PPTService
 
 		public void Exit()
 		{
+			if (DebugMode.IsEnabled)
+			{
+				IsShowing = false;
+				System.Windows.Application.Current.Shutdown();
+				return;
+			}
 			SetActive((IntPtr)_app.HWND);
 			SyntacticSugar.TryCatchAction(() =>
 			{
@@ -163,10 +208,39 @@ namespace PPTService
 
 		public void GotoSlide(int index)
 		{
+			if (DebugMode.IsEnabled)
+			{
+				DebugSetPage(index);
+				return;
+			}
 			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").RemoveEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
 			_slideShowWindow.View.GotoSlide(index, MsoTriState.msoFalse);
 			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
 			_slideShowWindow.Activate();
+		}
+
+		/// <summary>把模拟放映窗口的 HWND 交给本类，供窗口定位 / 置顶 / 批注层对齐使用。</summary>
+		public void SetDebugSlideWindowHandle(IntPtr hwnd)
+		{
+			SlideShowWindowIntPtr = hwnd;
+		}
+
+		private void DebugSetPage(int index)
+		{
+			if (index < 1)
+			{
+				index = 1;
+			}
+			if (index > DebugMode.SlidesCount)
+			{
+				index = DebugMode.SlidesCount;
+			}
+			if (index == _debugPage)
+			{
+				return;
+			}
+			_debugPage = index;
+			OnNextSlide();
 		}
 
 		public void UpdatePointerColor()
@@ -229,6 +303,21 @@ namespace PPTService
 		public void Initialize()
 		{
 			_stopwatch = new Stopwatch();
+			if (DebugMode.IsEnabled)
+			{
+				// 不启动任何 PowerPoint 进程轮询 / COM 调用，直接置为「正在放映」。
+				_stopwatch.Start();
+				IsShowing = true;
+				ConfigHelper.Instance.IsShowing = true;
+				ConfigHelper.Instance.IsPptShowTypeSpeaker = true;
+				ConfigHelper.Instance.IsInitApplicationSuccessful = true;
+				// 关闭上报，避免无网络环境下尝试联网。
+				ConfigHelper.Instance.IsComOk = false;
+				// 延后到 OnStartup 返回之后再触发，确保 ViewHelper 已订阅 ShowBegin。
+				System.Windows.Application.Current.Dispatcher.BeginInvoke(
+					new Action(OnShowBegin), DispatcherPriority.Background);
+				return;
+			}
 			_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(2500.0);
 			_checkPowerPointTimer.Tick += CheckPowerPointProcess;
 			_checkPowerPointTimer.Start();

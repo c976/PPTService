@@ -93,7 +93,8 @@ namespace PPTService
 
 		public bool IsNeedStart()
 		{
-			return ConfigController.IsNeedStart;
+			// 模拟放映模式下不依赖辅助设备检测结果，始终允许启动界面。
+			return DebugMode.IsEnabled || ConfigController.IsNeedStart;
 		}
 	}
 }

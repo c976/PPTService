@@ -40,6 +40,11 @@ namespace PPTService
 
 		public static bool GetPptShowingState(Window window)
 		{
+			// 模拟放映下没有真正的 PPT 子窗口链，直接认为正在放映，避免界面被置为全透明。
+			if (DebugMode.IsEnabled)
+			{
+				return true;
+			}
 			Sb.Clear();
 			List<IntPtr> childWindows = WindowsApi.GetChildWindows(PptOperator.Instance.SlideShowWindowIntPtr);
 			childWindows.Add(new WindowInteropHelper(window).Handle);

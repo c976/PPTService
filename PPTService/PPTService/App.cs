@@ -26,6 +26,8 @@ namespace PPTService
 
 		protected override void OnStartup(StartupEventArgs args)
 		{
+			// /debug：无需 Office/WPS，直接模拟放映状态下的界面（工具栏 + 翻页 + 批注）。
+			DebugMode.Enable(args.Args);
 			base.OnStartup(args);
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -41,7 +43,10 @@ namespace PPTService
 			});
 			bool createdNew;
 			_mutex = new Mutex(true, AppMutex, out createdNew);
-			if (!createdNew && (!args.Args.Any() || args.Args.First() != AppRestart))
+			// 调试模式允许与正式实例并存，方便对照测试。
+			bool allowSecondInstance = DebugMode.IsEnabled ||
+				(args.Args.Any() && args.Args.First() == AppRestart);
+			if (!createdNew && !allowSecondInstance)
 			{
 				Environment.Exit(0);
 			}
@@ -53,11 +58,18 @@ namespace PPTService
 			ConfigHelper.Instance = new ConfigHelper();
 			_pptOperator = new PptOperator();
 			PptOperator.Instance = _pptOperator;
+			if (DebugMode.IsEnabled)
+			{
+				DebugMode.CreateSlideWindow();
+			}
 			_pptOperator.Initialize();
 			MouseHelper.Instance = new MouseHelper();
 			new ViewHelper().Initialize();
 			Version = GetAttribute<AssemblyFileVersionAttribute>().Version;
-			FridayReporter.Initialize(AppName, Version);
+			if (!DebugMode.IsEnabled)
+			{
+				FridayReporter.Initialize(AppName, Version);
+			}
 			CatchUnhandledException();
 		}
 
@@ -65,7 +77,8 @@ namespace PPTService
 		{
 			DispatcherUnhandledException += (object s, DispatcherUnhandledExceptionEventArgs e) =>
 			{
-				PostErrorAndShutdown(new UnhandledExceptionEventArgs(e, false));
+				// 记录真正的异常（原来误把 EventArgs 传进去，日志里只剩类型名）。
+				PostErrorAndShutdown(new UnhandledExceptionEventArgs(e.Exception, false));
 			};
 			AppDomain.CurrentDomain.UnhandledException += (object s, UnhandledExceptionEventArgs e) =>
 			{

@@ -103,6 +103,12 @@ namespace PPTService
                 {
                     cfg.PageTurningPosition = "Default";
                 }
+                // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
+                // 不写回 UserConfig.json，不影响正常启动。用户在设置里改选 Office 批注后以用户选择为准。
+                if (DebugMode.IsEnabled)
+                {
+                    cfg.UseSelfAnnotation = true;
+                }
                 _current = cfg;
                 return cfg;
             }

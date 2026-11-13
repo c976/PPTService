@@ -269,6 +269,8 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View_\AnnotationWindow.cs" />
+    <Compile Include="View_\DebugSlideWindow.cs" />
+    <Compile Include="PPTService\DebugMode.cs" />
     <Compile Include="PPTService\UserConfig.cs" />
   </ItemGroup>
   <ItemGroup>

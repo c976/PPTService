@@ -361,6 +361,11 @@ namespace PPTService
 
 		private void UpdateSlideListBoxIndex(int index)
 		{
+			// 模拟放映没有真实缩略图，跳过列表选中逻辑。
+			if (DebugMode.IsEnabled)
+			{
+				return;
+			}
 			CancelSubscribeSelectionChangedEvent();
 			int num = index - 1;
 			if (LeftSlideListBox.SelectedIndex != num)
@@ -399,6 +404,13 @@ namespace PPTService
 
 		private void AnalyzePpt()
 		{
+			if (DebugMode.IsEnabled)
+			{
+				// 没有真实 PPT 文件可供导出缩略图，跳过分析直接进入放映态。
+				_isAnalyzing = false;
+				DoAfterAnalyzePpt();
+				return;
+			}
 			if (_isAnalyzing)
 			{
 				return;
@@ -533,7 +545,11 @@ namespace PPTService
 				PlayHiddenLeftCenterButtonGridStoryboard();
 				PlayHiddenRightCenterButtonGridStoryboard();
 				FridayReporter.ReportEventImmediately(EventID.PptShowBegin);
-				WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
+				// 模拟放映时保持主窗口键盘焦点（ESC / 方向键翻页）。
+				if (!DebugMode.IsEnabled)
+				{
+					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
+				}
 			});
 		}
 
