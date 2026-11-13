@@ -8,38 +8,55 @@ namespace PPTService.Defender
 	/// <summary>
 	/// PPTService.Defender —— PPT 小工具的守护（看门狗）进程。
 	///
-	/// 职责：
-	///  1. 监控 PPTService.exe：发现其退出且退出码非 0（崩溃 / 异常终止）时，自动重新启动它；
-	///     正常退出（退出码 0）时守护进程也一并退出。
-	///  2. 单实例：通过命名互斥体保证同一时刻只有一个守护进程。
-	///  3. 自检「首发崩溃」：启动时若发现上次启动未完成即崩溃的标记，说明守护进程自身在初始化阶段崩溃，
-	///     连续超过阈值则停止自启，避免无限崩溃循环。
-	///  4. 防「重启风暴」：被监控程序在短时间窗口内反复崩溃超过阈值则停止重启。
+	/// 互守护约定（与主程序 PPTService.DefenderGuardian 对应）：
+	///  - 主程序每 2s 巡检守护进程，掉了就拉起；
+	///  - 守护进程每 4s 巡检主程序，主程序崩溃 / 消失就重新拉起。
+	///  - 调试模式不启用（由主程序侧控制是否拉起本进程）。
 	///
-	/// 说明：
-	///  - 该进程由 PPTService 在启动时拉起（调试模式不拉起），自身不再依赖 PPTService 存活。
-	///  - 重新拉起 PPTService 时带 "Restart" 参数，绕过其单实例互斥体。
+	/// 注意：这里刻意不持有 Process 对象等待 HasExited，而是每轮重新枚举进程。
+	/// 旧版在 try 里 return p、finally 里 p.Dispose()，返回的是已释放对象，
+	/// Run() 首次访问 HasExited 即抛异常导致守护进程静默退出 —— 即「运行没有反应」。
+	///
+	/// 停止：正常退出 / 卸载 / 升级时直接结束掉两个进程（不设计进程间优雅退出握手），
+	/// 安装脚本会在同一轮里同时结束主程序与守护进程，避免互相拉起。
 	/// </summary>
 	internal static class Program
 	{
 		private const string WatchedExe = "PPTService.exe";
+		private const string WatchedProcessName = "PPTService";
 
 		private const string MutexName = "PPTService.Defender.Mutex";
 
-		// 启动标记：进入监控循环并初始化成功后即删除；若存在说明上次启动未完成即崩溃
+		// 启动标记：仅在「初始化阶段」存在，初始化成功后立刻删除。
+		// 因此残留标记 == 上次启动没走到初始化完成（首发崩溃），被强杀不会误判。
 		private const string BootMarker = "Defender.boot";
-
-		// 守护进程自身首发崩溃计数
+		private const string BootCrashCountFile = "BootCrashCount";
 		private const int MaxBootCrashes = 3;
 
-		// 重启风暴阈值：窗口内崩溃次数上限
-		private const int MaxRestartStorm = 5;
+		/// <summary>守护进程巡检主程序的间隔（毫秒）。</summary>
+		private const int CheckIntervalMs = 4000;
 
+		private const int MaxRestartStorm = 5;
 		private const int RestartStormWindowSec = 60;
 
 		private static readonly string DataDir = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 			"Seewo", "PPTService", "Defender");
+
+		private static string BaseDirectory
+		{
+			get { return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "."; }
+		}
+
+		private static string BootMarkerPath
+		{
+			get { return Path.Combine(DataDir, BootMarker); }
+		}
+
+		private static string BootCrashCountPath
+		{
+			get { return Path.Combine(DataDir, BootCrashCountFile); }
+		}
 
 		[STAThread]
 		private static void Main()
@@ -52,159 +69,146 @@ namespace PPTService.Defender
 				{
 					return;
 				}
-
-				// 自检：检测守护进程自身首发崩溃
+				if (!SelfCheck())
+				{
+					return;
+				}
 				try
 				{
-					Directory.CreateDirectory(DataDir);
-					string bootMarker = Path.Combine(DataDir, BootMarker);
-					string crashCountFile = Path.Combine(DataDir, "BootCrashCount");
-					if (File.Exists(bootMarker))
-					{
-						int bootCrashes = ReadInt(crashCountFile) + 1;
-						Log($"检测到守护进程上次启动未完成即崩溃（第 {bootCrashes} 次）。");
-						if (bootCrashes >= MaxBootCrashes)
-						{
-							Log($"守护进程连续 {MaxBootCrashes} 次启动崩溃，停止自启以避免死循环。");
-							File.Delete(bootMarker);
-							File.Delete(crashCountFile);
-							return;
-						}
-						WriteInt(crashCountFile, bootCrashes);
-					}
-					else
-					{
-						WriteInt(crashCountFile, 0);
-					}
-					// 写入启动标记：进入监控循环并成功初始化后删除
-					File.WriteAllText(bootMarker, DateTime.Now.ToString("o"));
+					string exePath = ResolveWatchedPath();
+					Log($"守护进程已启动（每 {CheckIntervalMs / 1000}s 巡检主程序），目标：{exePath}");
+					// 初始化完成：删除启动标记。此后被强杀不再算「首发崩溃」。
+					TryDelete(BootMarkerPath);
+					Run(exePath);
 				}
 				catch (Exception ex)
 				{
-					Log("自检阶段异常：" + ex);
+					Log("守护循环异常：" + ex);
 				}
+			}
+		}
 
+		/// <summary>自检「守护进程首发崩溃」：残留启动标记说明上次初始化未完成。</summary>
+		private static bool SelfCheck()
+		{
+			try
+			{
+				Directory.CreateDirectory(DataDir);
+				if (File.Exists(BootMarkerPath))
+				{
+					int crashes = ReadInt(BootCrashCountPath) + 1;
+					Log($"检测到守护进程上次启动未完成即崩溃（第 {crashes} 次）。");
+					if (crashes >= MaxBootCrashes)
+					{
+						Log($"连续 {MaxBootCrashes} 次启动崩溃，停止自启以避免死循环。");
+						TryDelete(BootCrashCountPath);
+						return false;
+					}
+					WriteInt(BootCrashCountPath, crashes);
+				}
+				else
+				{
+					WriteInt(BootCrashCountPath, 0);
+				}
+				File.WriteAllText(BootMarkerPath, DateTime.Now.ToString("o"));
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Log("自检阶段异常：" + ex);
+				return true;
+			}
+		}
+
+		private static void Run(string exePath)
+		{
+			int restartCount = 0;
+			DateTime stormWindowStart = DateTime.MinValue;
+
+			while (true)
+			{
+				Thread.Sleep(CheckIntervalMs);
 				try
 				{
-					Run();
+					if (IsMainRunning())
+					{
+						continue;
+					}
+					if (!File.Exists(exePath))
+					{
+						Log("目标程序不存在，跳过本次拉起。");
+						continue;
+					}
+
+					if ((DateTime.Now - stormWindowStart).TotalSeconds > RestartStormWindowSec)
+					{
+						stormWindowStart = DateTime.Now;
+						restartCount = 0;
+					}
+					restartCount++;
+					if (restartCount > MaxRestartStorm)
+					{
+						Log($"主程序在 {RestartStormWindowSec}s 内反复退出超过 {MaxRestartStorm} 次，停止拉起。");
+						return;
+					}
+					Log($"主程序不在运行，尝试重新启动（第 {restartCount} 次）……");
+					// 不带 Restart 参数：主程序单实例互斥体会自动去掉重复实例，
+					// 避免与 PostErrorAndShutdown 里的 Restart.PPTService() 抢出双份。
+					Process.Start(new ProcessStartInfo(exePath)
+					{
+						UseShellExecute = false,
+						WorkingDirectory = BaseDirectory
+					});
+					Log("已发出启动请求。");
 				}
-				finally
+				catch (Exception ex)
+				{
+					Log("巡检异常：" + ex.Message);
+				}
+			}
+		}
+
+		/// <summary>
+		/// 每轮重新枚举进程名，不缓存也不跨轮持有 Process 对象。
+		/// 精确比对进程名，避免把 PPTService.Defender 自己算成主程序。
+		/// </summary>
+		private static bool IsMainRunning()
+		{
+			Process[] processes = Process.GetProcessesByName(WatchedProcessName);
+			try
+			{
+				foreach (Process p in processes)
 				{
 					try
 					{
-						File.Delete(Path.Combine(DataDir, BootMarker));
+						if (string.Equals(p.ProcessName, WatchedProcessName, StringComparison.OrdinalIgnoreCase))
+						{
+							return true;
+						}
 					}
 					catch
 					{
 					}
 				}
+				return false;
 			}
-		}
-
-		private static void Run()
-		{
-			string exePath = ResolveWatchedPath();
-			Log($"守护进程启动，监控目标：{exePath}");
-
-			int restartCount = 0;
-			var stormWindowStart = DateTime.MinValue;
-
-			while (true)
+			finally
 			{
-				Process proc = FindOrStart(exePath);
-				if (proc == null)
-				{
-					Log("无法定位或启动被监控程序，守护进程退出。");
-					return;
-				}
-
-				Log($"被监控程序已启动（PID={proc.Id}），等待其退出……");
-				while (!proc.HasExited)
-				{
-					Thread.Sleep(1000);
-				}
-
-				int exitCode = 0;
-				try
-				{
-					exitCode = proc.ExitCode;
-				}
-				catch
-				{
-				}
-				Log($"被监控程序已退出，退出码={exitCode}。");
-
-				if (exitCode == 0)
-				{
-					// 正常退出：守护进程一同退出
-					Log("检测到正常退出，守护进程终止。");
-					return;
-				}
-
-				// 异常退出（崩溃）：重启，并做重启风暴保护
-				if ((DateTime.Now - stormWindowStart).TotalSeconds > RestartStormWindowSec)
-				{
-					stormWindowStart = DateTime.Now;
-					restartCount = 0;
-				}
-				restartCount++;
-				if (restartCount > MaxRestartStorm)
-				{
-					Log($"被监控程序在 {RestartStormWindowSec}s 内崩溃超过 {MaxRestartStorm} 次，停止重启。");
-					return;
-				}
-				Log($"尝试重启被监控程序（第 {restartCount} 次）……");
-				Thread.Sleep(2000);
-			}
-		}
-
-		private static Process FindOrStart(string exePath)
-		{
-			foreach (var p in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(WatchedExe)))
-			{
-				try
-				{
-					if (!p.HasExited)
-					{
-						// 仅当路径匹配时才视为目标（避免同名其它进程）
-						if (string.Equals(p.MainModule.FileName, exePath, StringComparison.OrdinalIgnoreCase))
-						{
-							return p;
-						}
-					}
-				}
-				catch
-				{
-				}
-				finally
+				foreach (Process p in processes)
 				{
 					p.Dispose();
 				}
 			}
-
-			if (!File.Exists(exePath))
-			{
-				return null;
-			}
-			var psi = new ProcessStartInfo(exePath, "Restart")
-			{
-				UseShellExecute = false,
-				CreateNoWindow = true,
-				WindowStyle = ProcessWindowStyle.Hidden
-			};
-			return Process.Start(psi);
 		}
 
 		private static string ResolveWatchedPath()
 		{
 			// 默认与守护进程同目录
-			var myDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
-			var candidate = Path.Combine(myDir, WatchedExe);
+			var candidate = Path.Combine(BaseDirectory, WatchedExe);
 			if (File.Exists(candidate))
 			{
 				return candidate;
 			}
-
 			// 回退：注册表 ExePath（与 PPTService.Restart 一致）
 			try
 			{
@@ -243,6 +247,17 @@ namespace PPTService.Defender
 			try
 			{
 				File.WriteAllText(file, n.ToString());
+			}
+			catch
+			{
+			}
+		}
+
+		private static void TryDelete(string file)
+		{
+			try
+			{
+				File.Delete(file);
 			}
 			catch
 			{

@@ -111,7 +111,9 @@ namespace PPTService
 
 		public void InitializeBottomArea()
 		{
-			RubberCheckBox.IsChecked = false;
+			// 每场放映开始都回到「鼠标」态：既保证工具栏视觉与 AnnotationController
+			// 的模式一致，也避免上一场遗留的笔/橡皮选中态。
+			UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
 		}
 
 		private void Select_OnClick(object sender, RoutedEventArgs e)

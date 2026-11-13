@@ -1,7 +1,6 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -51,43 +50,17 @@ namespace PPTService
 			{
 				Environment.Exit(0);
 			}
-			StartDefenderIfNeeded();
+			// 启动互守护：主程序每 2s 看护守护进程，守护进程每 4s 看护主程序。
+			// 调试模式不启用。卸载/升级时由安装脚本同时结束两个进程。
+			DefenderGuardian.Start();
 		}
 
-		/// <summary>
-		/// 启动守护进程 PPTService.Defender（调试模式下不启动）。
-		/// 守护进程独立于本进程存活，负责在 PPTService 崩溃时将其重新拉起。
-		/// </summary>
-		private void StartDefenderIfNeeded()
+		protected override void OnExit(ExitEventArgs e)
 		{
-			// 调试模式不需要守护进程
-			if (DebugMode.IsEnabled)
-			{
-				return;
-			}
-			try
-			{
-				string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".";
-				string defenderPath = Path.Combine(baseDir, "PPTService.Defender.exe");
-				if (!File.Exists(defenderPath))
-				{
-					return;
-				}
-				// 已运行则跳过（守护进程自身互斥体也会兜底）
-				if (Process.GetProcessesByName("PPTService.Defender").Length > 0)
-				{
-					return;
-				}
-				Process.Start(new ProcessStartInfo(defenderPath)
-				{
-					UseShellExecute = false,
-					CreateNoWindow = true,
-					WindowStyle = ProcessWindowStyle.Hidden
-				});
-			}
-			catch
-			{
-			}
+			// 正常退出：不做优雅握手，直接把守护进程一并结束掉，
+			// 否则它会在 4s 后把主程序重新拉起。
+			DefenderGuardian.StopAndKill();
+			base.OnExit(e);
 		}
 
 		private void StartProcess()

@@ -126,6 +126,22 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 放映结束 / 放映中断：把批注模式复位成「鼠标」。
+		/// 工具栏的 UpdateButtonState(None) 只改了 UI，不改这里的话下次放映 SetEnabled()
+		/// 会用旧的 _currentMode(Pen/Eraser) 把 Board 切回笔，出现「界面显示鼠标、实际是笔」。
+		/// </summary>
+		public static void ResetModeToMouse()
+		{
+			// 只复位状态与已有 Board，不走 SetMode → EnsureBoard，
+			// 避免在放映结束时反而重新创建/挂上批注层。
+			_currentMode = Mode.Mouse;
+			if (_board != null)
+			{
+				_board.GotoSelect();
+			}
+		}
+
 		public static void Close()
 		{
 			if (_board != null)

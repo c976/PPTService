@@ -373,12 +373,18 @@ FunctionEnd
 Function KillProcessesInDirectory
   Push $0
 KPD_Retry:
+  ; 主程序与守护进程互守护：先按名字结束守护进程，再按目录结束剩余进程，
+  ; 否则单独结束主程序会被守护进程立刻拉起。
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Pop $0
   Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
   Pop $0
   ${If} $0 == 0
     Goto KPD_Done
   ${EndIf}
   Sleep 1000
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Pop $0
   Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
   Pop $0
   ${If} $0 == 0
@@ -648,11 +654,21 @@ Section "Uninstall"
   ; 详细日志：引擎逐指令写入窗口详情区与 $INSTDIR\install.log
   LogSet on
 
-  ; 卸载前结束主程序进程（不在界面与日志中输出）。
+  ; 卸载前同时结束「主程序 + 守护进程」两个进程（不在界面与日志中输出）。
+  ; 两者互守护：主程序每 2s 拉起守护进程、守护进程每 4s 拉起主程序，
+  ; 只结束一个会被剩下的那个重新拉起，所以必须一起结束。
+  ; 先结束守护进程（否则它会把主程序拉回来），再结束主程序（否则它会把守护进程拉回来）。
   ; 按进程名结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Pop $0
   Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
   Pop $0
   Sleep 500
+  ; 二次清理：覆盖互守护在两次结束之间可能重新拉起的实例
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Pop $0
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
+  Pop $0
 
   ; ---------------------------------------------------------------------------
   ;  删除防火墙白名单规则（安装时启用白名单后，取消此注释）

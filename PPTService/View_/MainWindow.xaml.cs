@@ -506,7 +506,7 @@ namespace PPTService
 						MouseHelper.Instance.Stop();
 						ViewHelper.BottomArea.UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
 						ViewHelper.InnerBoardWindow.HiddenAndClearInkCanvas();
-						// 放映结束：隐藏批注窗口（下次放映开始时按配置重新显示）。
+						// 放映结束：只隐藏批注层（下次放映开始时按配置重新显示）。
 						AnnotationController.Hide();
 						PlayHiddenLeftSlideManagerViewStoryboard();
 						PlayHiddenRightSlideManagerViewStoryboard();
@@ -519,6 +519,11 @@ namespace PPTService
 						});
 						FridayReporter.ReportEventImmediately(EventID.PptShowEnd);
 					}
+					// 放映结束：批注模式一律复位到「鼠标」。必须放在最后——
+					// HiddenAndClearInkCanvas() 会经板中板 OnInnerBoardShowingChanged(false)
+					// 恢复 _modeBeforeInnerBoard（可能是笔），若不覆盖，下次放映 SetEnabled()
+					// 会把 Board 切回笔，出现「工具栏显示鼠标、实际是笔」的不一致。
+					AnnotationController.ResetModeToMouse();
 				});
 			});
 		}
