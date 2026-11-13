@@ -7,9 +7,11 @@ using System.Windows.Media;
 namespace PPTService
 {
     /// <summary>
-    /// /debug 模式下的模拟幻灯片放映窗口。
+    /// /debug 模式下的模拟幻灯片放映窗口（充当 PowerPoint 的 SlideShow 窗口）。
     /// 它提供真实的 HWND（供 WindowStateHelper / WindowsApi / AnnotationController 使用），
-    /// 并保持非 Topmost，从而始终位于工具栏窗口与批注窗口之下。
+    /// 并保持非 Topmost，从而始终位于工具栏窗口之下。
+    /// 工具栏窗口（MainWindow）自身已内含自实现批注的绘制层（Board 控件），
+    /// 故本窗口只需位于工具栏之下即可，无需再额外压一个独立的批注窗口。
     /// 鼠标模式穿透时点击会落到本窗口，可用来验证穿透与翻页反馈。
     /// </summary>
     public class DebugSlideWindow : Window

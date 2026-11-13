@@ -24,6 +24,10 @@ namespace PPTService
 	{
 		private readonly IDesktopBoardModesProvider _modesProvider = new DefaultDesktopBoardModesProvider();
 
+		// 鼠标也能书写 / 擦除的笔模式（原版只认触屏 / 压感笔）。复用同一实例，
+		// 与 DefaultDesktopBoardModesProvider.PenMode 的 Lazy 单例用法保持一致。
+		private readonly Mode _penMode = new MouseEnabledPenWritingMode();
+
 		public Board InkBoard { get; }
 
 		public AnnotationBoard()
@@ -58,7 +62,7 @@ namespace PPTService
 
 		public void GotoInk()
 		{
-			InkBoard.Mode = _modesProvider.PenMode;
+			InkBoard.Mode = _penMode;
 			InkBoard.IsHitTestVisible = true;
 		}
 

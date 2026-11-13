@@ -269,6 +269,7 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View_\AnnotationBoard.cs" />
+    <Compile Include="View_\MouseEnabledPenWritingMode.cs" />
     <Compile Include="View_\DebugSlideWindow.cs" />
     <Compile Include="View_\InkBoardStyleFallback.cs" />
     <Compile Include="PPTService\DebugMode.cs" />
