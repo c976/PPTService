@@ -90,7 +90,7 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <!-- PPTService.Ink 的原版白板基类链（SafeWindow / Win32 等）所在程序集，
-         派生 AnnotationWindow 时必须显式引用，否则 CS0012。 -->
+         AnnotationBoard 直接引用其 Board / Initializer / 模式提供器等类型时必须显式引用，否则 CS0012。 -->
     <Reference Include="Cvte.Core.cc">
       <HintPath>..\lib\Cvte.Core.cc.dll</HintPath>
       <Private>True</Private>
@@ -268,7 +268,7 @@
     <Compile Include="View_\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\AnnotationWindow.cs" />
+    <Compile Include="View_\AnnotationBoard.cs" />
     <Compile Include="View_\DebugSlideWindow.cs" />
     <Compile Include="View_\InkBoardStyleFallback.cs" />
     <Compile Include="PPTService\DebugMode.cs" />

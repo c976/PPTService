@@ -113,6 +113,23 @@ namespace PPTService
 		}
 
 		/// <summary>
+		/// 把自实现批注的绘制层（Board 控件）挂到视觉树最底层；传入 null 即移除。
+		/// 工具栏按钮网格位于其之上，WPF 单窗口命中测试保证按钮永远可点。
+		/// </summary>
+		public void SetAnnotationLayer(UIElement layer)
+		{
+			AnnotationHost.Child = layer;
+		}
+
+		/// <summary>
+		/// 移除自实现批注绘制层。
+		/// </summary>
+		public void RemoveAnnotationLayer()
+		{
+			AnnotationHost.Child = null;
+		}
+
+		/// <summary>
 		/// 按用户配置决定翻页按钮放在「两边」还是「底部」，并把缩略图导航面板对齐到对应位置。
 		/// 仅将当前生效的那一对翻页控件加入可视树，避免网格透明度动画同时影响两套控件。
 		/// </summary>
@@ -671,15 +688,10 @@ namespace PPTService
 			{
 				return;
 			}
-			// 自实现批注下，书写期间绝不做 PowerPoint COM 调用或跨窗口 z 序调整。
-			// 原逻辑每 300ms 调一次 PptOperator.UpdatePointerColor() / PointerType（COM），
-			// 在 Office 放映 + 触控时会与 WPF 触笔线程互锁，表现为「画第一笔就卡死」，
-			// 真机日志则表现为每 0.3 秒刷一条 ColorFormat COMException。
-			// 翻页仍由 PptOperator.NextSlide 事件驱动，不依赖本定时器。
-			if (UserConfigManager.Load().UseSelfAnnotation)
-			{
-				return;
-			}
+			// 自实现批注下也必须维持工具栏的显隐与「浮在 PPT 放映窗口之上」：
+			// 否则工具栏会被 PPT 盖住而「按钮整体消失」。批注层已合并进本窗口，
+			// 不再需要跨窗口 SetWindowPos；且 UpdateButtonState() 在自实现批注时已跳过
+			// Office COM（不会触发之前的「画第一笔卡死」），故定时器照常运行即可。
 			SyntacticSugar.TryCatchAction(() =>
 			{
 				if (IsNeedUpdateTimer)

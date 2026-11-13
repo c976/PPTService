@@ -506,6 +506,8 @@
         <GoToStateAction StateName="Adaptive3800" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
       </pptService:AdaptiveTrigger>
     </i:Interaction.Triggers>
+    <!-- 自实现批注绘制层：始终位于最底层，工具栏按钮网格在其之上，按钮永远可点。 -->
+    <Border Name="AnnotationHost" Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="3" />
     <Grid Name="LeftCenterButtonGrid" Row="0" RowSpan="2" Column="0" HorizontalAlignment="Left" />
     <Grid Name="RightCenterButtonGrid" Row="0" RowSpan="2" Column="2" HorizontalAlignment="Right" />
     <Grid Name="LeftBottomButtonGrid" Row="1" Column="0" HorizontalAlignment="Left" />
