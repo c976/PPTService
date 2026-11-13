@@ -186,6 +186,19 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 重新放映 / 切换到新 PPT 时清掉上一场的全部笔迹。
+		/// Board 按页累计 Slide，若不清除，结束放映再放映、或换一份 PPT 时旧笔迹仍会残留。
+		/// 一场放映内的翻页只走 ShowPage（保留逐页笔迹），不调用本方法。
+		/// </summary>
+		public static void Reset()
+		{
+			if (_board != null)
+			{
+				_board.ClearSlides();
+			}
+		}
+
 		/// <summary>PPT 翻页（含不通过小工具的翻页）时切换到对应页的笔迹。</summary>
 		public static void ShowPage(int pageIndex)
 		{

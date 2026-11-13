@@ -207,6 +207,8 @@ namespace PPTService
 					IsExiting = false;
 					Opacity = 1.0;
 					AnnotationController.SetEnabled(UserConfigManager.Load().UseSelfAnnotation);
+					// 重新放映 / 切换 PPT：清掉上一场残留笔迹，再切到当前页
+					AnnotationController.Reset();
 					AnnotationController.ShowPage(PptOperator.Instance.CurrentShowPosition);
 				});
 				SyntacticSugar.CurrentDispatcherBeginInvoke(AnalyzePpt);

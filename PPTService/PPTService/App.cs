@@ -1,6 +1,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -49,6 +50,43 @@ namespace PPTService
 			if (!createdNew && !allowSecondInstance)
 			{
 				Environment.Exit(0);
+			}
+			StartDefenderIfNeeded();
+		}
+
+		/// <summary>
+		/// 启动守护进程 PPTService.Defender（调试模式下不启动）。
+		/// 守护进程独立于本进程存活，负责在 PPTService 崩溃时将其重新拉起。
+		/// </summary>
+		private void StartDefenderIfNeeded()
+		{
+			// 调试模式不需要守护进程
+			if (DebugMode.IsEnabled)
+			{
+				return;
+			}
+			try
+			{
+				string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".";
+				string defenderPath = Path.Combine(baseDir, "PPTService.Defender.exe");
+				if (!File.Exists(defenderPath))
+				{
+					return;
+				}
+				// 已运行则跳过（守护进程自身互斥体也会兜底）
+				if (Process.GetProcessesByName("PPTService.Defender").Length > 0)
+				{
+					return;
+				}
+				Process.Start(new ProcessStartInfo(defenderPath)
+				{
+					UseShellExecute = false,
+					CreateNoWindow = true,
+					WindowStyle = ProcessWindowStyle.Hidden
+				});
+			}
+			catch
+			{
 			}
 		}
 
