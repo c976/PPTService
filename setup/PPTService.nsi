@@ -29,7 +29,7 @@ SetCompressorDictSize 32
 ;  产品定义
 ; -----------------------------------------------------------------------------
 !define PRODUCT_NAME          "PPT小工具增强版"
-!define PRODUCT_NAME_EN       "PPTServiceUltra"
+!define PRODUCT_NAME_EN       "PPTService"
 ; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
 !include "${__FILEDIR__}\Version.nsh"
 !define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
@@ -47,7 +47,7 @@ SetCompressorDictSize 32
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 UninstallCaption "$(STR_AppName) 卸载"
 BrandingText "${PRODUCT_PUBLISHER}"
-OutFile "${__FILEDIR__}\PPTServiceSetup.exe"
+OutFile "${__FILEDIR__}\PPTServiceUltraSetup.exe"
 Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
 UninstallIcon "${__FILEDIR__}\Skin\Icons\Uninstall.ico"
 
@@ -65,7 +65,7 @@ VIAddVersionKey /LANG=2052 "FileVersion"      "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=2052 "ProductVersion"   "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=2052 "LegalCopyright"   "Copyright (C) The PPTServiceUltra Project."
 VIAddVersionKey /LANG=2052 "LegalTrademarks"  "${PRODUCT_PUBLISHER}"
-VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceSetup.exe"
+VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceUltraSetup.exe"
 
 ; -----------------------------------------------------------------------------
 ;  MUI 现代界面（卸载部分使用）
