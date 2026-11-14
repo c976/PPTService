@@ -52,25 +52,25 @@
         <GroupBox Grid.Row="2" Header="批注方式" Margin="0,0,0,8">
           <StackPanel Margin="4">
             <CheckBox Name="EnableSelfAnnotationCheckBox"
-                      Content="启用自实现批注功能（压感笔迹 / 手势橡皮）"
+                      Content="启用自实现批注功能"
                       Margin="2" />
-            <TextBlock Text="不勾选时使用 Office / WPS 原生批注；关闭后可随时重新开启。"
+            <TextBlock Text="不勾选时使用 Office / WPS 原生批注"
                        Margin="20,4,2,2" FontSize="11" Foreground="Gray" TextWrapping="Wrap" />
           </StackPanel>
         </GroupBox>
 
         <GroupBox Grid.Row="3" Header="其它功能" Margin="0,0,0,8">
           <StackPanel Margin="4">
-            <CheckBox Name="QrCodeCheckBox" Content="显示「创建二维码（分享）」按钮" Margin="2" />
-            <CheckBox Name="ShowLoadingCheckBox" Content="显示 PPT 加载时的转圈（首次分析幻灯片）" Margin="2" />
+            <CheckBox Name="QrCodeCheckBox" Content="显示分享（创建二维码）按钮" Margin="2" />
+            <CheckBox Name="ShowLoadingCheckBox" Content="显示加载进度条界面" Margin="2" />
           </StackPanel>
         </GroupBox>
 
         <GroupBox Grid.Row="4" Header="翻页按钮位置" Margin="0,0,0,8">
           <StackPanel Margin="4">
-            <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（按程序原逻辑：WPS 两边 / Office 底部）" Margin="2" />
-            <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部（左右下角）" Margin="2" />
-            <RadioButton Name="RbBoth" GroupName="PagePos" Content="两边（左右居中）" Margin="2" />
+            <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（WPS 侧边 / Office 底部）" Margin="2" />
+            <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部" Margin="2" />
+            <RadioButton Name="RbBoth" GroupName="PagePos" Content="侧边" Margin="2" />
           </StackPanel>
         </GroupBox>
 
