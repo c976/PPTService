@@ -2,12 +2,14 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -27,6 +29,9 @@ namespace PPTService
 		private int _currentPageIndex;
 
 		private string _prePptFilePath;
+
+		/// <summary>是否允许窗口真正关闭；仅系统注销/关机或程序内部主动退出时置 true。</summary>
+		private bool _allowClose;
 
 		private static readonly int TimerSpan = 300;
 
@@ -64,6 +69,9 @@ namespace PPTService
 		{
 			InitializeComponent();
 			DataContext = this;
+			// 主窗口是常驻工具栏，禁止用户用 Alt+F4 / 系统菜单 / 任务栏等常规途径关掉它，
+			// 并从 Alt+Tab 中隐藏（见 EnableCloseProtection）。
+			EnableCloseProtection();
 			UpdateTimer = new DispatcherTimer
 			{
 				Interval = TimeSpan.FromMilliseconds(TimerSpan)
@@ -90,6 +98,73 @@ namespace PPTService
 			{
 				e.Handled = true;
 			};
+		}
+
+		/// <summary>
+		/// 启用主窗口关闭保护：拦截 Closing / WM_SYSCOMMAND(SC_CLOSE) / WM_CLOSE，
+		/// 阻止 Alt+F4、标题栏关闭、任务栏右键关闭、任务管理器「结束任务」等常规关闭途径；
+		/// 并给窗口加 WS_EX_TOOLWINDOW，从 Alt+Tab 与任务栏中隐藏。
+		/// 系统注销 / 关机（WM_QUERYENDSESSION / WM_ENDSESSION）与程序内部
+		/// 显式调用 AllowClose() 仍可正常退出，避免卡住系统。
+		/// </summary>
+		public void EnableCloseProtection()
+		{
+			Closing += MainWindow_Closing;
+			SourceInitialized += MainWindow_SourceInitialized;
+			System.Windows.Application.Current.SessionEnding += delegate { _allowClose = true; };
+		}
+
+		/// <summary>程序内部需要真正退出时（如调试模式结束放映）放行一次关闭。</summary>
+		public void AllowClose()
+		{
+			_allowClose = true;
+		}
+
+		private void MainWindow_Closing(object sender, CancelEventArgs e)
+		{
+			if (!_allowClose)
+			{
+				e.Cancel = true;
+			}
+		}
+
+		private void MainWindow_SourceInitialized(object sender, EventArgs e)
+		{
+			IntPtr hwnd = new WindowInteropHelper(this).Handle;
+			if (hwnd == IntPtr.Zero)
+			{
+				return;
+			}
+			// 保留原有的 WS_EX_LAYERED（透明窗口必需），只追加 TOOLWINDOW、清掉 APPWINDOW。
+			uint exStyle = WindowsApi.GetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle);
+			exStyle |= WindowsApi.WindowFlags.WsExToolWindow;
+			exStyle &= ~WindowsApi.WindowFlags.WsExAppWindow;
+			WindowsApi.SetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle, exStyle);
+			// SWP_FRAMECHANGED 让样式立即生效（NOMOVE/NOSIZE/NOZORDER/NOACTIVATE 保持位置与层级）。
+			WindowsApi.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x0037);
+			HwndSource source = HwndSource.FromHwnd(hwnd);
+			if (source != null)
+			{
+				source.AddHook(MainWindow_WndProc);
+			}
+		}
+
+		private IntPtr MainWindow_WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+		{
+			if (msg == WindowsApi.WindowFlags.WmQueryEndSession || msg == WindowsApi.WindowFlags.WmEndSession)
+			{
+				_allowClose = true;
+			}
+			else if (!_allowClose)
+			{
+				if (msg == WindowsApi.WindowFlags.WmClose ||
+					(msg == WindowsApi.WindowFlags.WmSysCommand &&
+					 (wParam.ToInt32() & 0xFFF0) == WindowsApi.WindowFlags.ScClose))
+				{
+					handled = true;
+				}
+			}
+			return IntPtr.Zero;
 		}
 
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -525,10 +600,15 @@ namespace PPTService
 						});
 						FridayReporter.ReportEventImmediately(EventID.PptShowEnd);
 					}
-					// 放映结束：批注模式一律复位到「鼠标」。必须放在最后——
-					// HiddenAndClearInkCanvas() 会经板中板 OnInnerBoardShowingChanged(false)
-					// 恢复 _modeBeforeInnerBoard（可能是笔），若不覆盖，下次放映 SetEnabled()
-					// 会把 Board 切回笔，出现「工具栏显示鼠标、实际是笔」的不一致。
+					// 放映结束：笔色 / 粗细 / 模式 / 弹窗 / 滑杆全部复位，含板中板自己的 Board。
+					// 顺序：先复位注解控制器真值源，再让工具栏与板中板按新真值同步；
+					// 最后统一切回「鼠标」——HiddenAndClearInkCanvas() 会经板中板
+					// OnInnerBoardShowingChanged(false) 恢复 _modeBeforeInnerBoard（可能是笔），
+					// 若不覆盖，下次放映 SetEnabled() 会把 Board 切回笔，出现
+					// 「工具栏显示鼠标、实际是笔」的不一致。
+					AnnotationController.ResetPenSettings();
+					ViewHelper.BottomArea?.ResetPenSettings();
+					ViewHelper.ResetInnerBoardPenSettingsIfCreated();
 					AnnotationController.ResetModeToMouse();
 				});
 			});

@@ -227,7 +227,7 @@ namespace PPTService
             }
             QrCodeCheckBox.IsChecked = def.ShowQrCode;
             ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
-            EnableSelfAnnotationCheckBox.IsChecked = false;
+            EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
             RbDefault.IsChecked = true;
         }
     }

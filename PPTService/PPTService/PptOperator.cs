@@ -192,6 +192,8 @@ namespace PPTService
 			if (DebugMode.IsEnabled)
 			{
 				IsShowing = false;
+				// 主窗口启用了关闭保护，程序内部主动退出时显式放行。
+				ViewHelper.MainWindow?.AllowClose();
 				System.Windows.Application.Current.Shutdown();
 				return;
 			}
@@ -262,6 +264,24 @@ namespace PPTService
 			{
 				PointerType = PpSlideShowPointerType.ppSlideShowPointerPen;
 				_slideShowWindow.View.PointerColor.RGB = color;
+			});
+		}
+
+		/// <summary>
+		/// 放映结束：只把 Office 原生画笔颜色复位为默认色，不改指针类型
+		/// （SetPointerColor 会强制切到画笔，放映结束时调用会把鼠标态弄乱）。
+		/// 放映窗口可能已经释放，COM 异常由 TryCatchAction 吞掉。
+		/// </summary>
+		public void ResetPointerColor()
+		{
+			PointerColor = PenSettings.DefaultColor;
+			SyntacticSugar.TryCatchAction(() =>
+			{
+				if (_slideShowWindow != null)
+				{
+					Color c = PenSettings.DefaultColor;
+					_slideShowWindow.View.PointerColor.RGB = (c.B << 16) | (c.G << 8) | c.R;
+				}
 			});
 		}
 

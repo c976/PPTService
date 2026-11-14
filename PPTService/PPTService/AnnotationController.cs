@@ -240,6 +240,27 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 放映结束：把笔色与粗细复位为默认值，并同步到主批注层 Board 与 Office 指针色缓存。
+		/// 只改纯状态与已有 Board，不走 SetColor → 避免在放映结束时反而重新挂上批注层。
+		/// 板中板有自己独立的 Board，由 InnerBoardWindow.ResetPenSettings() 单独复位。
+		/// </summary>
+		public static void ResetPenSettings()
+		{
+			_color = PenSettings.DefaultColor;
+			_thickness = PenSettings.PenWeight;
+			if (PptOperator.Instance != null)
+			{
+				// 同时复位 Office 原生画笔颜色缓存与 COM 指针色（不改指针类型）。
+				PptOperator.Instance.ResetPointerColor();
+			}
+			if (_board != null)
+			{
+				_board.SetInkColor(_color);
+				_board.SetInkThickness(_thickness);
+			}
+		}
+
 		/// <summary>PPT 翻页（含不通过小工具的翻页）时切换到对应页的笔迹。</summary>
 		public static void ShowPage(int pageIndex)
 		{

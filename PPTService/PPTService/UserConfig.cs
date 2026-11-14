@@ -17,7 +17,7 @@ namespace PPTService
     }
 
     /// <summary>
-    /// 用户配置根对象，序列化到程序启动目录 Configs/UserConfig.json。
+    /// 用户配置根对象，序列化到 %LOCALAPPDATA%\PPTServiceUltra\UserConfig.json。
     /// </summary>
     public class UserConfig
     {
@@ -32,12 +32,12 @@ namespace PPTService
         /// </summary>
         public bool ShowQrCode { get; set; }
 
-        /// <summary>
-        /// 批注方式：false（默认）= 使用 Office 原生批注；
-        /// true = 使用 PPTService.Ink 里的原版桌面批注白板窗口（压感软笔 / 手势橡皮，
-        /// 独立透明窗口、鼠标模式穿透、逐页笔迹），适配希沃设备。
-        /// </summary>
-        public bool UseSelfAnnotation { get; set; }
+		/// <summary>
+		/// 批注方式：true（默认）= 使用 PPTService.Ink 里的原版桌面批注白板窗口
+		/// （压感软笔 / 手势橡皮，独立透明窗口、鼠标模式穿透、逐页笔迹），适配希沃设备；
+		/// false = 使用 Office / WPS 原生批注。
+		/// </summary>
+		public bool UseSelfAnnotation { get; set; }
 
 		/// <summary>
 		/// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
@@ -62,16 +62,17 @@ namespace PPTService
 			ShowQrCode = true;
 			PageTurningPosition = "Default";
 			ShowLoadingSpinner = true;
+			// 默认开启自实现批注（压感软笔 / 手势橡皮 / 板中板）。
+			UseSelfAnnotation = true;
 		}
     }
 
     /// <summary>
-    /// 用户配置读写与下发。文件位于程序启动目录下的 Configs/UserConfig.json。
+    /// 用户配置读写与下发。文件位于 %LOCALAPPDATA%\PPTServiceUltra\UserConfig.json。
     /// </summary>
     public static class UserConfigManager
     {
-        private static readonly string ConfigDirectory =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
+        private static readonly string ConfigDirectory = AppPath.LocalRoot();
 
         private static readonly string ConfigFilePath =
             Path.Combine(ConfigDirectory, "UserConfig.json");
@@ -138,7 +139,7 @@ namespace PPTService
                 },
 			ShowQrCode = true,
 			PageTurningPosition = "Default",
-			UseSelfAnnotation = false,
+			UseSelfAnnotation = true,
 			ShowLoadingSpinner = true
 		};
         }

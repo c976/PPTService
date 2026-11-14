@@ -166,14 +166,17 @@ namespace PPTService
 			EraserSliderPopup.IsOpen = false;
 			if (IsInnerBoardSelfAnnotation)
 			{
+				// 点击前是否已处于画笔模式：首次点击只切到画笔，
+				// 已在画笔模式再点一次才弹出笔颜色/粗细面板。
+				bool wasPenMode = SelectedPenImage.Visibility == Visibility.Visible;
 				// 板中板：切到新白板引擎的画笔并同步当前颜色，工具栏视觉保持「笔」选中，
 				// 不走 PenClick 的 Office 指针分支（自实现批注下 Office 指针必须保持 None）。
 				ViewHelper.InnerBoardWindow.SetPen(AnnotationController.CurrentColor);
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = false;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
-				ColorDiskPopup.IsOpen = true;
-				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
+				ColorDiskPopup.IsOpen = wasPenMode;
+				FridayReporter.ReportEventImmediately(wasPenMode ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
 				return;
 			}
 			PenClick();
@@ -324,6 +327,11 @@ namespace PPTService
 		/// </summary>
 		private void ThicknessRadioButton_OnClick(object sender, RoutedEventArgs e)
 		{
+			// Office 原生批注不支持改笔迹粗细，三个选项已隐藏；这里再兜一层防止误触发。
+			if (!UserConfigManager.Load().UseSelfAnnotation)
+			{
+				return;
+			}
 			RadioButton radioButton = e.OriginalSource as RadioButton;
 			if (radioButton == null || !(radioButton.Tag is double))
 			{
@@ -396,19 +404,26 @@ namespace PPTService
 
 		private void ColorDiskPopup_OnOpened(object sender, EventArgs e)
 		{
-			// Office 批注模式不支持自实现笔迹选择，若因其它路径异常打开则立即收起
-			// （板中板打开时仍走自实现白板引擎，允许打开）。
-			if (!UserConfigManager.Load().UseSelfAnnotation && !IsInnerBoardWindowShowing)
-			{
-				ColorDiskPopup.IsOpen = false;
-				return;
-			}
+			// Office 原生批注不支持修改笔迹粗细：只隐藏三个粗细选项，颜色选择保留。
+			bool showThickness = UserConfigManager.Load().UseSelfAnnotation;
+			ThicknessGrid.Visibility = showThickness ? Visibility.Visible : Visibility.Collapsed;
+			ColorGrid.Margin = showThickness ? new Thickness(-12.0, 4.0, 0.0, 0.0) : new Thickness(0.0, 4.0, 0.0, 0.0);
+			// 只显示颜色时把 3x3 色块居中，避免左侧留白。
+			PenPopupStackPanel.HorizontalAlignment = showThickness ? HorizontalAlignment.Stretch : HorizontalAlignment.Center;
 			// 自实现批注下 PptOperator.PointerColor 不可信（Office 指针为 None，常读到黑），
 			// 颜色盘勾选状态一律取 AnnotationController 的真值源（板中板同样适用）。
 			// PptOperator.Instance 由 App.OnStartup 赋值，放映未开始 / 初始化前可能为 null。
 			Color pointerColor = UserConfigManager.Load().UseSelfAnnotation || PptOperator.Instance == null
 				? AnnotationController.CurrentColor
 				: PptOperator.Instance.PointerColor;
+			SyncPenSelectionStates(pointerColor);
+			EraserSliderPopup.IsOpen = false;
+			(Resources["ShowColorDiskStoryBoard"] as Storyboard)?.Begin();
+		}
+
+		/// <summary>按真值源同步颜色盘 / 粗细三档的勾选态。</summary>
+		private void SyncPenSelectionStates(Color pointerColor)
+		{
 			foreach (object child in ColorGrid.Children)
 			{
 				RadioButton radioButton = child as RadioButton;
@@ -428,12 +443,39 @@ namespace PPTService
 				}
 				radioButton.IsChecked = Math.Abs((double)radioButton.Tag - AnnotationController.CurrentThickness) < 0.0001;
 			}
+		}
+
+		/// <summary>
+		/// 放映结束：复位工具栏笔设置相关 UI（笔图标颜色、颜色盘/粗细勾选、
+		/// 笔设置弹窗、滑动清屏滑杆、板中板切换前的模式缓存）。
+		/// 真值源由 AnnotationController.ResetPenSettings()、板中板 Board 由
+		/// InnerBoardWindow.ResetPenSettings() 分别复位，此处只负责工具栏。
+		/// </summary>
+		public void ResetPenSettings()
+		{
+			ColorDiskPopup.IsOpen = false;
 			EraserSliderPopup.IsOpen = false;
-			(Resources["ShowColorDiskStoryBoard"] as Storyboard)?.Begin();
+			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
+			EraserSlide.Value = 0.0;
+			PenBrush = new SolidColorBrush(PenSettings.DefaultColor);
+			SyncPenSelectionStates(PenSettings.DefaultColor);
+			_modeBeforeInnerBoard = AnnotationController.Mode.Mouse;
 		}
 
 		public void PenClick()
 		{
+			PenClick(true);
+		}
+
+		/// <summary>
+		/// allowColorPopup=false 供板中板打开时程序内部调用：只切到画笔，不弹笔设置面板
+		/// （面板只应由「用户点笔按钮」触发）。
+		/// </summary>
+		public void PenClick(bool allowColorPopup)
+		{
+			// 点击前是否已处于画笔模式：首次点击只切到画笔，
+			// 已在画笔模式再点一次才弹出笔颜色/粗细面板。
+			bool wasPenMode = SelectedPenImage.Visibility == Visibility.Visible;
 			if (IsSelfAnnotationActive)
 			{
 				// 画笔模式：用选中颜色在覆盖层上绘制（启用压感）
@@ -441,33 +483,32 @@ namespace PPTService
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = false;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
-				ColorDiskPopup.IsOpen = true;
-				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
+				bool openPopup = wasPenMode && allowColorPopup;
+				ColorDiskPopup.IsOpen = openPopup;
+				FridayReporter.ReportEventImmediately(openPopup ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
 				return;
 			}
 			SelectCheckBox.IsChecked = false;
-			if (SelectedPenImage.Visibility == Visibility.Collapsed)
+			if (!wasPenMode)
 			{
 				PptOperator.Instance.PointerType = PpSlideShowPointerType.ppSlideShowPointerPen;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
 				RubberCheckBox.IsChecked = false;
+				ColorDiskPopup.IsOpen = false;
 				WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
 			}
+			else if (allowColorPopup)
+			{
+				// 已在画笔模式再点一次：弹出笔颜色面板。
+				// Office 原生批注模式下只显示颜色，三个粗细选项在 ColorDiskPopup_OnOpened 里隐藏。
+				ColorDiskPopup.IsOpen = true;
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionColorDisk);
+			}
 			else
 			{
-				// Office 批注模式（主批注层为 Office 原生指针）不支持自实现笔迹粗细/颜色，
-				// 已选中的画笔再次点击不再弹出笔设置面板（隐藏笔迹选择）。
-				// 板中板打开时仍走自实现白板引擎，保留笔设置面板（见下方 IsInnerBoardWindowShowing 分支）。
-				if (IsInnerBoardWindowShowing)
-				{
-					ColorDiskPopup.IsOpen = true;
-					FridayReporter.ReportEventImmediately(EventID.BottomRegionColorDisk);
-				}
-				else
-				{
-					FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
-				}
+				ColorDiskPopup.IsOpen = false;
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
 			}
 		}
 

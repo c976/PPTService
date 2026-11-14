@@ -8,9 +8,9 @@ namespace PPTService
 {
 	public class AppPath
 	{
-		private static readonly string Company = "Seewo";
-
-		private static readonly string AppName = "PPTService";
+		/// <summary>本程序所有运行时数据（配置 / 日志 / 临时缩略图 / 二维码 / 事件缓存）的统一根目录名，
+		/// 位于 %LOCALAPPDATA%（Local）下，不再散落在 Roaming\Seewo\PPTService 或安装目录。</summary>
+		public static readonly string AppFolderName = "PPTServiceUltra";
 
 		private static readonly string Log = "Log";
 
@@ -18,9 +18,20 @@ namespace PPTService
 
 		private static readonly string Document = "Document";
 
+		/// <summary>%LOCALAPPDATA%\PPTServiceUltra，不存在时自动创建。</summary>
+		public static string LocalRoot()
+		{
+			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppFolderName);
+			if (!Directory.Exists(text))
+			{
+				Directory.CreateDirectory(text);
+			}
+			return text;
+		}
+
 		public static string DocumentPath()
 		{
-			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Company, AppName, Document);
+			string text = Path.Combine(LocalRoot(), Document);
 			if (!Directory.Exists(text))
 			{
 				Directory.CreateDirectory(text);
@@ -30,7 +41,7 @@ namespace PPTService
 
 		public static string LogPath()
 		{
-			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Company, AppName, Log);
+			string text = Path.Combine(LocalRoot(), Log);
 			if (!Directory.Exists(text))
 			{
 				Directory.CreateDirectory(text);
@@ -40,7 +51,7 @@ namespace PPTService
 
 		public static string TemPath()
 		{
-			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Company, AppName, Temporary);
+			string text = Path.Combine(LocalRoot(), Temporary);
 			if (!Directory.Exists(text))
 			{
 				Directory.CreateDirectory(text);
@@ -48,14 +59,10 @@ namespace PPTService
 			return text;
 		}
 
+		/// <summary>保留原有方法名（ConfigHelper 的 app.config 用它），实现改为统一根目录。</summary>
 		public static string RootPath()
 		{
-			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Company, AppName);
-			if (!Directory.Exists(text))
-			{
-				Directory.CreateDirectory(text);
-			}
-			return text;
+			return LocalRoot();
 		}
 
 		public static void ClearTempFolder()

@@ -72,6 +72,18 @@ namespace PPTService
 			UpdateIndex();
 		}
 
+		/// <summary>
+		/// 放映结束：把板中板自己的 Board 笔色 / 粗细复位为全局默认值。
+		/// 板中板与主批注层是两个独立 Board，仅复位 AnnotationController 不够。
+		/// </summary>
+		public void ResetPenSettings()
+		{
+			IsEraserActive = false;
+			_board.SetInkColor(AnnotationController.CurrentColor);
+			_board.SetInkThickness(AnnotationController.CurrentThickness);
+			_board.GotoSelect();
+		}
+
 		/// <summary>「滑动清屏」：只清当前页笔迹，保留其它页（对应桌面批注的 CleanInk）。</summary>
 		public void ClearCurrentPage()
 		{
@@ -197,7 +209,8 @@ namespace PPTService
 				SetRubber();
 				break;
 			default:
-				ViewHelper.BottomArea.PenClick();
+				// 程序内部切到画笔，不弹笔设置面板（面板只由用户点笔按钮触发）。
+				ViewHelper.BottomArea.PenClick(false);
 				SetPen(PptOperator.Instance.PointerColor);
 				break;
 			}

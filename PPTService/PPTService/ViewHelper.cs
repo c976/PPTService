@@ -38,6 +38,15 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>放映结束时复位板中板笔色 / 粗细；窗口尚未创建则不主动创建（避免建一整套白板）。</summary>
+		public static void ResetInnerBoardPenSettingsIfCreated()
+		{
+			if (_innerBoardWindow != null)
+			{
+				_innerBoardWindow.ResetPenSettings();
+			}
+		}
+
 		public void Initialize()
 		{
 			PptOperator.Instance.ShowBegin += Instance_ShowBegin;

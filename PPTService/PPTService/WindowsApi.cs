@@ -120,6 +120,25 @@ namespace PPTService
 			public const int WsExTransparent = 32;
 
 			public const int GwlExstyle = -20;
+
+			/// <summary>WS_EX_TOOLWINDOW：从 Alt+Tab / 任务栏中隐藏。</summary>
+			public const uint WsExToolWindow = 128u;
+
+			/// <summary>WS_EX_APPWINDOW：若存在会强制出现在 Alt+Tab，需清掉。</summary>
+			public const uint WsExAppWindow = 262144u;
+
+			/// <summary>WM_SYSCOMMAND 的关闭命令（系统菜单 / 标题栏关闭 / 任务栏）。</summary>
+			public const int WmSysCommand = 274;
+
+			public const int ScClose = 61536;
+
+			/// <summary>WM_CLOSE：其它进程或任务管理器「结束任务」发的常规关闭。</summary>
+			public const int WmClose = 16;
+
+			/// <summary>系统注销 / 关机，此时必须放行，否则会卡住系统退出。</summary>
+			public const int WmQueryEndSession = 17;
+
+			public const int WmEndSession = 22;
 		}
 
 		[DllImport("hid.dll")]
