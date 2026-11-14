@@ -42,6 +42,10 @@ namespace PPTService
             {
                 RbBoth.IsChecked = true;
             }
+            else if (cfg.PageTurningPosition == "None")
+            {
+                RbNone.IsChecked = true;
+            }
             else
             {
                 RbDefault.IsChecked = true;
@@ -189,6 +193,10 @@ namespace PPTService
             else if (RbBoth.IsChecked == true)
             {
                 cfg.PageTurningPosition = "Both";
+            }
+            else if (RbNone.IsChecked == true)
+            {
+                cfg.PageTurningPosition = "None";
             }
             else
             {

@@ -71,6 +71,7 @@
             <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（WPS 侧边 / Office 底部）" Margin="2" />
             <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部" Margin="2" />
             <RadioButton Name="RbBoth" GroupName="PagePos" Content="侧边" Margin="2" />
+            <RadioButton Name="RbNone" GroupName="PagePos" Content="不显示" Margin="2" />
           </StackPanel>
         </GroupBox>
 

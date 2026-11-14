@@ -42,11 +42,15 @@ namespace PPTService
 
 		private AnnotationController.Mode _modeBeforeInnerBoard;
 
-		/// <summary>按下笔/橡皮按钮瞬间记录的弹窗开合状态：StaysOpen=False 会在按下时先把弹窗收起，
+		/// <summary>按下笔按钮瞬间记录的弹窗开合状态：StaysOpen=False 会在按下时先把弹窗收起，
 		/// Click 时 IsOpen 已不可信，故用此字段判断「再点一次是开还是收」。</summary>
 		private bool _penPopupWasOpen;
 
-		private bool _eraserPopupWasOpen;
+		/// <summary>滑动清屏滑杆是否处于打开状态：ShowEraserSliderPopup 打开时置真，
+		/// EraserSliderPopup.Closed（含 StaysOpen 失焦自动关闭与手动关闭）置假。
+		/// 作为「再点橡皮收起/弹出」的唯一真值源，不再依赖按下瞬间的 IsOpen 时序，
+		/// 因此不与 StaysOpen 自动收起产生竞态（修复「滑杆已开时再点橡皮无法收起」的老 bug）。</summary>
+		private bool _eraserSliderOpen;
 
 		/// <summary>
 		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
@@ -130,6 +134,9 @@ namespace PPTService
 			DataContext = this;
 			// 笔设置面板关闭后把绘制焦点还给幻灯片（或板中板），避免关闭后再点一次才落笔。
 			ColorDiskPopup.Closed += ColorDiskPopup_OnClosed;
+			// 滑动清屏滑杆任意方式关闭（失焦自动 / 手动 / 清屏完成）都收起真值标记，
+			// 让「再点橡皮」的 toggle 判断始终基于真实状态，不受 StaysOpen 时序影响。
+			EraserSliderPopup.Closed += (object s, EventArgs e) => { _eraserSliderOpen = false; };
 		}
 
 		public void InitializeBottomArea()
@@ -175,11 +182,6 @@ namespace PPTService
 		{
 			// 在 StaysOpen=False 把弹窗收起之前记录真实开合状态，供 Click 里判断「开 / 收」。
 			_penPopupWasOpen = ColorDiskPopup.IsOpen;
-		}
-
-		private void RubberCheckBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-		{
-			_eraserPopupWasOpen = EraserSliderPopup.IsOpen;
 		}
 
 		private void Pen_OnClick(object sender, RoutedEventArgs e)
@@ -393,6 +395,7 @@ namespace PPTService
 			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
 			EraserSlide.Value = 0.0;
 			EraserSliderPopup.IsOpen = true;
+			_eraserSliderOpen = true;
 		}
 
 		private void EraserSliderPopup_OnOpened(object sender, EventArgs e)
@@ -401,11 +404,11 @@ namespace PPTService
 		}
 
 		/// <summary>橡皮模式下再点橡皮：滑杆已开则收起，未开则弹出。
-		/// 是否「已开」由 RubberCheckBox_PreviewMouseDown 记录的 _eraserPopupWasOpen 判定，
-		/// 因为 StaysOpen=False 会在按下瞬间先把滑杆收起，Click 时 IsOpen 已不可信。</summary>
+		/// 是否「已开」以 _eraserSliderOpen 真值源判定（打开时置真、Closed 事件置假，
+		/// Closed 在 StaysOpen 失焦关闭与手动关闭时都会触发），不依赖按下瞬间 IsOpen 的时序。</summary>
 		private void ToggleEraserSliderPopup()
 		{
-			if (_eraserPopupWasOpen)
+			if (_eraserSliderOpen)
 			{
 				EraserSliderPopup.IsOpen = false;
 			}

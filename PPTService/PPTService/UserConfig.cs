@@ -41,7 +41,7 @@ namespace PPTService
 
 		/// <summary>
 		/// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
-		/// Bottom（强制底部两侧角）/ Both（强制左右两边）。
+		/// Bottom（强制底部两侧角）/ Both（强制左右两边）/ None（不显示翻页按钮）。
 		/// </summary>
 		public string PageTurningPosition { get; set; }
 
@@ -109,11 +109,11 @@ namespace PPTService
                     cfg = CreateDefault();
                     Save(cfg);
                 }
-                // 规范化翻页位置取值，仅允许 Default / Bottom / Both。
-                if (cfg.PageTurningPosition != "Bottom" && cfg.PageTurningPosition != "Both")
-                {
-                    cfg.PageTurningPosition = "Default";
-                }
+			// 规范化翻页位置取值，仅允许 Default / Bottom / Both / None。
+			if (cfg.PageTurningPosition != "Bottom" && cfg.PageTurningPosition != "Both" && cfg.PageTurningPosition != "None")
+			{
+				cfg.PageTurningPosition = "Default";
+			}
                 // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
                 // 不写回 UserConfig.json，不影响正常启动。用户在设置里改过后以用户选择为准。
                 if (DebugMode.IsEnabled && !_annotationUserOverride)
@@ -184,22 +184,26 @@ namespace PPTService
             ViewHelper.MainWindow?.ApplyPageTurningLayout();
         }
 
-        /// <summary>
-        /// 解析翻页按钮实际布局：Sides（左右两边）/ Bottom（底部两侧角）。
-        /// Default 沿用程序原逻辑（Office 2016+ 底部，WPS/旧版 两边）。
-        /// </summary>
-        public static string GetPageTurningLayout()
-        {
-            UserConfig cfg = Load();
-            if (cfg.PageTurningPosition == "Bottom")
-            {
-                return "Bottom";
-            }
-            if (cfg.PageTurningPosition == "Both")
-            {
-                return "Sides";
-            }
-            return PptVersionManager.IsOffice2016OrLater ? "Bottom" : "Sides";
-        }
+		/// <summary>
+		/// 解析翻页按钮实际布局：Sides（左右两边）/ Bottom（底部两侧角）/ None（不显示翻页按钮）。
+		/// Default 沿用程序原逻辑（Office 2016+ 底部，WPS/旧版 两边）。
+		/// </summary>
+		public static string GetPageTurningLayout()
+		{
+			UserConfig cfg = Load();
+			if (cfg.PageTurningPosition == "Bottom")
+			{
+				return "Bottom";
+			}
+			if (cfg.PageTurningPosition == "Both")
+			{
+				return "Sides";
+			}
+			if (cfg.PageTurningPosition == "None")
+			{
+				return "None";
+			}
+			return PptVersionManager.IsOffice2016OrLater ? "Bottom" : "Sides";
+		}
     }
 }

@@ -211,7 +211,7 @@ namespace PPTService
 		/// </summary>
 		public void ApplyPageTurningLayout()
 		{
-			bool useBottom = UserConfigManager.GetPageTurningLayout() == "Bottom";
+			string layout = UserConfigManager.GetPageTurningLayout();
 
 			if (LeftCenterButtonGrid.Children.Contains(ViewHelper.LeftArea))
 			{
@@ -230,6 +230,13 @@ namespace PPTService
 				RightBottomButtonGrid.Children.Remove(ViewHelper.RightBottomArea);
 			}
 
+			// 不显示翻页按钮：仅移除四块翻页区域控件即可，缩略图导航面板保持原逻辑。
+			if (layout == "None")
+			{
+				return;
+			}
+
+			bool useBottom = layout == "Bottom";
 			if (useBottom)
 			{
 				LeftBottomButtonGrid.Children.Add(ViewHelper.LeftBottomArea);
