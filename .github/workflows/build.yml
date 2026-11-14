@@ -113,6 +113,6 @@ jobs:
           gh release upload $tag $asset --clobber
           gh release edit $tag --notes $notes
         } else {
-          gh release create $tag $asset --title "PPTService $tag" --notes $notes --latest
+          gh release create $tag $asset --title "PPTServiceUltra $tag" --notes $notes --latest
         }
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
