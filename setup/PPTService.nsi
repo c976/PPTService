@@ -32,9 +32,12 @@ SetCompressorDictSize 32
 !define PRODUCT_NAME_EN       "PPTService"
 ; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
 !include "${__FILEDIR__}\Version.nsh"
-!define PRODUCT_PUBLISHER     "Seewo"
+!define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
 !define PRODUCT_WEB_SITE      "www.seewo.com"
-!define PRODUCT_GUID          "{958764e5-bbb2-43c1-1234-8d454abd130a}"
+!define PRODUCT_GUID          "{FED7F3E7-97BC-4A64-9903-A783762634B3}"
+; 旧 Seewo 版沿用的卸载 GUID：本项目改用新 GUID 后，
+; 安装前仍需按此旧 ID 卸载原 Seewo 路径版，故单独保留。
+!define LEGACY_GUID           "{958764e5-bbb2-43c1-1234-8d454abd130a}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_UNINST_KEY    "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_GUID}"
 !define PRODUCT_DIR_REGKEY    "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME_EN}.exe"
@@ -42,7 +45,7 @@ SetCompressorDictSize 32
 !define SUPPORT_DIR           "Main\SupportFiles"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-UninstallCaption "${PRODUCT_NAME} 卸载"
+UninstallCaption "$(STR_AppName) 卸载"
 BrandingText "${PRODUCT_PUBLISHER}"
 OutFile "${__FILEDIR__}\PPTServiceSetup.exe"
 Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
@@ -123,8 +126,7 @@ FunctionEnd
 ; -----------------------------------------------------------------------------
 ;  文案（简体中文 2052）
 ; -----------------------------------------------------------------------------
-LangString STR_AppName          2052 "PPT小工具"
-LangString STR_MenuFolder       2052 "希沃软件"
+LangString STR_AppName          2052 "PPT小工具增强版"
 LangString STR_SelectDir        2052 "选择要安装 PPT小工具 的文件夹位置: "
 LangString STR_ExitConfirm      2052 "你真的要退出安装吗？"
 LangString STR_MutexInstaller   2052 "本产品已经有一个安裝向导正在运行！"
@@ -134,7 +136,8 @@ LangString STR_NeedAdmin        2052 "请使用管理员权限执行本程序。
 LangString STR_RootPath         2052 "不能将软件安装在驱动器根路径。"
 LangString STR_ProcessBusy      2052 "检测到安装路径下有进程尚未退出，忽略此问题可能导致安装异常。$\n是否重试关闭这些进程？"
 LangString STR_UninstallConfirm 2052 "你确定要卸载本产品吗？"
-LangString STR_UninstallDone    2052 "${PRODUCT_NAME} 已成功地从你的计算机移除。"
+LangString STR_AskDeleteData   2052 "是否同时删除数据文件夹（包含配置、日志等用户数据）？$\n（位于 %LOCALAPPDATA%\PPTServiceUltra，此操作不可恢复）"
+LangString STR_UninstallDone    2052 "$(STR_AppName) 已成功地从你的计算机移除。"
 LangString STR_InstallingOld    2052 "正在卸载旧版本……"
 LangString STR_FrameworkBusy    2052 "正在安装 Microsoft .Net Framework，预计需要五分钟..."
 LangString STR_FrameworkOK      2052 "Microsoft .NET Framework 安装成功..."
@@ -153,6 +156,7 @@ Var SkinHandle       ; 皮肤窗口句柄
 Var RunOnFinish      ; 完成页「立即运行」勾选状态
 Var ProcessDir       ; 进程检查的目标目录
 Var OldInstallDir    ; 上一版本的安装目录
+Var DeleteDataFolder  ; 卸载时用户是否选择删除数据文件夹（1=删除）
 ; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
 ; Var FrameworkVersion ; .NET 版本
 ; Var NeedReboot       ; 是否需要重启
@@ -404,45 +408,26 @@ Function PrepareInstall
 FunctionEnd
 
 ; -----------------------------------------------------------------------------
-;  枚举并静默卸载所有旧版本：遍历 HKLM 卸载项（32/64 位视图），
-;  凡 DisplayName 为产品名（PPT小工具）者，取出其 UninstallString 静默卸载。
-;  这样无论是「原 Seewo 路径版」（C:\Program Files\Seewo\PPTService）
-;  还是「当前路径版」（C:\Program Files\PPTServiceUltra）都会被清理。
+;  卸载旧版本：本项目已改用新 GUID，但原 Seewo 路径版仍使用旧 GUID，
+;  故安装前需分别读取「旧 GUID」与「本 GUID」两个固定卸载项并各静默卸载一次，
+;  两个安装路径（Seewo\PPTService 与 PPTServiceUltra）都会被清理，无需枚举。
 ; -----------------------------------------------------------------------------
 Function UninstallOldVersions
-  Push $R2
-  Push $R3
-  Push $R4
-  Push $R5
-  Push $R6
-  ; 32 位视图：本安装程序与历史版本均为 32 位，默认视图即可覆盖
-  Call UninstallOldInView
-  ; 64 位视图：极少数 64 位旧版本兜底
-  SetRegView 64
-  Call UninstallOldInView
-  SetRegView 32
-  Pop $R6
-  Pop $R5
-  Pop $R4
-  Pop $R3
-  Pop $R2
+  ; 旧 Seewo 版（沿用原 GUID）
+  ReadRegStr $4 ${PRODUCT_UNINST_ROOT_KEY} "Software\Microsoft\Windows\CurrentVersion\Uninstall\${LEGACY_GUID}" "UninstallString"
+  ${If} $4 != ""
+    Call DoUninstallOld
+  ${EndIf}
+  ; 本项目旧版本（当前 GUID）
+  ReadRegStr $4 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
+  ${If} $4 != ""
+    Call DoUninstallOld
+  ${EndIf}
 FunctionEnd
 
-Function UninstallOldInView
-  Push $0   ; 枚举索引
-  Push $1   ; 子键名
-  Push $2   ; DisplayName / 临时字符
-  Push $3   ; UninstallString
-  Push $4   ; 清洗后的卸载程序路径
-UOV_Loop:
-  EnumRegKey $1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall" $0
-  StrCmp $1 "" UOV_Done
-  IntOp $0 $0 + 1
-  ReadRegStr $2 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "DisplayName"
-  StrCmp $2 "$(STR_AppName)" 0 UOV_Loop
-  ReadRegStr $3 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
-  StrCpy $4 $3
-  ; 去掉首尾引号（若有）
+; 输入：$4 = 卸载程序路径（可能带引号）；静默卸载并清理其安装目录。
+Function DoUninstallOld
+  ; 清洗首尾引号（若有）
   StrCpy $2 $4 1
   ${If} $2 == '"'
     StrCpy $4 $4 "" 1
@@ -451,7 +436,6 @@ UOV_Loop:
   ${If} $2 == '"'
     StrCpy $4 $4 -1
   ${EndIf}
-  ; $4 = "...\Uninstall.exe"
   ${GetParent} "$4" $OldInstallDir
   ${If} $OldInstallDir != ""
   ${AndIf} ${FileExists} "$OldInstallDir\*.*"
@@ -462,13 +446,7 @@ UOV_Loop:
     ExecWait '"$4" /S _?=$OldInstallDir' $R1
     RMDir /r "$OldInstallDir"
   ${EndIf}
-  Goto UOV_Loop
-UOV_Done:
-  Pop $4
-  Pop $3
-  Pop $2
-  Pop $1
-  Pop $0
+  StrCpy $4 ""
 FunctionEnd
 
 ; =============================================================================
@@ -682,8 +660,8 @@ Function CreateShortcuts
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成快捷方式……" "text"
   SetShellVarContext all
   SetOutPath "$INSTDIR"
-  CreateDirectory "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)"
-  CreateShortCut "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)\$(STR_AppName).lnk" \
+  CreateDirectory "$SMPROGRAMS\$(STR_AppName)"
+  CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk" \
       "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
 FunctionEnd
 
@@ -717,9 +695,8 @@ Section "Uninstall"
   Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
   Pop $0
 
-  Delete "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)\$(STR_AppName).lnk"
-  RMDir "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)"
-  RMDir "$SMPROGRAMS\$(STR_MenuFolder)"
+  Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk"
+  RMDir "$SMPROGRAMS\$(STR_AppName)"
 
   DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME_EN}"
   DeleteRegKey HKLM "${APP_REGKEY}"
@@ -737,15 +714,26 @@ Section "Uninstall"
   Delete "$INSTDIR\install.log"
   RMDir "$INSTDIR"
 
+  ; 用户选择删除数据文件夹时，清理 %LOCALAPPDATA%\PPTServiceUltra（配置/日志等用户数据）
+  ${If} $DeleteDataFolder == "1"
+    RMDir /r "$LOCALAPPDATA\PPTServiceUltra"
+  ${EndIf}
+
   ; 停留在卸载窗口，用户点「关闭」后才弹出完成提示
   SetAutoClose false
 SectionEnd
 
 Function un.onInit
-  ; 升级流程以 /S 调用卸载器：跳过确认框，静默完成卸载
+  StrCpy $DeleteDataFolder "0"
+  ; 升级流程以 /S 调用卸载器：跳过确认框与数据询问，静默完成卸载（默认保留数据）
   IfSilent SilentUninstall 0
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_UninstallConfirm)" IDYES +2
   Abort
+  ; 是否删除数据文件夹（%LOCALAPPDATA%\PPTServiceUltra）；默认按钮为「否」，不主动删数据
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_AskDeleteData)" IDYES +2
+  Goto SkipDeleteData
+  StrCpy $DeleteDataFolder "1"
+  SkipDeleteData:
   SilentUninstall:
 FunctionEnd
 
