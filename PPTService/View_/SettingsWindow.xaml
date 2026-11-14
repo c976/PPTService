@@ -9,14 +9,13 @@
             HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True">
       <Grid Margin="16">
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
           <TextBlock Text="设置" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
@@ -75,15 +74,18 @@
           </StackPanel>
         </GroupBox>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
-          <Button Name="ResetButton" Content="恢复默认" Width="80" Margin="0,0,8,0" Click="Reset_Click" />
-          <Button Name="ApplyButton" Content="应用" Width="70" Margin="0,0,8,0" Click="Apply_Click" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button Name="OkButton" Content="确定" Width="70" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
-          <Button Name="CancelButton" Content="取消" Width="70" IsCancel="True" Click="Cancel_Click" />
-        </StackPanel>
+        <Grid Grid.Row="5" Margin="0,0,0,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Button Name="ResetButton" Grid.Column="0" Content="恢复默认" Width="80" Margin="0,0,8,0" HorizontalAlignment="Left" Click="Reset_Click" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button Name="OkButton" Content="确定" Width="70" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
+            <Button Name="CancelButton" Content="取消" Width="70" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
+            <Button Name="ApplyButton" Content="应用" Width="70" Click="Apply_Click" />
+          </StackPanel>
+        </Grid>
       </Grid>
     </Border>
   </Grid>

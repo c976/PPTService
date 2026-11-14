@@ -9,7 +9,6 @@
 ;    - 更新组件与静默更新服务的安装（资源需自行放入 Addon 目录）
 ;    - Microsoft .NET Framework 4.5 检测 / 安装 / 重启
 ;    - 安装目录体积统计（EstimatedSize）
-;    - 防火墙白名单规则
 ;  需要启用时，取消对应注释即可。
 ; =============================================================================
 
@@ -49,9 +48,7 @@ OutFile "${__FILEDIR__}\PPTServiceSetup.exe"
 Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
 UninstallIcon "${__FILEDIR__}\Skin\Icons\Uninstall.ico"
 
-InstallDir "$PROGRAMFILES\Seewo\PPTService"
-; 升级时由上一版本的卸载信息定位安装目录
-InstallDirRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
+InstallDir "$PROGRAMFILES\PPTServiceUltra"
 
 ShowInstDetails show
 ShowUnInstDetails show
@@ -155,7 +152,6 @@ Var SkinPage         ; $SkinDir\2052
 Var SkinHandle       ; 皮肤窗口句柄
 Var RunOnFinish      ; 完成页「立即运行」勾选状态
 Var ProcessDir       ; 进程检查的目标目录
-Var OldUninstaller   ; 上一版本的卸载程序路径
 Var OldInstallDir    ; 上一版本的安装目录
 ; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
 ; Var FrameworkVersion ; .NET 版本
@@ -399,26 +395,80 @@ FunctionEnd
 Function PrepareInstall
   DetailPrint "正在进行安装前的准备工作……"
 
-  ; 读取上一版本的卸载信息，若存在则先静默卸载旧版本
-  ReadRegStr $OldUninstaller ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
-  ${If} $OldUninstaller != ""
-    DetailPrint "$(STR_InstallingOld)"
-    nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "$(STR_InstallingOld)" "text"
-
-    ${GetParent} "$OldUninstaller" $OldInstallDir
-    ${If} $OldInstallDir != ""
-    ${AndIf} ${FileExists} "$OldInstallDir\*.*"
-      ; 旧目录中仍有进程时循环重试
-      StrCpy $ProcessDir "$OldInstallDir"
-      Call KillProcessesInDirectory
-      ExecWait '"$OldUninstaller" /S _?=$OldInstallDir' $0
-      RMDir /r "$OldInstallDir"
-    ${EndIf}
-  ${EndIf}
+  ; 卸载所有已安装的旧版本（无论此前装在 Seewo 路径还是当前路径），再继续安装。
+  Call UninstallOldVersions
 
   ; 当前安装目录中仍有进程时循环重试
   StrCpy $ProcessDir "$INSTDIR"
   Call KillProcessesInDirectory
+FunctionEnd
+
+; -----------------------------------------------------------------------------
+;  枚举并静默卸载所有旧版本：遍历 HKLM 卸载项（32/64 位视图），
+;  凡 DisplayName 为产品名（PPT小工具）者，取出其 UninstallString 静默卸载。
+;  这样无论是「原 Seewo 路径版」（C:\Program Files\Seewo\PPTService）
+;  还是「当前路径版」（C:\Program Files\PPTServiceUltra）都会被清理。
+; -----------------------------------------------------------------------------
+Function UninstallOldVersions
+  Push $R2
+  Push $R3
+  Push $R4
+  Push $R5
+  Push $R6
+  ; 32 位视图：本安装程序与历史版本均为 32 位，默认视图即可覆盖
+  Call UninstallOldInView
+  ; 64 位视图：极少数 64 位旧版本兜底
+  SetRegView 64
+  Call UninstallOldInView
+  SetRegView 32
+  Pop $R6
+  Pop $R5
+  Pop $R4
+  Pop $R3
+  Pop $R2
+FunctionEnd
+
+Function UninstallOldInView
+  Push $0   ; 枚举索引
+  Push $1   ; 子键名
+  Push $2   ; DisplayName / 临时字符
+  Push $3   ; UninstallString
+  Push $4   ; 清洗后的卸载程序路径
+UOV_Loop:
+  EnumRegKey $1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall" $0
+  StrCmp $1 "" UOV_Done
+  IntOp $0 $0 + 1
+  ReadRegStr $2 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "DisplayName"
+  StrCmp $2 "$(STR_AppName)" 0 UOV_Loop
+  ReadRegStr $3 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
+  StrCpy $4 $3
+  ; 去掉首尾引号（若有）
+  StrCpy $2 $4 1
+  ${If} $2 == '"'
+    StrCpy $4 $4 "" 1
+  ${EndIf}
+  StrCpy $2 $4 1 -1
+  ${If} $2 == '"'
+    StrCpy $4 $4 -1
+  ${EndIf}
+  ; $4 = "...\Uninstall.exe"
+  ${GetParent} "$4" $OldInstallDir
+  ${If} $OldInstallDir != ""
+  ${AndIf} ${FileExists} "$OldInstallDir\*.*"
+    DetailPrint "$(STR_InstallingOld) ($OldInstallDir)"
+    nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "$(STR_InstallingOld)" "text"
+    StrCpy $ProcessDir "$OldInstallDir"
+    Call KillProcessesInDirectory
+    ExecWait '"$4" /S _?=$OldInstallDir' $R1
+    RMDir /r "$OldInstallDir"
+  ${EndIf}
+  Goto UOV_Loop
+UOV_Done:
+  Pop $4
+  Pop $3
+  Pop $2
+  Pop $1
+  Pop $0
 FunctionEnd
 
 ; =============================================================================
@@ -622,15 +672,6 @@ Function WriteRegistry
   ; 开机自启
   WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME_EN}" \
       "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
-
-  ; ---------------------------------------------------------------------------
-  ;  防火墙白名单（默认不启用；同时取消卸载段中的对应注释）
-  ; ---------------------------------------------------------------------------
-  ; !insertmacro EasiLog 'EasiSetup: "FireWall" Entered...'
-  ; DetailPrint "正在添加防火墙规则……"
-  ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在添加防火墙规则……" "text"
-  ; Cvte.FireWall::AddFireWallWhiteListByDirectory "$INSTDIR"
-  ; !insertmacro EasiLog 'EasiSetup: "FireWall" Left...'
 FunctionEnd
 
 ; -----------------------------------------------------------------------------
@@ -675,11 +716,6 @@ Section "Uninstall"
   Pop $0
   Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
   Pop $0
-
-  ; ---------------------------------------------------------------------------
-  ;  删除防火墙白名单规则（安装时启用白名单后，取消此注释）
-  ; ---------------------------------------------------------------------------
-  ; Cvte.FireWall::DeleteFireWallWhiteListByDirectory "$INSTDIR"
 
   Delete "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)\$(STR_AppName).lnk"
   RMDir "$SMPROGRAMS\$(STR_MenuFolder)\$(STR_AppName)"
