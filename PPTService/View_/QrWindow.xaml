@@ -35,5 +35,6 @@
       </UIElement.RenderTransform>
       <Image Name="QrImage" Margin="10" />
     </Border>
+    <Button Name="SaveButton" Style="{DynamicResource Style.DownloadButton}" Content="保存二维码" Width="160" Height="48" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0 0 0 56" Click="SaveButton_OnClick" />
   </Grid>
 </Window>
