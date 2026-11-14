@@ -31,7 +31,7 @@ namespace PPTService
 		private static AnnotationBoard _board;
 		private static Window _toolbarWindow;
 		private static int _currentPageIndex = 1;
-		private static Color _color = Colors.Red;
+		private static Color _color = PenSettings.DefaultColor;
 		private static double _thickness = PenSettings.PenWeight;
 		private static Mode _currentMode = Mode.Mouse;
 

@@ -397,7 +397,7 @@ namespace PPTService
 			Color pointerColor = UserConfigManager.Load().UseSelfAnnotation || PptOperator.Instance == null
 				? AnnotationController.CurrentColor
 				: PptOperator.Instance.PointerColor;
-			foreach (object child in ColorDiskGrid.Children)
+			foreach (object child in ColorGrid.Children)
 			{
 				RadioButton radioButton = child as RadioButton;
 				if (radioButton == null)

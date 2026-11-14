@@ -17,7 +17,7 @@ namespace PPTService
 		/// <summary>橡皮滑杆滑到该比例以上才清屏，避免误触。</summary>
 		public static double EraserSlideThreshold = 0.8;
 
-		/// <summary>默认笔色（红）。</summary>
-		public static readonly Color DefaultColor = Colors.Red;
+		/// <summary>默认笔色（与工具栏颜色盘首色 #FFFF1200 对齐）。</summary>
+		public static readonly Color DefaultColor = Color.FromRgb(255, 18, 0);
 	}
 }

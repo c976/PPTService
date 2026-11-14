@@ -16,6 +16,19 @@ namespace PPTService
 
 		public static readonly DependencyProperty CheckedImageProperty = DependencyProperty.RegisterAttached("CheckedImage", typeof(ImageSource), typeof(ControlHelper), new PropertyMetadata(null));
 
+		/// <summary>笔迹粗细图标几何（移植自桌面批注 ControlsHelper.Geometry）。</summary>
+		public static readonly DependencyProperty GeometryProperty = DependencyProperty.RegisterAttached("Geometry", typeof(Geometry), typeof(ControlHelper), new PropertyMetadata(null));
+
+		public static Geometry GetGeometry(DependencyObject obj)
+		{
+			return (Geometry)obj.GetValue(GeometryProperty);
+		}
+
+		public static void SetGeometry(DependencyObject obj, Geometry value)
+		{
+			obj.SetValue(GeometryProperty, value);
+		}
+
 		public static readonly DependencyProperty AltF4EnabledProperty = DependencyProperty.RegisterAttached("AltF4Enabled", typeof(bool), typeof(ControlHelper), new PropertyMetadata(true));
 
 		private static readonly DependencyProperty IsAltDownProperty = DependencyProperty.RegisterAttached("IsAltDown", typeof(bool), typeof(ControlHelper), new PropertyMetadata(false));
