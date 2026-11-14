@@ -342,6 +342,12 @@ namespace PPTService
 		/// <summary>打开「滑动清屏」滑杆，并关闭其它工具栏弹窗。</summary>
 		private void ShowEraserSliderPopup()
 		{
+			// Office 批注模式（主批注层为 Office 原生指针）不支持自实现「滑动清屏」，
+			// 即便橡皮已选中也不弹出清屏滑杆；「一键清屏」功能整体禁用。
+			if (!UserConfigManager.Load().UseSelfAnnotation)
+			{
+				return;
+			}
 			ColorDiskPopup.IsOpen = false;
 			// 上一次回弹动画可能仍在持有 Value（HoldEnd），先解除再复位。
 			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
@@ -390,6 +396,13 @@ namespace PPTService
 
 		private void ColorDiskPopup_OnOpened(object sender, EventArgs e)
 		{
+			// Office 批注模式不支持自实现笔迹选择，若因其它路径异常打开则立即收起
+			// （板中板打开时仍走自实现白板引擎，允许打开）。
+			if (!UserConfigManager.Load().UseSelfAnnotation && !IsInnerBoardWindowShowing)
+			{
+				ColorDiskPopup.IsOpen = false;
+				return;
+			}
 			// 自实现批注下 PptOperator.PointerColor 不可信（Office 指针为 None，常读到黑），
 			// 颜色盘勾选状态一律取 AnnotationController 的真值源（板中板同样适用）。
 			// PptOperator.Instance 由 App.OnStartup 赋值，放映未开始 / 初始化前可能为 null。
@@ -443,8 +456,18 @@ namespace PPTService
 			}
 			else
 			{
-				ColorDiskPopup.IsOpen = true;
-				FridayReporter.ReportEventImmediately(EventID.BottomRegionColorDisk);
+				// Office 批注模式（主批注层为 Office 原生指针）不支持自实现笔迹粗细/颜色，
+				// 已选中的画笔再次点击不再弹出笔设置面板（隐藏笔迹选择）。
+				// 板中板打开时仍走自实现白板引擎，保留笔设置面板（见下方 IsInnerBoardWindowShowing 分支）。
+				if (IsInnerBoardWindowShowing)
+				{
+					ColorDiskPopup.IsOpen = true;
+					FridayReporter.ReportEventImmediately(EventID.BottomRegionColorDisk);
+				}
+				else
+				{
+					FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
+				}
 			}
 		}
 
