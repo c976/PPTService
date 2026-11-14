@@ -167,7 +167,7 @@
       </Grid.ColumnDefinitions>
       <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
       <CheckBox Name="SelectCheckBox" Grid.Column="0" IsChecked="True" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.SelectNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.SelectSelected}" Click="Select_OnClick" />
-      <Button Name="PenButton" Grid.Column="1" Style="{StaticResource NormalButtonStyle}" Click="Pen_OnClick">
+      <Button Name="PenButton" Grid.Column="1" Style="{StaticResource NormalButtonStyle}" Click="Pen_OnClick" PreviewMouseDown="PenButton_PreviewMouseDown">
         <ContentControl.Content>
           <Grid>
             <Image Name="PenImage" Source="{StaticResource ImageSource.GrayPenNormal}" />
@@ -230,7 +230,7 @@
           </Grid>
         </ContentControl.Content>
       </Button>
-      <CheckBox Name="RubberCheckBox" Grid.Column="2" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.RubberNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.RubberSelected}" Click="Rubber_OnClick" />
+      <CheckBox Name="RubberCheckBox" Grid.Column="2" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.RubberNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.RubberSelected}" Click="Rubber_OnClick" PreviewMouseDown="RubberCheckBox_PreviewMouseDown" />
       <pptService:ImageButton x:Name="MagnifierButton" Click="Magnifier_Click" Grid.Column="3" NormalSource="{StaticResource ImageSource.MagnifierNormal}" PressedSource="{StaticResource ImageSource.MagnifierSelected}" />
       <CheckBox Name="InnerBoardCheckBox" Grid.Column="4" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.PlateNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.PlateSelected}" Click="InnerBoard_Click" />
       <!-- 笔设置面板（1:1 移植自桌面批注 DesktopPenPopupBorder）：
@@ -270,7 +270,7 @@
       </Popup>
       <!-- 橡皮已选中时再次点击橡皮弹出（1:1 移植自桌面批注 DesktopEraserPopupBorder）：
            水平滑杆，拇指为 eraserthumb 图标，滑到底（≥0.8）清当前页。 -->
-      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
+      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
         <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="#E6FFFFFF" CornerRadius="4">
           <Slider Name="EraserSlide" Maximum="1" Style="{StaticResource Style.Slider.Eraser}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
           <UIElement.Effect>

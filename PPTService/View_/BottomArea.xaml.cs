@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -39,6 +41,12 @@ namespace PPTService
 		}
 
 		private AnnotationController.Mode _modeBeforeInnerBoard;
+
+		/// <summary>按下笔/橡皮按钮瞬间记录的弹窗开合状态：StaysOpen=False 会在按下时先把弹窗收起，
+		/// Click 时 IsOpen 已不可信，故用此字段判断「再点一次是开还是收」。</summary>
+		private bool _penPopupWasOpen;
+
+		private bool _eraserPopupWasOpen;
 
 		/// <summary>
 		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
@@ -120,6 +128,8 @@ namespace PPTService
 		{
 			InitializeComponent();
 			DataContext = this;
+			// 笔设置面板关闭后把绘制焦点还给幻灯片（或板中板），避免关闭后再点一次才落笔。
+			ColorDiskPopup.Closed += ColorDiskPopup_OnClosed;
 		}
 
 		public void InitializeBottomArea()
@@ -161,6 +171,17 @@ namespace PPTService
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionSelect);
 		}
 
+		private void PenButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			// 在 StaysOpen=False 把弹窗收起之前记录真实开合状态，供 Click 里判断「开 / 收」。
+			_penPopupWasOpen = ColorDiskPopup.IsOpen;
+		}
+
+		private void RubberCheckBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			_eraserPopupWasOpen = EraserSliderPopup.IsOpen;
+		}
+
 		private void Pen_OnClick(object sender, RoutedEventArgs e)
 		{
 			EraserSliderPopup.IsOpen = false;
@@ -175,8 +196,10 @@ namespace PPTService
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = false;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
-				ColorDiskPopup.IsOpen = wasPenMode;
-				FridayReporter.ReportEventImmediately(wasPenMode ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
+				// 笔模式下再点笔：已开则收起、未开则打开（点击弹窗外区域也会由 StaysOpen 收起）。
+				// 是否「已开」用按下瞬间记录的 _penPopupWasOpen，因为 StaysOpen=False 会在按下时先收起弹窗。
+				ColorDiskPopup.IsOpen = wasPenMode && !_penPopupWasOpen;
+				FridayReporter.ReportEventImmediately(ColorDiskPopup.IsOpen ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
 				return;
 			}
 			PenClick();
@@ -199,7 +222,7 @@ namespace PPTService
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
 				if (eraserAlreadyActive)
 				{
-					ShowEraserSliderPopup();
+					ToggleEraserSliderPopup();
 				}
 				else
 				{
@@ -220,7 +243,7 @@ namespace PPTService
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
 				if (eraserAlreadyActive)
 				{
-					ShowEraserSliderPopup();
+					ToggleEraserSliderPopup();
 				}
 				else
 				{
@@ -231,11 +254,20 @@ namespace PPTService
 			}
 			if (IsInnerBoardWindowShowing)
 			{
+				bool eraserAlreadyActive = RubberCheckBox.IsChecked == true;
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = true;
 				ViewHelper.InnerBoardWindow.SetRubber();
 				SetPptPointerType(PpSlideShowPointerType.ppSlideShowPointerEraser);
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
+				if (eraserAlreadyActive)
+				{
+					ToggleEraserSliderPopup();
+				}
+				else
+				{
+					EraserSliderPopup.IsOpen = false;
+				}
 			}
 			else
 			{
@@ -314,10 +346,7 @@ namespace PPTService
 				}
 				SetPenColor(radioButton.Background.ToString());
 				ColorDiskPopup.IsOpen = false;
-				if (!IsInnerBoardWindowShowing)
-				{
-					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
-				}
+				BringSlideToForeground();
 			}
 		}
 
@@ -345,6 +374,9 @@ namespace PPTService
 			{
 				ViewHelper.InnerBoardWindow.SetPenThickness(thickness);
 			}
+			// 选完粗细即收起面板，并把焦点还给绘制目标，下一次点击直接落笔。
+			ColorDiskPopup.IsOpen = false;
+			BringSlideToForeground();
 		}
 
 		/// <summary>打开「滑动清屏」滑杆，并关闭其它工具栏弹窗。</summary>
@@ -366,6 +398,21 @@ namespace PPTService
 		private void EraserSliderPopup_OnOpened(object sender, EventArgs e)
 		{
 			EraserSlide.Value = 0.0;
+		}
+
+		/// <summary>橡皮模式下再点橡皮：滑杆已开则收起，未开则弹出。
+		/// 是否「已开」由 RubberCheckBox_PreviewMouseDown 记录的 _eraserPopupWasOpen 判定，
+		/// 因为 StaysOpen=False 会在按下瞬间先把滑杆收起，Click 时 IsOpen 已不可信。</summary>
+		private void ToggleEraserSliderPopup()
+		{
+			if (_eraserPopupWasOpen)
+			{
+				EraserSliderPopup.IsOpen = false;
+			}
+			else
+			{
+				ShowEraserSliderPopup();
+			}
 		}
 
 		private void EraserSlide_DragStarted(object sender, DragStartedEventArgs e)
@@ -395,11 +442,16 @@ namespace PPTService
 			if (IsInnerBoardSelfAnnotation)
 			{
 				ViewHelper.InnerBoardWindow.ClearCurrentPage();
+				ViewHelper.InnerBoardWindow.SetPen(AnnotationController.CurrentColor);
 			}
 			else if (UserConfigManager.Load().UseSelfAnnotation)
 			{
 				AnnotationController.ClearCurrentPage();
+				AnnotationController.SetMode(AnnotationController.Mode.Pen);
 			}
+			// 滑动清屏后自动切回画笔（PPT 与板中板一致），方便继续书写。
+			UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
+			BringSlideToForeground();
 		}
 
 		private void ColorDiskPopup_OnOpened(object sender, EventArgs e)
@@ -419,6 +471,25 @@ namespace PPTService
 			SyncPenSelectionStates(pointerColor);
 			EraserSliderPopup.IsOpen = false;
 			(Resources["ShowColorDiskStoryBoard"] as Storyboard)?.Begin();
+		}
+
+		private void ColorDiskPopup_OnClosed(object sender, EventArgs e)
+		{
+			// 面板关闭后把绘制焦点还给幻灯片（或板中板），下一次点击直接落笔，无需再点一次获取焦点。
+			BringSlideToForeground();
+		}
+
+		/// <summary>将前台焦点交还给绘制目标：板中板打开时交还板中板窗口，否则交还放映窗口。</summary>
+		private void BringSlideToForeground()
+		{
+			if (PptOperator.Instance == null || !PptOperator.Instance.IsShowing)
+			{
+				return;
+			}
+			IntPtr hwnd = IsInnerBoardWindowShowing
+				? new WindowInteropHelper(ViewHelper.InnerBoardWindow).Handle
+				: PptOperator.Instance.SlideShowWindowIntPtr;
+			WindowsApi.SetForegroundWindow(hwnd);
 		}
 
 		/// <summary>按真值源同步颜色盘 / 粗细三档的勾选态。</summary>
@@ -483,7 +554,9 @@ namespace PPTService
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = false;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
-				bool openPopup = wasPenMode && allowColorPopup;
+				// 已在笔模式再点一次：当前已开则收起、未开则打开（切换开关）。
+				// 用 _penPopupWasOpen 而非 ColorDiskPopup.IsOpen：StaysOpen=False 在按下瞬间已先把弹窗收起。
+				bool openPopup = wasPenMode && allowColorPopup && !_penPopupWasOpen;
 				ColorDiskPopup.IsOpen = openPopup;
 				FridayReporter.ReportEventImmediately(openPopup ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
 				return;
@@ -500,10 +573,11 @@ namespace PPTService
 			}
 			else if (allowColorPopup)
 			{
-				// 已在画笔模式再点一次：弹出笔颜色面板。
+				// 已在画笔模式再点一次：toggle 笔颜色面板（已开则收起、未开则打开）。
 				// Office 原生批注模式下只显示颜色，三个粗细选项在 ColorDiskPopup_OnOpened 里隐藏。
-				ColorDiskPopup.IsOpen = true;
-				FridayReporter.ReportEventImmediately(EventID.BottomRegionColorDisk);
+				// 用 _penPopupWasOpen 而非当前 IsOpen：StaysOpen=False 在按下瞬间已先把弹窗收起。
+				ColorDiskPopup.IsOpen = !_penPopupWasOpen;
+				FridayReporter.ReportEventImmediately(ColorDiskPopup.IsOpen ? EventID.BottomRegionColorDisk : EventID.BottomRegionPen);
 			}
 			else
 			{
