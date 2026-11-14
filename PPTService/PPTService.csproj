@@ -175,6 +175,7 @@
     <Compile Include="PPTService\AnalyzeRate.cs" />
     <Compile Include="PPTService\App.cs" />
     <Compile Include="PPTService\AnnotationController.cs" />
+    <Compile Include="PPTService\PenSettings.cs" />
     <Compile Include="PPTService\DefenderGuardian.cs" />
     <Compile Include="PPTService\AppPath.cs" />
     <Compile Include="PPTService\AttachedViewModelBase.cs" />

@@ -4,6 +4,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -52,6 +53,9 @@ namespace PPTService
 				return;
 			}
 			IsInnerBoardWindowShowing = showing;
+			// 切换板中板时收起笔设置 / 滑动清屏弹窗，避免残留遮挡。
+			EraserSliderPopup.IsOpen = false;
+			ColorDiskPopup.IsOpen = false;
 			if (!UserConfigManager.Load().UseSelfAnnotation)
 			{
 				return;
@@ -127,6 +131,7 @@ namespace PPTService
 
 		private void Select_OnClick(object sender, RoutedEventArgs e)
 		{
+			EraserSliderPopup.IsOpen = false;
 			if (IsSelfAnnotationActive)
 			{
 				// 鼠标模式：批注窗口穿透，点击落到 PPT。
@@ -158,6 +163,7 @@ namespace PPTService
 
 		private void Pen_OnClick(object sender, RoutedEventArgs e)
 		{
+			EraserSliderPopup.IsOpen = false;
 			if (IsInnerBoardSelfAnnotation)
 			{
 				// 板中板：切到新白板引擎的画笔并同步当前颜色，工具栏视觉保持「笔」选中，
@@ -182,29 +188,41 @@ namespace PPTService
 			if (IsInnerBoardSelfAnnotation)
 			{
 				// 板中板：走新白板引擎的手势橡皮，不触碰 Office 指针。
+				// 橡皮已选中时再点一次 → 弹出「滑动清屏」滑杆（移植桌面批注）。
+				bool eraserAlreadyActive = ViewHelper.InnerBoardWindow.IsEraserActive;
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = true;
 				ViewHelper.InnerBoardWindow.SetRubber();
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
+				if (eraserAlreadyActive)
+				{
+					ShowEraserSliderPopup();
+				}
+				else
+				{
+					EraserSliderPopup.IsOpen = false;
+				}
 				FridayReporter.ReportEventImmediately(EventID.BottomRegionRubber);
 				return;
 			}
 			if (IsSelfAnnotationActive)
 			{
-				// 手势橡皮：拖动擦除经过的笔迹；再次点击橡皮则清屏
-				// （对应桌面批注橡皮弹窗里「滑杆清屏」的行为）。
-				if (AnnotationController.IsEnabled &&
-					AnnotationController.CurrentMode == AnnotationController.Mode.Eraser)
-				{
-					AnnotationController.ClearCurrentPage();
-				}
-				else
-				{
-					AnnotationController.SetMode(AnnotationController.Mode.Eraser);
-				}
+				// 手势橡皮：拖动擦除经过的笔迹；橡皮已选中时再点一次弹出
+				// 「滑动清屏」滑杆，滑到底才清当前页（对应桌面批注 DesktopEraserPopupBorder）。
+				bool eraserAlreadyActive = AnnotationController.IsEnabled &&
+					AnnotationController.CurrentMode == AnnotationController.Mode.Eraser;
+				AnnotationController.SetMode(AnnotationController.Mode.Eraser);
 				SelectCheckBox.IsChecked = false;
 				RubberCheckBox.IsChecked = true;
 				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
+				if (eraserAlreadyActive)
+				{
+					ShowEraserSliderPopup();
+				}
+				else
+				{
+					EraserSliderPopup.IsOpen = false;
+				}
 				FridayReporter.ReportEventImmediately(EventID.BottomRegionRubber);
 				return;
 			}
@@ -301,28 +319,104 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 笔迹粗细选择（移植自桌面批注 DesktopPenPopupBorder 的 ThicknessGrid）。
+		/// 粗细由 AnnotationController 统一保存，同时同步主批注层与板中板。
+		/// </summary>
+		private void ThicknessRadioButton_OnClick(object sender, RoutedEventArgs e)
+		{
+			RadioButton radioButton = e.OriginalSource as RadioButton;
+			if (radioButton == null || !(radioButton.Tag is double))
+			{
+				return;
+			}
+			double thickness = (double)radioButton.Tag;
+			// 无条件记录真值（纯静态状态，无副作用），保证切换到自实现批注后
+			// 新建 Board 时能把用户选过的粗细应用上；Office 批注的笔宽由 Office 自身控制。
+			AnnotationController.SetThickness(thickness);
+			if (UserConfigManager.Load().UseSelfAnnotation && IsInnerBoardWindowShowing)
+			{
+				ViewHelper.InnerBoardWindow.SetPenThickness(thickness);
+			}
+		}
+
+		/// <summary>打开「滑动清屏」滑杆，并关闭其它工具栏弹窗。</summary>
+		private void ShowEraserSliderPopup()
+		{
+			ColorDiskPopup.IsOpen = false;
+			// 上一次回弹动画可能仍在持有 Value（HoldEnd），先解除再复位。
+			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
+			EraserSlide.Value = 0.0;
+			EraserSliderPopup.IsOpen = true;
+		}
+
+		private void EraserSliderPopup_OnOpened(object sender, EventArgs e)
+		{
+			EraserSlide.Value = 0.0;
+		}
+
+		private void EraserSlide_DragStarted(object sender, DragStartedEventArgs e)
+		{
+			// 停掉上一次的回弹动画，避免拖动时被动画拉回。
+			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
+		}
+
+		/// <summary>
+		/// 松手后滑杆回弹；滑到阈值以上才清「当前页」笔迹。
+		/// 移植自桌面批注 DesktopEraserPopupBorder.Tracker_DragCompleted（阈值 0.8）。
+		/// </summary>
+		private void EraserSlide_DragCompleted(object sender, DragCompletedEventArgs e)
+		{
+			double value = EraserSlide.Value;
+			DoubleAnimation snapBack = new DoubleAnimation(0.0, TimeSpan.FromMilliseconds(300.0))
+			{
+				EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
+			};
+			EraserSlide.BeginAnimation(RangeBase.ValueProperty, snapBack);
+			if (value < PenSettings.EraserSlideThreshold)
+			{
+				// 未滑到底：只回弹，弹窗保持打开，用户可继续尝试。
+				return;
+			}
+			EraserSliderPopup.IsOpen = false;
+			if (IsInnerBoardSelfAnnotation)
+			{
+				ViewHelper.InnerBoardWindow.ClearCurrentPage();
+			}
+			else if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				AnnotationController.ClearCurrentPage();
+			}
+		}
+
 		private void ColorDiskPopup_OnOpened(object sender, EventArgs e)
 		{
-			RedRadioButton.IsChecked = false;
-			BlueRadioButton.IsChecked = false;
-			BlackRadioButton.IsChecked = false;
 			// 自实现批注下 PptOperator.PointerColor 不可信（Office 指针为 None，常读到黑），
 			// 颜色盘勾选状态一律取 AnnotationController 的真值源（板中板同样适用）。
-			Color pointerColor = UserConfigManager.Load().UseSelfAnnotation
+			// PptOperator.Instance 由 App.OnStartup 赋值，放映未开始 / 初始化前可能为 null。
+			Color pointerColor = UserConfigManager.Load().UseSelfAnnotation || PptOperator.Instance == null
 				? AnnotationController.CurrentColor
 				: PptOperator.Instance.PointerColor;
-			if (pointerColor == Colors.Red)
+			foreach (object child in ColorDiskGrid.Children)
 			{
-				RedRadioButton.IsChecked = true;
+				RadioButton radioButton = child as RadioButton;
+				if (radioButton == null)
+				{
+					continue;
+				}
+				SolidColorBrush brush = radioButton.Background as SolidColorBrush;
+				radioButton.IsChecked = brush != null && brush.Color == pointerColor;
 			}
-			if (pointerColor == Colors.Black)
+			foreach (object child in ThicknessGrid.Children)
 			{
-				BlackRadioButton.IsChecked = true;
+				RadioButton radioButton = child as RadioButton;
+				if (radioButton == null || !(radioButton.Tag is double))
+				{
+					continue;
+				}
+				radioButton.IsChecked = Math.Abs((double)radioButton.Tag - AnnotationController.CurrentThickness) < 0.0001;
 			}
-			if (pointerColor.R == 0 && pointerColor.G == 133 && pointerColor.B == 205)
-			{
-				BlueRadioButton.IsChecked = true;
-			}
+			EraserSliderPopup.IsOpen = false;
 			(Resources["ShowColorDiskStoryBoard"] as Storyboard)?.Begin();
 		}
 

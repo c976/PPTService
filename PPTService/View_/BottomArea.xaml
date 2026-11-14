@@ -26,6 +26,34 @@
           </EasingDoubleKeyFrame>
         </DoubleAnimationUsingKeyFrames>
       </Storyboard>
+      <!-- 橡皮「滑动清屏」滑杆（移植自桌面批注 DesktopEraserPopupBorder）：
+           拖动到底（≥0.8）才清当前页，避免误触；松手后自动回弹。 -->
+      <Style x:Key="EraserSliderStyle" TargetType="{x:Type Slider}">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Slider}">
+              <Border Name="RootBorder" CornerRadius="26" Width="200" Height="52" Background="#D4D4D4">
+                <Grid Margin="5">
+                  <TextBlock Text="滑动清屏" FontSize="16" Foreground="#989898" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 14 0" IsHitTestVisible="False" />
+                  <Track Name="PART_Track">
+                    <Track.Thumb>
+                      <Thumb Name="EraserThumb" Focusable="False" Width="42" Height="42">
+                        <Thumb.Template>
+                          <ControlTemplate TargetType="{x:Type Thumb}">
+                            <Border CornerRadius="21" Background="White" BorderBrush="#B0B0B0" BorderThickness="1">
+                              <Image Source="{StaticResource ImageSource.RubberNormal}" Width="22" Height="22" Stretch="Uniform" />
+                            </Border>
+                          </ControlTemplate>
+                        </Thumb.Template>
+                      </Thumb>
+                    </Track.Thumb>
+                  </Track>
+                </Grid>
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
     </ResourceDictionary>
   </FrameworkElement.Resources>
   <Grid Name="RootGrid" Height="50">
@@ -67,21 +95,11 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="90" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="210" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="144" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
-            </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskGrid" Storyboard.TargetProperty="Margin">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <Thickness>0 0 0 4</Thickness>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
           </Storyboard>
         </VisualState>
         <VisualState x:Name="Adaptive1440" />
@@ -111,21 +129,11 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="300" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="420" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="288" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
-            </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskGrid" Storyboard.TargetProperty="Margin">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <Thickness>0 0 0 14</Thickness>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
           </Storyboard>
         </VisualState>
       </VisualStateGroup>
@@ -227,7 +235,9 @@
       <CheckBox Name="RubberCheckBox" Grid.Column="2" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.RubberNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.RubberSelected}" Click="Rubber_OnClick" />
       <pptService:ImageButton x:Name="MagnifierButton" Click="Magnifier_Click" Grid.Column="3" NormalSource="{StaticResource ImageSource.MagnifierNormal}" PressedSource="{StaticResource ImageSource.MagnifierSelected}" />
       <CheckBox Name="InnerBoardCheckBox" Grid.Column="4" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.PlateNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.PlateSelected}" Click="InnerBoard_Click" />
-      <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="150" Height="50" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
+      <!-- 笔设置面板（移植自桌面批注 DesktopPenPopupBorder）：3 档粗细 + 9 色。
+           内部固定 280x192，外层 Viewbox 按 Popup 尺寸等比缩放（210x144 / 280x192 / 420x288 同比例）。 -->
+      <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="280" Height="192" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
         <Grid Background="#00FFFFFF">
           <Grid Name="ColorDiskStoryBoardGrid" RenderTransformOrigin="0.5,1">
             <UIElement.RenderTransform>
@@ -235,19 +245,48 @@
                 <ScaleTransform ScaleX="0" ScaleY="0" />
               </TransformGroup>
             </UIElement.RenderTransform>
-            <Image Source="{StaticResource ImageSource.ColorDisk}" Stretch="Fill" />
-            <Grid Name="ColorDiskGrid" Height="25" Margin="0 0 0 7">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-              </Grid.ColumnDefinitions>
-              <RadioButton Name="RedRadioButton" Background="#FFFF0000" Grid.Column="0" Style="{StaticResource ColorRadioButtonStyle}" Click="RadioButton_OnClick" />
-              <RadioButton Name="BlueRadioButton" Background="#0085CD" Grid.Column="1" Style="{StaticResource ColorRadioButtonStyle}" Click="RadioButton_OnClick" />
-              <RadioButton Name="BlackRadioButton" Background="#FF000000" Grid.Column="2" Style="{StaticResource ColorRadioButtonStyle}" Click="RadioButton_OnClick" />
-            </Grid>
+            <Viewbox Stretch="Fill">
+              <Border Width="280" Height="192" Background="#E6FFFFFF" CornerRadius="4">
+                <StackPanel Orientation="Horizontal">
+                  <UniformGrid Name="ThicknessGrid" Rows="3" Columns="1" VerticalAlignment="Center" Margin="18 0 6 0">
+                    <RadioButton Name="ThinRadioButton" Style="{StaticResource PenThicknessRadioButtonStyle}" Tag="{x:Static pptService:PenSettings.PenLightWeight}" Click="ThicknessRadioButton_OnClick">
+                      <Ellipse Width="6" Height="6" Fill="#FF666666" />
+                    </RadioButton>
+                    <RadioButton Name="MediumRadioButton" Style="{StaticResource PenThicknessRadioButtonStyle}" Tag="{x:Static pptService:PenSettings.PenWeight}" Click="ThicknessRadioButton_OnClick" IsChecked="True">
+                      <Ellipse Width="13" Height="13" Fill="#FF666666" />
+                    </RadioButton>
+                    <RadioButton Name="BoldRadioButton" Style="{StaticResource PenThicknessRadioButtonStyle}" Tag="{x:Static pptService:PenSettings.PenBoldWeight}" Click="ThicknessRadioButton_OnClick">
+                      <Ellipse Width="21" Height="21" Fill="#FF666666" />
+                    </RadioButton>
+                  </UniformGrid>
+                  <UniformGrid Name="ColorDiskGrid" Rows="3" Columns="3" Margin="6 10 14 10" VerticalAlignment="Center">
+                    <RadioButton Background="#FFFF0000" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FFFF8B00" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FFFFD800" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF0085CD" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF306ED9" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF331EB5" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF306C01" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF66D552" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                    <RadioButton Background="#FF000000" Style="{StaticResource PenColorRadioButtonStyle}" Click="RadioButton_OnClick" />
+                  </UniformGrid>
+                </StackPanel>
+                <UIElement.Effect>
+                  <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
+                </UIElement.Effect>
+              </Border>
+            </Viewbox>
           </Grid>
         </Grid>
+      </Popup>
+      <!-- 橡皮已选中时再次点击橡皮弹出：滑到底（≥0.8）清当前页笔迹。 -->
+      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
+        <Border Width="230" Height="100" Background="#E6FFFFFF" CornerRadius="4">
+          <Slider Name="EraserSlide" Maximum="1" Minimum="0" Value="0" Style="{StaticResource EraserSliderStyle}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
+          <UIElement.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
+          </UIElement.Effect>
+        </Border>
       </Popup>
     </Grid>
     <Grid Name="PlaceholderGrid" Column="3" Width="4" />

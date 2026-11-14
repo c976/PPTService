@@ -32,6 +32,7 @@ namespace PPTService
 		private static Window _toolbarWindow;
 		private static int _currentPageIndex = 1;
 		private static Color _color = Colors.Red;
+		private static double _thickness = PenSettings.PenWeight;
 		private static Mode _currentMode = Mode.Mouse;
 
 		public static bool IsEnabled { get; private set; }
@@ -40,6 +41,12 @@ namespace PPTService
 		public static Color CurrentColor
 		{
 			get { return _color; }
+		}
+
+		/// <summary>当前笔迹粗细（移植自桌面批注的三档粗细，两个白板共用）。</summary>
+		public static double CurrentThickness
+		{
+			get { return _thickness; }
 		}
 
 		public static Mode CurrentMode
@@ -86,6 +93,10 @@ namespace PPTService
 			{
 				main.SetAnnotationLayer(_board.InkBoard);
 			}
+			// 把用户当前选择的颜色 / 粗细应用到新建的 Board
+			// （Board 构造里用的是默认红色与默认粗细）。
+			_board.SetInkColor(_color);
+			_board.SetInkThickness(_thickness);
 		}
 
 		public static void SetEnabled(bool enable)
@@ -186,10 +197,24 @@ namespace PPTService
 			_color = color;
 			// 定时器在自实现批注下不再调 PptOperator.UpdatePointerColor()（COM），
 			// 这里手动同步普通属性，保证颜色盘与板中板画笔颜色正确。
-			PptOperator.Instance.PointerColor = color;
+			// PptOperator.Instance 由 App.OnStartup 赋值，启动早期可能为 null。
+			if (PptOperator.Instance != null)
+			{
+				PptOperator.Instance.PointerColor = color;
+			}
 			if (_board != null)
 			{
 				_board.SetInkColor(color);
+			}
+		}
+
+		/// <summary>设置笔迹粗细，同步主批注层与板中板（两者共用同一真值源）。</summary>
+		public static void SetThickness(double thickness)
+		{
+			_thickness = thickness;
+			if (_board != null)
+			{
+				_board.SetInkThickness(thickness);
 			}
 		}
 

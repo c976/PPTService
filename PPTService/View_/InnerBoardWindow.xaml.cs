@@ -29,12 +29,13 @@ namespace PPTService
 
 		private static readonly int MaxSlides = 100;
 
-		private static readonly int WindowHeight = 2100;
-
 		/// <summary>板中板自己的白板实例（Board 是独立 UIElement，不能与 MainWindow 共用）。</summary>
 		private readonly AnnotationBoard _board;
 
 		public bool IsShowing { get; set; }
+
+		/// <summary>当前是否处于橡皮模式（供工具栏判断「再点一次橡皮」）。</summary>
+		public bool IsEraserActive { get; private set; }
 
 		public InnerBoardWindow()
 		{
@@ -54,7 +55,8 @@ namespace PPTService
 		private void InnerBoardWindow_Loaded(object sender, RoutedEventArgs e)
 		{
 			Top = 0.0;
-			_board.SetInkThickness(3.0);
+			// 与主批注层共用颜色 / 粗细真值源，不再使用旧 InkCanvas 时代的固定笔宽。
+			_board.SetInkThickness(AnnotationController.CurrentThickness);
 			_board.SetInkColor(AnnotationController.CurrentColor);
 		}
 
@@ -66,18 +68,33 @@ namespace PPTService
 			_board.GoToSlide(0);
 			_totalIndex = 1;
 			_currentIndex = 1;
+			IsEraserActive = false;
 			UpdateIndex();
+		}
+
+		/// <summary>「滑动清屏」：只清当前页笔迹，保留其它页（对应桌面批注的 CleanInk）。</summary>
+		public void ClearCurrentPage()
+		{
+			_board.CleanInk();
+		}
+
+		/// <summary>设置板中板笔迹粗细。</summary>
+		public void SetPenThickness(double thickness)
+		{
+			_board.SetInkThickness(thickness);
 		}
 
 		/// <summary>切到画笔模式（沿用当前笔色）。</summary>
 		public void SetPenToInkMode()
 		{
+			IsEraserActive = false;
 			_board.GotoInk();
 		}
 
 		/// <summary>设置笔色并切到画笔模式。</summary>
 		public void SetPen(Color color)
 		{
+			IsEraserActive = false;
 			_board.SetInkColor(color);
 			_board.GotoInk();
 		}
@@ -85,12 +102,14 @@ namespace PPTService
 		/// <summary>手势橡皮（拖动擦除）。</summary>
 		public void SetRubber()
 		{
+			IsEraserActive = true;
 			_board.GotoEraser();
 		}
 
 		/// <summary>鼠标 / 选择模式：白板不再接收笔迹输入。</summary>
 		public void SetNone()
 		{
+			IsEraserActive = false;
 			_board.GotoSelect();
 		}
 
@@ -101,8 +120,9 @@ namespace PPTService
 				IsShowing = true;
 				Show();
 				ChangeWindowRect();
-				// 原版按窗口高度放大笔宽，这里映射到新引擎的 InkBoardSettings.InkThickness。
-				_board.SetInkThickness(Height > (double)WindowHeight ? 6.0 : 3.0);
+				// 每次打开都同步主工具栏当前选择的颜色 / 粗细。
+				_board.SetInkThickness(AnnotationController.CurrentThickness);
+				_board.SetInkColor(AnnotationController.CurrentColor);
 				(Resources["ShowStoryBoard"] as Storyboard)?.Begin();
 			}
 		}
