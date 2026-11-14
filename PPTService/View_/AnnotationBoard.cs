@@ -42,10 +42,19 @@ namespace PPTService
 		// 但触控 / 压感笔在部分设备上层窗口的命中测试会绕过该消息而失效，故回退到 alpha 方案。
 		private static readonly Brush CaptureBackground = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
 
+		/// <summary>
+		/// 笔 / 橡皮模式是否用 alpha=1 背景来捕获输入。
+		/// MainWindow 是全透明覆盖在 PPT 之上的分层窗口，必须为 true；
+		/// 板中板有白色不透明底板（InkCanvasBorder），像素 alpha 已为 255，
+		/// 输入天然会被窗口捕获，传 false 可让白板保持纯白、零色偏。
+		/// </summary>
+		private readonly bool _captureInputWithAlpha;
+
 		public Board InkBoard { get; }
 
-		public AnnotationBoard()
+		public AnnotationBoard(bool captureInputWithAlpha = true)
 		{
+			_captureInputWithAlpha = captureInputWithAlpha;
 			Board board = new Board
 			{
 				Background = Brushes.Transparent,
@@ -75,21 +84,29 @@ namespace PPTService
 			InkBoard.Background = Brushes.Transparent;
 		}
 
+		private Brush WritingBackground
+		{
+			// 板中板场景：窗口已有白色不透明底板，Board 直接铺白，既保证 WPF 命中测试
+			// 命中 Board 而非底板，也不引入任何半透明色偏（板中板本来就是白板）。
+			get { return _captureInputWithAlpha ? CaptureBackground : Brushes.White; }
+		}
+
 		public void GotoInk()
 		{
 			InkBoard.Mode = _penMode;
-			// 笔模式：alpha=1 背景让分层 MainWindow 在该区域捕获输入（视觉仍近乎透明，PPT 可见），
+			// 笔模式：MainWindow 场景用 alpha=1 背景让分层窗口在该区域捕获输入
+			// （视觉仍近乎透明，PPT 可见）；板中板有白底，保持纯透明即可。
 			// 触摸 / 压感笔 / 橡皮 / 鼠标均可落到 Board 的笔迹管线。
 			InkBoard.IsHitTestVisible = true;
-			InkBoard.Background = CaptureBackground;
+			InkBoard.Background = WritingBackground;
 		}
 
 		public void GotoEraser()
 		{
 			InkBoard.Mode = _modesProvider.EraserMode;
-			// 橡皮模式：与笔模式同理，共享同一条 DynamicRenderer 管线，alpha=1 背景捕获输入。
+			// 橡皮模式：与笔模式同理，共享同一条 DynamicRenderer 管线。
 			InkBoard.IsHitTestVisible = true;
-			InkBoard.Background = CaptureBackground;
+			InkBoard.Background = WritingBackground;
 		}
 
 		public void CleanInk()

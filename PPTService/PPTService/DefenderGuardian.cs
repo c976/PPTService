@@ -3,15 +3,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using System.Windows.Threading;
 
 namespace PPTService
 {
 	/// <summary>
 	/// 主程序侧的守护进程「看护」：
 	///  - 启动时立即拉起 PPTService.Defender（调试模式不启用）；
-	///  - 每 2s 巡检一次，发现守护进程不在就重新拉起（主程序守护守护进程）；
-	///  - 守护进程侧每 4s 巡检主程序，主程序崩溃时由它重新拉起（见 PPTService.Defender）。
+	///  - 每 1s 巡检一次，发现守护进程不在就重新拉起，保证「2s 内拉起」；
+	///  - 守护进程侧每 0.5s 巡检主程序，主程序崩溃后 1s 内由它重新拉起（见 PPTService.Defender）。
 	///
 	/// 互守护不设计进程间优雅退出握手：正常退出时直接结束掉两个进程
 	/// （StopAndKill），卸载/升级时由安装脚本同时结束两个进程（见 setup/PPTService.nsi）。
@@ -22,11 +21,17 @@ namespace PPTService
 
 		private const string DefenderMutexName = "PPTService.Defender.Mutex";
 
-		/// <summary>主程序巡检守护进程的间隔（毫秒）。</summary>
-		private const int CheckIntervalMs = 2000;
+		/// <summary>
+		/// 主程序巡检守护进程的间隔（毫秒）。设为 1s：守护进程被结束后最坏 1s 被发现，
+		/// 加上进程启动耗时仍可保证「2s 内拉起」。
+		/// </summary>
+		private const int CheckIntervalMs = 1000;
 
-		private static DispatcherTimer _timer;
+		// 用线程池定时器而非 DispatcherTimer：PPT COM 调用等耗时操作可能长时间占用 UI 线程，
+		// DispatcherTimer 会被拖到 2s 之后才触发，无法保证「2s 内拉起」。
+		private static Timer _timer;
 		private static int _checking;
+		private static volatile bool _stopped;
 
 		private static string BaseDirectory
 		{
@@ -41,21 +46,18 @@ namespace PPTService
 		/// <summary>由 App.OnStartup 调用。调试模式不启用守护进程。</summary>
 		public static void Start()
 		{
-			if (DebugMode.IsEnabled || _timer != null)
+			if (DebugMode.IsEnabled || _timer != null || _stopped)
 			{
 				return;
 			}
 			EnsureDefenderRunning();
-			_timer = new DispatcherTimer(DispatcherPriority.Background)
-			{
-				Interval = TimeSpan.FromMilliseconds(CheckIntervalMs)
-			};
-			_timer.Tick += delegate { EnsureDefenderRunning(); };
-			_timer.Start();
+			// 先启动一次，之后每 1s 巡检；线程池计时不受 UI 线程阻塞影响。
+			_timer = new Timer(delegate { EnsureDefenderRunning(); }, null,
+				CheckIntervalMs, CheckIntervalMs);
 		}
 
 		/// <summary>
-		/// 程序正常退出：停止巡检并直接结束守护进程，避免它 4s 后把主程序拉回来。
+		/// 程序正常退出：停止巡检并直接结束守护进程，避免它 0.5s 内把主程序拉回来。
 		/// 调试模式直接返回，防止误杀同时运行的正式实例。
 		/// </summary>
 		public static void StopAndKill()
@@ -64,11 +66,13 @@ namespace PPTService
 			{
 				return;
 			}
-			DispatcherTimer timer = _timer;
-			_timer = null;
+			// 先置停止标志：线程池回调可能正在飞行，Dispose 不会等待它结束，
+			// 否则退出瞬间可能又把守护进程拉起一次。
+			_stopped = true;
+			Timer timer = Interlocked.Exchange(ref _timer, null);
 			if (timer != null)
 			{
-				timer.Stop();
+				timer.Dispose();
 			}
 			try
 			{
@@ -103,7 +107,7 @@ namespace PPTService
 			}
 			try
 			{
-				if (DebugMode.IsEnabled || !File.Exists(DefenderPath) || IsDefenderRunning())
+				if (_stopped || DebugMode.IsEnabled || !File.Exists(DefenderPath) || IsDefenderRunning())
 				{
 					return;
 				}

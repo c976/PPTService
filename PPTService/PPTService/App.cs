@@ -50,15 +50,16 @@ namespace PPTService
 			{
 				Environment.Exit(0);
 			}
-			// 启动互守护：主程序每 2s 看护守护进程，守护进程每 4s 看护主程序。
-			// 调试模式不启用。卸载/升级时由安装脚本同时结束两个进程。
+			// 启动互守护：主程序每 1s 看护守护进程（2s 内拉起），
+			// 守护进程每 0.5s 看护主程序（1s 内拉起）。调试模式不启用。
+			// 卸载/升级时由安装脚本同时结束两个进程。
 			DefenderGuardian.Start();
 		}
 
 		protected override void OnExit(ExitEventArgs e)
 		{
 			// 正常退出：不做优雅握手，直接把守护进程一并结束掉，
-			// 否则它会在 4s 后把主程序重新拉起。
+			// 否则它会在 0.5s 内把主程序重新拉起。
 			DefenderGuardian.StopAndKill();
 			base.OnExit(e);
 		}

@@ -9,8 +9,8 @@ namespace PPTService.Defender
 	/// PPTService.Defender —— PPT 小工具的守护（看门狗）进程。
 	///
 	/// 互守护约定（与主程序 PPTService.DefenderGuardian 对应）：
-	///  - 主程序每 2s 巡检守护进程，掉了就拉起；
-	///  - 守护进程每 4s 巡检主程序，主程序崩溃 / 消失就重新拉起。
+	///  - 守护进程每 0.5s 巡检主程序，主程序崩溃 / 消失后 1s 内重新拉起；
+	///  - 主程序每 1s 巡检守护进程，守护进程消失后 2s 内重新拉起。
 	///  - 调试模式不启用（由主程序侧控制是否拉起本进程）。
 	///
 	/// 注意：这里刻意不持有 Process 对象等待 HasExited，而是每轮重新枚举进程。
@@ -33,11 +33,22 @@ namespace PPTService.Defender
 		private const string BootCrashCountFile = "BootCrashCount";
 		private const int MaxBootCrashes = 3;
 
-		/// <summary>守护进程巡检主程序的间隔（毫秒）。</summary>
-		private const int CheckIntervalMs = 4000;
+		/// <summary>
+		/// 守护进程巡检主程序的间隔（毫秒）。设为 500ms：主程序崩溃后最坏 500ms 被发现，
+		/// 加上进程启动耗时仍可保证「1s 内拉起」。
+		/// </summary>
+		private const int CheckIntervalMs = 500;
 
 		private const int MaxRestartStorm = 5;
 		private const int RestartStormWindowSec = 60;
+
+		/// <summary>
+		/// 拉起后主程序存活超过该秒数视为「启动成功」，清空连续崩溃计数。
+		/// 巡检间隔缩短到 0.5s 后，若只按「60s 内拉起次数」统计，
+		/// 主程序启动慢 / 单实例互斥体抢占导致连续几次快速退出会在 2.5s 内
+		/// 触发风暴保护而永久放弃守护；用存活时间区分「反复崩溃」与「正常运行后崩溃」。
+		/// </summary>
+		private const int HealthyAfterRestartSec = 3;
 
 		private static readonly string DataDir = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -76,7 +87,7 @@ namespace PPTService.Defender
 				try
 				{
 					string exePath = ResolveWatchedPath();
-					Log($"守护进程已启动（每 {CheckIntervalMs / 1000}s 巡检主程序），目标：{exePath}");
+					Log($"守护进程已启动（每 {CheckIntervalMs}ms 巡检主程序，1s 内拉起），目标：{exePath}");
 					// 初始化完成：删除启动标记。此后被强杀不再算「首发崩溃」。
 					TryDelete(BootMarkerPath);
 					Run(exePath);
@@ -124,6 +135,7 @@ namespace PPTService.Defender
 		{
 			int restartCount = 0;
 			DateTime stormWindowStart = DateTime.MinValue;
+			DateTime lastRestart = DateTime.MinValue;
 
 			while (true)
 			{
@@ -132,6 +144,13 @@ namespace PPTService.Defender
 				{
 					if (IsMainRunning())
 					{
+						// 拉起后能稳定存活一段时间 = 启动成功，清空连续崩溃计数。
+						if (lastRestart != DateTime.MinValue &&
+							(DateTime.Now - lastRestart).TotalSeconds >= HealthyAfterRestartSec)
+						{
+							restartCount = 0;
+							lastRestart = DateTime.MinValue;
+						}
 						continue;
 					}
 					if (!File.Exists(exePath))
@@ -148,7 +167,7 @@ namespace PPTService.Defender
 					restartCount++;
 					if (restartCount > MaxRestartStorm)
 					{
-						Log($"主程序在 {RestartStormWindowSec}s 内反复退出超过 {MaxRestartStorm} 次，停止拉起。");
+						Log($"主程序连续 {MaxRestartStorm} 次拉起后快速退出，停止拉起以避免重启风暴。");
 						return;
 					}
 					Log($"主程序不在运行，尝试重新启动（第 {restartCount} 次）……");
@@ -159,6 +178,7 @@ namespace PPTService.Defender
 						UseShellExecute = false,
 						WorkingDirectory = BaseDirectory
 					});
+					lastRestart = DateTime.Now;
 					Log("已发出启动请求。");
 				}
 				catch (Exception ex)

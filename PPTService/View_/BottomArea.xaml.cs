@@ -19,13 +19,22 @@ namespace PPTService
 		public bool IsInnerBoardWindowShowing { get; set; }
 
 		/// <summary>
-		/// 自实现批注是否接管工具栏按钮：设置为自实现批注，且板中板未打开。
-		/// 板中板是独立白板，打开时按钮必须走原版 InkCanvas 逻辑，
-		/// 否则点橡皮会被批注层抢走，板中板仍停留在画笔模式。
+		/// 自实现批注是否接管「主批注层」的工具栏按钮：板中板未打开时为真。
+		/// 板中板打开时按钮改由 IsInnerBoardSelfAnnotation 分支驱动板中板自己的
+		/// AnnotationBoard（同一套新白板引擎，只是目标 Board 不同）。
 		/// </summary>
 		public bool IsSelfAnnotationActive
 		{
 			get { return UserConfigManager.Load().UseSelfAnnotation && !IsInnerBoardWindowShowing; }
+		}
+
+		/// <summary>
+		/// 板中板打开且使用自实现批注：按钮只驱动板中板新白板，
+		/// 不再触碰 Office 指针（旧 InkCanvas 时代的 SetPptPointerType / SetPointerColor）。
+		/// </summary>
+		private bool IsInnerBoardSelfAnnotation
+		{
+			get { return UserConfigManager.Load().UseSelfAnnotation && IsInnerBoardWindowShowing; }
 		}
 
 		private AnnotationController.Mode _modeBeforeInnerBoard;
@@ -128,6 +137,15 @@ namespace PPTService
 				FridayReporter.ReportEventImmediately(EventID.BottomRegionSelect);
 				return;
 			}
+			if (IsInnerBoardSelfAnnotation)
+			{
+				// 板中板走新白板引擎：切到选择态，不再触碰 Office 指针（旧 InkCanvas 路径）。
+				ViewHelper.InnerBoardWindow.SetNone();
+				RubberCheckBox.IsChecked = false;
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionSelect);
+				return;
+			}
 			if (IsInnerBoardWindowShowing)
 			{
 				ViewHelper.InnerBoardWindow.SetNone();
@@ -140,6 +158,18 @@ namespace PPTService
 
 		private void Pen_OnClick(object sender, RoutedEventArgs e)
 		{
+			if (IsInnerBoardSelfAnnotation)
+			{
+				// 板中板：切到新白板引擎的画笔并同步当前颜色，工具栏视觉保持「笔」选中，
+				// 不走 PenClick 的 Office 指针分支（自实现批注下 Office 指针必须保持 None）。
+				ViewHelper.InnerBoardWindow.SetPen(AnnotationController.CurrentColor);
+				SelectCheckBox.IsChecked = false;
+				RubberCheckBox.IsChecked = false;
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerPen);
+				ColorDiskPopup.IsOpen = true;
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionPen);
+				return;
+			}
 			PenClick();
 			if (IsInnerBoardWindowShowing)
 			{
@@ -149,6 +179,16 @@ namespace PPTService
 
 		private void Rubber_OnClick(object sender, RoutedEventArgs e)
 		{
+			if (IsInnerBoardSelfAnnotation)
+			{
+				// 板中板：走新白板引擎的手势橡皮，不触碰 Office 指针。
+				SelectCheckBox.IsChecked = false;
+				RubberCheckBox.IsChecked = true;
+				ViewHelper.InnerBoardWindow.SetRubber();
+				UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerEraser);
+				FridayReporter.ReportEventImmediately(EventID.BottomRegionRubber);
+				return;
+			}
 			if (IsSelfAnnotationActive)
 			{
 				// 手势橡皮：拖动擦除经过的笔迹；再次点击橡皮则清屏
@@ -231,20 +271,27 @@ namespace PPTService
 			RadioButton radioButton = e.OriginalSource as RadioButton;
 			if (radioButton != null)
 			{
-			if (IsSelfAnnotationActive)
-			{
-				// 自实现批注：直接用调色板颜色设置覆盖层笔迹颜色（压感笔迹）
 				SolidColorBrush brush = radioButton.Background as SolidColorBrush;
-				if (brush != null)
+				if (UserConfigManager.Load().UseSelfAnnotation)
 				{
-					AnnotationController.SetColor(brush.Color);
-					// 同步刷新工具栏画笔图标颜色：否则要等下一次点击「笔」触发
-					// UpdateButtonState 才会从 PptOperator.PointerColor 重新取色，图标颜色滞后。
-					PenBrush = new SolidColorBrush(brush.Color);
+					// 自实现批注（含板中板打开期间）：统一走 AnnotationController 作为颜色真值源，
+					// 不走 SetPenColor → PptOperator.SetPointerColor 的 Office COM 路径
+					// （自实现批注下 Office 指针必须保持 None）。
+					if (brush != null)
+					{
+						AnnotationController.SetColor(brush.Color);
+						if (IsInnerBoardWindowShowing)
+						{
+							// 板中板使用新白板引擎，同步它的笔色并保持在画笔模式。
+							ViewHelper.InnerBoardWindow.SetPen(brush.Color);
+						}
+						// 立即刷新工具栏笔图标颜色，避免被 UpdateButtonState 从
+						// PptOperator.PointerColor（自实现批注下不可信，常为黑）覆盖。
+						PenBrush = new SolidColorBrush(brush.Color);
+					}
+					ColorDiskPopup.IsOpen = false;
+					return;
 				}
-				ColorDiskPopup.IsOpen = false;
-				return;
-			}
 				SetPenColor(radioButton.Background.ToString());
 				ColorDiskPopup.IsOpen = false;
 				if (!IsInnerBoardWindowShowing)
@@ -259,7 +306,11 @@ namespace PPTService
 			RedRadioButton.IsChecked = false;
 			BlueRadioButton.IsChecked = false;
 			BlackRadioButton.IsChecked = false;
-			Color pointerColor = PptOperator.Instance.PointerColor;
+			// 自实现批注下 PptOperator.PointerColor 不可信（Office 指针为 None，常读到黑），
+			// 颜色盘勾选状态一律取 AnnotationController 的真值源（板中板同样适用）。
+			Color pointerColor = UserConfigManager.Load().UseSelfAnnotation
+				? AnnotationController.CurrentColor
+				: PptOperator.Instance.PointerColor;
 			if (pointerColor == Colors.Red)
 			{
 				RedRadioButton.IsChecked = true;
@@ -348,7 +399,11 @@ namespace PPTService
 				RubberCheckBox.IsChecked = false;
 				PenImage.Visibility = Visibility.Collapsed;
 				SelectedPenImage.Visibility = Visibility.Visible;
-				PenBrush = new SolidColorBrush(PptOperator.Instance.PointerColor);
+				// 笔图标颜色：自实现批注（含板中板）用 AnnotationController 真值源，
+				// 否则 UpdateButtonState 会把调色板选中的颜色覆盖成 Office 的黑色。
+				PenBrush = new SolidColorBrush(UserConfigManager.Load().UseSelfAnnotation
+					? AnnotationController.CurrentColor
+					: PptOperator.Instance.PointerColor);
 				if (PptAnalyzer.CurrentAnalyzeRate != AnalyzeRate.Highest)
 				{
 					PptAnalyzer.StopAnalyzeAllAsyn();

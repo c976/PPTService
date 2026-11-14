@@ -122,7 +122,9 @@
     </i:Interaction.Triggers>
     <Border Name="InkCanvasBorder" Grid.Row="0" Margin="20 0 20 0" Background="#FFFFFFFF" BorderThickness="1" BorderBrush="#80666666">
       <Grid>
-        <InkCanvas Name="InkCanvas" EditingMode="Ink" Background="#00FFFFFF" />
+        <!-- 新批注引擎（PPTService.Ink 的 Board）宿主：Board 由 InnerBoardWindow 构造时挂入。
+             放在页码按钮之前，保证页码按钮永远在笔迹层之上可点；白底由 InkCanvasBorder 提供。 -->
+        <Grid Name="BoardHost" />
         <Border Name="SlideIndexButtonBorder" Height="50" Width="150" CornerRadius="6" Margin="10" BorderThickness="1" Background="#FFFFFFFF" BorderBrush="#80666666" VerticalAlignment="Bottom" HorizontalAlignment="Right">
           <Grid>
             <Grid.ColumnDefinitions>
