@@ -29,7 +29,10 @@ SetCompressorDictSize 32
 ;  产品定义
 ; -----------------------------------------------------------------------------
 !define PRODUCT_NAME          "PPT小工具增强版"
-!define PRODUCT_NAME_EN       "PPTService"
+; 项目名称（英文），用于版本信息产品名、皮肤窗体标题等展示用途
+!define PRODUCT_NAME_EN       "PPTServiceUltra"
+; 实际 exe 文件名（不含扩展名），快捷方式/自启动/进程互守护/App Paths 等由此引用
+!define PRODUCT_EXE_NAME       "PPTService"
 ; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
 !include "${__FILEDIR__}\Version.nsh"
 !define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
@@ -40,7 +43,7 @@ SetCompressorDictSize 32
 !define LEGACY_GUID           "{958764e5-bbb2-43c1-1234-8d454abd130a}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_UNINST_KEY    "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_GUID}"
-!define PRODUCT_DIR_REGKEY    "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME_EN}.exe"
+!define PRODUCT_DIR_REGKEY    "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_EXE_NAME}.exe"
 !define APP_REGKEY            "SOFTWARE\Seewo\PPTService"
 !define SUPPORT_DIR           "Main\SupportFiles"
 
@@ -116,7 +119,7 @@ FunctionEnd
 ; 请把下方 Page custom / Page instfiles 两行注释掉，并取消这里的注释。
 /*
 ; !define MUI_ABORTWARNING
-; !define MUI_FINISHPAGE_RUN "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+; !define MUI_FINISHPAGE_RUN "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
 ; !insertmacro MUI_PAGE_WELCOME
 ; !insertmacro MUI_PAGE_DIRECTORY
 ; !insertmacro MUI_PAGE_INSTFILES
@@ -331,13 +334,13 @@ Function OnChangePath
     StrCpy $2 ""
   ${EndIf}
   StrCpy $3 "1"
-  ${If} $R0 == "${PRODUCT_NAME_EN}"
+  ${If} $R0 == "${PRODUCT_EXE_NAME}"
     StrCpy $3 "0"
-  ${ElseIf} $2 == "\${PRODUCT_NAME_EN}"
+  ${ElseIf} $2 == "\${PRODUCT_EXE_NAME}"
     StrCpy $3 "0"
   ${EndIf}
   ${If} $3 == "1"
-    StrCpy $R0 "$R0\${PRODUCT_NAME_EN}"
+    StrCpy $R0 "$R0\${PRODUCT_EXE_NAME}"
   ${EndIf}
   StrCpy $INSTDIR $R0
   nsSkinEngine::SetControlData /NOUNLOAD "edt_Dir" "$INSTDIR" "Text"
@@ -347,7 +350,7 @@ Function OnFinish
   nsSkinEngine::GetControlData /NOUNLOAD "checkbox_RunNow" "Checked"
   Pop $RunOnFinish
   ${If} $RunOnFinish == 1
-    Exec 'explorer "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"'
+    Exec 'explorer "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"'
   ${EndIf}
   SendMessage $HWNDPARENT 0x0111 1 0
   nsSkinEngine::HideNSISSkinEngine
@@ -375,7 +378,7 @@ Function KillProcessesInDirectory
 KPD_Retry:
   ; 主程序与守护进程互守护：守护进程每 0.5s 拉起主程序、主程序每 1s 拉起守护进程。
   ; 先按名字结束守护进程，再按目录结束剩余进程，否则单独结束主程序会被立刻拉起。
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
   Pop $0
   Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
   Pop $0
@@ -383,7 +386,7 @@ KPD_Retry:
     Goto KPD_Done
   ${EndIf}
   Sleep 1000
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
   Pop $0
   Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
   Pop $0
@@ -626,13 +629,13 @@ Function WriteRegistry
 
   ; 卸载信息（App Paths 与控制面板）
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_DIR_REGKEY}" "" \
-      "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName"     "$(STR_AppName)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"  "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher"       "${PRODUCT_PUBLISHER}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout"    "${PRODUCT_WEB_SITE}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon"     "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon"     "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
 
   ; ---------------------------------------------------------------------------
   ;  安装目录体积统计（EstimatedSize，单位 KB）——默认不写入；需要时取消注释
@@ -644,12 +647,12 @@ Function WriteRegistry
   WriteRegStr HKLM "${APP_REGKEY}" "path"    "$INSTDIR"
   WriteRegStr HKLM "${APP_REGKEY}" "version" "${PRODUCT_VERSION}"
   WriteRegStr HKLM "${APP_REGKEY}" "code"    "${PRODUCT_GUID}"
-  WriteRegStr HKLM "${APP_REGKEY}" "ExePath" "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+  WriteRegStr HKLM "${APP_REGKEY}" "ExePath" "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
   WriteRegStr HKLM "${APP_REGKEY}" "admin"   "0"
 
   ; 开机自启
-  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME_EN}" \
-      "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_EXE_NAME}" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
 FunctionEnd
 
 ; -----------------------------------------------------------------------------
@@ -662,7 +665,7 @@ Function CreateShortcuts
   SetOutPath "$INSTDIR"
   CreateDirectory "$SMPROGRAMS\$(STR_AppName)"
   CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk" \
-      "$INSTDIR\Main\${PRODUCT_NAME_EN}.exe"
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
 FunctionEnd
 
 ; =============================================================================
@@ -678,27 +681,27 @@ Section "Uninstall"
   ; 只结束一个会在 1s 内被剩下的那个重新拉起，所以必须一起结束。
   ; 先结束守护进程（否则它会把主程序拉回来），再结束主程序（否则它会把守护进程拉回来）。
   ; 按进程名结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
   Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
   Pop $0
   Sleep 200
   ; 二次清理：覆盖互守护在两次结束之间可能重新拉起的实例（间隔已缩短到 0.5s / 1s）
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
   Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
   Pop $0
   Sleep 200
   ; 三次清理：兜底覆盖最后一次巡检周期，确保卸载后两个进程都不再复活
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.Defender.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
   Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_NAME_EN}.exe"
+  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
   Pop $0
 
   Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk"
   RMDir "$SMPROGRAMS\$(STR_AppName)"
 
-  DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_NAME_EN}"
+  DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_EXE_NAME}"
   DeleteRegKey HKLM "${APP_REGKEY}"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_DIR_REGKEY}"
