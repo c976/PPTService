@@ -18,7 +18,7 @@ namespace PPTService
         public SettingsWindow()
         {
             InitializeComponent();
-            VersionTextBlock.Text = "版本 " + GitVersionInfo.InformationalVersion;
+            VersionTextBlock.Text = "PPTServiceUltra 版本 " + GitVersionInfo.InformationalVersion;
             LoadFromConfig();
         }
 

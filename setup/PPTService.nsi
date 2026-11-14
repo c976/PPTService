@@ -28,8 +28,8 @@ SetCompressorDictSize 32
 ; -----------------------------------------------------------------------------
 ;  产品定义
 ; -----------------------------------------------------------------------------
-!define PRODUCT_NAME          "PPT小工具"
-!define PRODUCT_NAME_EN       "PPTService"
+!define PRODUCT_NAME          "PPT小工具增强版"
+!define PRODUCT_NAME_EN       "PPTServiceUltra"
 ; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
 !include "${__FILEDIR__}\Version.nsh"
 !define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
@@ -63,7 +63,7 @@ VIAddVersionKey /LANG=2052 "CompanyName"      "${PRODUCT_PUBLISHER}"
 VIAddVersionKey /LANG=2052 "FileDescription"  "${PRODUCT_NAME} 安装程序"
 VIAddVersionKey /LANG=2052 "FileVersion"      "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=2052 "ProductVersion"   "${PRODUCT_VERSION}"
-VIAddVersionKey /LANG=2052 "LegalCopyright"   "Copyright (C) 2020 Guangzhou Shirui Electronics Co.,Ltd, All Rights Reserved."
+VIAddVersionKey /LANG=2052 "LegalCopyright"   "Copyright (C) The PPTServiceUltra Project."
 VIAddVersionKey /LANG=2052 "LegalTrademarks"  "${PRODUCT_PUBLISHER}"
 VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceSetup.exe"
 
@@ -127,7 +127,7 @@ FunctionEnd
 ;  文案（简体中文 2052）
 ; -----------------------------------------------------------------------------
 LangString STR_AppName          2052 "PPT小工具增强版"
-LangString STR_SelectDir        2052 "选择要安装 PPT小工具 的文件夹位置: "
+LangString STR_SelectDir        2052 "选择要安装 PPT小工具增强版 的文件夹位置: "
 LangString STR_ExitConfirm      2052 "你真的要退出安装吗？"
 LangString STR_MutexInstaller   2052 "本产品已经有一个安裝向导正在运行！"
 LangString STR_MutexUninstaller 2052 "本产品已经有一个卸载向导正在运行！"
@@ -136,7 +136,7 @@ LangString STR_NeedAdmin        2052 "请使用管理员权限执行本程序。
 LangString STR_RootPath         2052 "不能将软件安装在驱动器根路径。"
 LangString STR_ProcessBusy      2052 "检测到安装路径下有进程尚未退出，忽略此问题可能导致安装异常。$\n是否重试关闭这些进程？"
 LangString STR_UninstallConfirm 2052 "你确定要卸载本产品吗？"
-LangString STR_AskDeleteData   2052 "是否同时删除数据文件夹（包含配置、日志等用户数据）？$\n（位于 %LOCALAPPDATA%\PPTServiceUltra，此操作不可恢复）"
+LangString STR_AskDeleteData   2052 "是否同时删除数据文件夹（如果你正在更新应用，则不需要删除）？$\n此操作不可恢复。"
 LangString STR_UninstallDone    2052 "$(STR_AppName) 已成功地从你的计算机移除。"
 LangString STR_InstallingOld    2052 "正在卸载旧版本……"
 LangString STR_FrameworkBusy    2052 "正在安装 Microsoft .Net Framework，预计需要五分钟..."

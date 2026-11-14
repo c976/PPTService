@@ -22,7 +22,7 @@
           <TextBlock Name="VersionTextBlock" FontSize="12" Foreground="Gray" DockPanel.Dock="Right" VerticalAlignment="Center" />
         </DockPanel>
 
-        <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，可拖动或 ▲▼ 调整顺序）" Margin="0,0,0,8">
+        <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，可拖动或使用 ▲▼ 调整顺序）" Margin="0,0,0,8">
           <ListBox Name="ToolbarListBox" Margin="4" BorderThickness="0" Background="Transparent"
                    AllowDrop="True"
                    PreviewMouseLeftButtonDown="ToolbarListBox_PreviewMouseLeftButtonDown"
@@ -70,7 +70,7 @@
             <RadioButton Name="RbDefault" GroupName="PagePos" Content="默认（WPS 侧边 / Office 底部）" Margin="2" />
             <RadioButton Name="RbBottom" GroupName="PagePos" Content="底部" Margin="2" />
             <RadioButton Name="RbBoth" GroupName="PagePos" Content="侧边" Margin="2" />
-            <RadioButton Name="RbNone" GroupName="PagePos" Content="不显示" Margin="2" />
+            <RadioButton Name="RbNone" GroupName="PagePos" Content="隐藏" Margin="2" />
           </StackPanel>
         </GroupBox>
 

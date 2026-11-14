@@ -1,8 +1,6 @@
-# PPTService
+# PPTServiceUltra
 
-基于 PPTService 1.0.0.795 版本反编译的代码
-
-> 本副本用于二次开发，**功能正常优先**，不再要求 100% 还原原版逻辑。原 6 个 `Cvte.*` 类库已按调用闭包整合进 `PPTService.Core` 单一程序集，命名空间统一到 `PPTService.Core.*`，不再生成或依赖任何 CVTE 程序集。
+基于 PPTService 1.0.0.795 版本二次开发增强版本
 
 目标框架 Visual Studio 2015 .Net Framework 4.5
 
@@ -22,43 +20,7 @@
 └── setup\                       NSIS 安装脚本（含构建生成的 Version.nsh）
 ```
 
-## 特殊修改
-
-### 反混淆与源码重建
-
-原版 8 个程序集中有 4 个被 **SmartAssembly 7.5.1.4370** 混淆：`Cvte.Core.cc.dll`、`Cvte.Pipe.Http.dll`、`Cvte.WebService.dll`、`Cvte.Windows.cc.dll`。直接反编译会产出依赖元数据 token 的 `MemberRefsProxy` 空壳、被合并进同一个 `dynamic` 字段的多个属性，以及不可打印的类型名与命名空间。这样编译虽能通过，运行行为却不正确（二维码分享等路径会失败）。
-
-处理方式：
-
-1. `de4dot -p sa` 反混淆，还原代理调用与加密字符串；
-2. `ilspycmd -p -lv CSharp6` 重新生成项目源码，沿用各 csproj 的 `LangVersion 6`，不改构建配置。
-
-去混淆后的替身名按语义重命名：`ns0..ns9` 目录合并为各模块的 `Internal\`，命名空间现统一为 `PPTService.Core.*`，11 个类型改为可读名（如 `PictureUploadRequest`、`AccountSettings`、`SignatureUrlEncoder`、`UserEntity`、`DataContractJsonHelper`）。de4dot 解密后失去调用者的 SA 字符串加密辅助类（`SmartAssembly.*`、8 个空 `AttributeN`、字符串解密表）已删除。
-
-### 编译兼容处理
-
-以下均为让反编译源码在 .NET Framework 4.5 / C# 6 下通过编译所必需的最小修补，不改变语义：
-
-| 类别 | 处理 |
-|---|---|
-| COM Interop | 4 个事件接口（`EApplication_Event`、`MasterEvents_Event`、`PresEvents_Event`、`SldEvents_Event`）补源接口 IID 的 `[Guid]`，配合 `[ComImport]` 解决 `CS0596` |
-| ILSpy 元数据特性 | 删除 C# 无法表达的 `[NullableContext]` / `[Nullable]` / `[TupleElementNames]` / `[Embedded]` |
-| C# 6 语法 | `stackalloc` 改为局部变量声明初始化；struct 内 lambda 不能捕获 `this` 成员（`CS1673`），在 `ConfiguratorExtensions.cs` 2 处先复制到局部变量；修正 goto 控制流导致的 `CS0165`；property setter 中误写的 `text` 改回 `value` |
-| IL 不可表达结构 | 仅返回类型不同的重载、与 enclosing type 同名的成员、泛型参数与包含类型同名等，采用重命名并同步修正调用点 |
-| ILSpy 误判 | `PictureUploadRequest` / `AttachmentUploadRequest` 的 `FileKey` 原 IL 是 `.override`，被反编译成显式接口实现，改回 `public override` |
-| 缺失类型 | 新增 `ComponentModel\DebuggingProperties.cs`（本副本路径）：原版 `Cvte.Net.dll` 有指向 `[Cvte.Core.cc]Cvte.ComponentModel.DebuggingProperties::get_IsDebug()` 的 TypeRef，但随包分发的 `Cvte.Core.cc.dll` 已不含该类型。|
-
-### 单程序集整合（本副本）
-
-- 以 `PPTService` / `PPTService.Collection` 为入口做类型级调用闭包分析，从原 6 个 `Cvte.*` 项目的 595 个 `.cs` 中取出可达部分，再用编译错误迭代补齐扩展方法、注解、被间接引用的类型，最终 **152 个文件**合并为新项目 `PPTService.Core`。
-- 所有 CVTE 命名空间统一到 `PPTService.Core` 前缀下（保留原子层级，如 `Cvte.Windows` → `PPTService.Core.Windows`），主程序只需把 `using` 换成新命名空间；`.sln` 与各 `.csproj` 的 `Cvte.*` 项目引用已全部移除，`Cvte.*.dll` 不再生成。
-- `lib\` 下的 `Newtonsoft.Json` / `linq2db` 等为第三方依赖，保留；`setup\Plugins\` 下的 `Cvte.ProcessKiller.dll`、`Cvte.FireWall.dll` 是 NSIS 插件（非 CVTE 类库），保留。
-- `PPTService.Core\` 内源码按命名空间扁平化分目录（如 `Net.WebServices.EventReport\`、`Windows.Threading\`、`WebService.Internal\`），目录名与 `PPTService.Core.*` 命名空间一一对应，路径中不再含 `Cvte.` 字样；`csproj` 的 `Compile` 路径已同步更新。
-
-### 运行行为修正
-
-- LinqToDB 表名：`UserEntity` 是没有 `TableAttribute` 的实体，`GetTable<T>()` 默认以类名作表名。重命名后显式加 `[Table("Class26")]` 锁定原映射，避免 `User.db` 查表失败。
-- 进度环收尾：`LoadingView.xaml.cs` 在跑到 100% 时不再执行 `Progress = 0` / `ClearData()`（原版会闪一下 0%），改为修正资源键为 `StoryBoard.HiddenRootGridImmediately` 并直接 `LoadingScreen<LoadingView>.Current.Hide()`；同时同步结束 `DispatcherFrame` 并保留 30ms 兜底，消除概率性卡在 99% 的卡死。
+## 修改
 
 ### 动态构建版本号与界面调整
 
