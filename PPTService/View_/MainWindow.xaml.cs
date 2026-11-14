@@ -458,7 +458,7 @@ namespace PPTService
 						SetListBoxItem(imageFiles);
 						DoAfterAnalyzePpt();
 					}
-					else
+					else if (UserConfigManager.Load().ShowLoadingSpinner)
 					{
 						LoadingScreen<LoadingView>.Current.Show(new Rect
 						{
@@ -487,6 +487,12 @@ namespace PPTService
 							LoadingScreen<LoadingView>.Current.Hide();
 							SyntacticSugar.CurrentDispatcherBeginInvoke(DoAfterAnalyzePpt);
 						});
+					}
+					else
+					{
+						// 不显示加载转圈：跳过 LoadingView，直接完成分析后的初始化与回调。
+						InitListBoxItem();
+						DoAfterAnalyzePpt();
 					}
 					_prePptFilePath = pptFilePath;
 				}

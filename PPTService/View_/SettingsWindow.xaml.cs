@@ -32,6 +32,7 @@ namespace PPTService
             }
             ToolbarListBox.ItemsSource = _items;
             QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
+            ShowLoadingCheckBox.IsChecked = cfg.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
             if (cfg.PageTurningPosition == "Bottom")
             {
@@ -179,6 +180,7 @@ namespace PPTService
                 cfg.ToolbarButtons.Add(new ToolbarButtonSetting { Id = vm.Id, Visible = vm.IsVisible });
             }
             cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
+            cfg.ShowLoadingSpinner = ShowLoadingCheckBox.IsChecked == true;
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
             if (RbBottom.IsChecked == true)
             {
@@ -224,6 +226,7 @@ namespace PPTService
                 _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
             }
             QrCodeCheckBox.IsChecked = def.ShowQrCode;
+            ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = false;
             RbDefault.IsChecked = true;
         }

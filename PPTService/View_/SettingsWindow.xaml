@@ -60,7 +60,10 @@
         </GroupBox>
 
         <GroupBox Grid.Row="3" Header="其它功能" Margin="0,0,0,8">
-          <CheckBox Name="QrCodeCheckBox" Content="显示「创建二维码（分享）」按钮" Margin="4" />
+          <StackPanel Margin="4">
+            <CheckBox Name="QrCodeCheckBox" Content="显示「创建二维码（分享）」按钮" Margin="2" />
+            <CheckBox Name="ShowLoadingCheckBox" Content="显示 PPT 加载时的转圈（首次分析幻灯片）" Margin="2" />
+          </StackPanel>
         </GroupBox>
 
         <GroupBox Grid.Row="4" Header="翻页按钮位置" Margin="0,0,0,8">

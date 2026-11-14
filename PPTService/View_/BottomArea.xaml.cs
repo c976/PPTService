@@ -281,7 +281,6 @@ namespace PPTService
 				PptOperator.Instance.Exit();
 			}
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionExit);
-			DispatcherTask.Start(3000.0, AutoUpdater.Check);
 		}
 
 		private void RadioButton_OnClick(object sender, RoutedEventArgs e)

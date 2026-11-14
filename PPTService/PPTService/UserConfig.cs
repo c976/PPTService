@@ -39,23 +39,30 @@ namespace PPTService
         /// </summary>
         public bool UseSelfAnnotation { get; set; }
 
-        /// <summary>
-        /// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
-        /// Bottom（强制底部两侧角）/ Both（强制左右两边）。
-        /// </summary>
-        public string PageTurningPosition { get; set; }
+		/// <summary>
+		/// 翻页按钮位置：Default（沿用程序原逻辑：WPS 两边 / Office 底部）/
+		/// Bottom（强制底部两侧角）/ Both（强制左右两边）。
+		/// </summary>
+		public string PageTurningPosition { get; set; }
 
-        // 兼容旧版配置字段（Auto/Custom/Wps/Office），反序列化时忽略，不再使用。
+		/// <summary>
+		/// 是否显示 PPT 加载时的转圈（圆形进度加载界面）。
+		/// true（默认）= 首次分析 PPT 时显示 LoadingView；false = 跳过该加载界面。
+		/// </summary>
+		public bool ShowLoadingSpinner { get; set; }
+
+		// 兼容旧版配置字段（Auto/Custom/Wps/Office），反序列化时忽略，不再使用。
         public string PageTurningMode { get; set; }
         public string WpsPageTurningPosition { get; set; }
         public string OfficePageTurningPosition { get; set; }
 
-        public UserConfig()
-        {
-            ToolbarButtons = new List<ToolbarButtonSetting>();
-            ShowQrCode = true;
-            PageTurningPosition = "Default";
-        }
+		public UserConfig()
+		{
+			ToolbarButtons = new List<ToolbarButtonSetting>();
+			ShowQrCode = true;
+			PageTurningPosition = "Default";
+			ShowLoadingSpinner = true;
+		}
     }
 
     /// <summary>
@@ -129,10 +136,11 @@ namespace PPTService
                     new ToolbarButtonSetting { Id = "Magnifier", Visible = true },
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
-                ShowQrCode = true,
-                PageTurningPosition = "Default",
-                UseSelfAnnotation = false
-            };
+			ShowQrCode = true,
+			PageTurningPosition = "Default",
+			UseSelfAnnotation = false,
+			ShowLoadingSpinner = true
+		};
         }
 
         public static void Save(UserConfig cfg)

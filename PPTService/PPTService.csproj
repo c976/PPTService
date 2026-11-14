@@ -179,7 +179,6 @@
     <Compile Include="PPTService\DefenderGuardian.cs" />
     <Compile Include="PPTService\AppPath.cs" />
     <Compile Include="PPTService\AttachedViewModelBase.cs" />
-    <Compile Include="PPTService\AutoUpdater.cs" />
     <Compile Include="PPTService\CircularProgressBarViewModel.cs" />
     <Compile Include="PPTService\ConfigController.cs" />
     <Compile Include="PPTService\ConfigHelper.cs" />
@@ -263,9 +262,6 @@
     </Compile>
     <Compile Include="View_\RightBottomArea.xaml.cs">
       <DependentUpon>RightBottomArea.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View_\UpdateWindow.xaml.cs">
-      <DependentUpon>UpdateWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View_\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -382,11 +378,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <LogicalName>view_/rightbottomarea.xaml</LogicalName>
-    </Page>
-    <Page Include="View_\UpdateWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <LogicalName>view_/updatewindow.xaml</LogicalName>
     </Page>
     <Page Include="View_\SettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
