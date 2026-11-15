@@ -211,7 +211,9 @@ namespace PPTService
 			_brushes = new ResourceDictionary();
 			foreach (string key in BrushKeys)
 			{
-				_brushes[key] = new SolidColorBrush(Colors.Transparent);
+				// 占位用不透明白色：万一后续配色刷新失败，界面仍是原版浅色外观，
+				// 不会因为 DynamicResource 取到透明画刷而「看不见」。
+				_brushes[key] = new SolidColorBrush(Colors.White);
 			}
 			app.Resources.MergedDictionaries.Add(_brushes);
 			// SystemColors 键必须放在应用资源根字典：原生控件模板用
@@ -221,7 +223,11 @@ namespace PPTService
 
 		private static void Set(string key, byte a, byte r, byte g, byte b)
 		{
-			((SolidColorBrush)_brushes[key]).Color = Color.FromArgb(a, r, g, b);
+			// ResourceDictionary 会自动冻结（Freeze）放进去的 Freezable，
+			// 已冻结的画刷不能改 Color 属性（抛 InvalidOperationException）。
+			// 因此每次刷新都替换整支画刷对象；DynamicResource 引用会重新解析到新画刷，
+			// 实现运行时换肤即时生效。
+			_brushes[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
 		}
 
 		/// <summary>当前生效的明暗（跟随系统时读注册表，读取失败按浅色处理）。</summary>
