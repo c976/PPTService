@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -11,6 +12,9 @@ namespace PPTService
     public partial class SettingsWindow : Window
     {
         private ObservableCollection<ToolbarItemVm> _items;
+
+        // 初始化 / 恢复默认时批量改控件值，期间不能触发「即时保存」。
+        private bool _loading;
 
         private ToolbarItemVm _dragItem;
         private Point _dragStartPoint;
@@ -41,7 +45,41 @@ namespace PPTService
         {
             InitializeComponent();
             VersionTextBlock.Text = "PPTServiceUltra 版本 " + GitVersionInfo.InformationalVersion;
-            LoadFromConfig();
+            // 窗口级捕获所有复选框与下拉框变更（含 DataTemplate 里的 CheckBox），
+            // 一处接线即可覆盖全部设置项，改动即时保存并下发。
+            AddHandler(ToggleButton.CheckedEvent, new RoutedEventHandler(SettingChanged));
+            AddHandler(ToggleButton.UncheckedEvent, new RoutedEventHandler(SettingChanged));
+            AddHandler(Selector.SelectionChangedEvent, new SelectionChangedEventHandler(SelectionSettingChanged));
+            _loading = true;
+            try
+            {
+                LoadFromConfig();
+            }
+            finally
+            {
+                _loading = false;
+            }
+        }
+
+        private void SettingChanged(object sender, RoutedEventArgs e)
+        {
+            if (!_loading)
+            {
+                SaveAndApply();
+            }
+        }
+
+        private void SelectionSettingChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SettingChanged(sender, e);
+        }
+
+        /// <summary>任何改动立即写入配置并应用到运行中的界面，无需「确定 / 应用」。</summary>
+        private void SaveAndApply()
+        {
+            UserConfig cfg = BuildConfig();
+            UserConfigManager.Save(cfg);
+            UserConfigManager.ApplyCurrent();
         }
 
         private void LoadFromConfig()
@@ -86,6 +124,7 @@ namespace PPTService
             if (i > 0)
             {
                 _items.Move(i, i - 1);
+                SaveAndApply();
             }
         }
 
@@ -100,6 +139,7 @@ namespace PPTService
             if (i >= 0 && i < _items.Count - 1)
             {
                 _items.Move(i, i + 1);
+                SaveAndApply();
             }
         }
 
@@ -154,6 +194,7 @@ namespace PPTService
                 if (oldIndex >= 0 && newIndex >= 0)
                 {
                     _items.Move(oldIndex, newIndex);
+                    SaveAndApply();
                 }
             }
             _dragItem = null;
@@ -207,6 +248,7 @@ namespace PPTService
                     _items.Move(oldIndex, newIndex);
                     // 更新基准点，允许一次长按拖动连续跨多行。
                     _touchStartPoint = pos;
+                    SaveAndApply();
                 }
             }
             e.Handled = true;
@@ -265,41 +307,37 @@ namespace PPTService
             return cfg;
         }
 
-        private void Apply_Click(object sender, RoutedEventArgs e)
-        {
-            UserConfig cfg = BuildConfig();
-            UserConfigManager.Save(cfg);
-            UserConfigManager.ApplyCurrent();
-        }
-
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            Apply_Click(sender, e);
-            DialogResult = true;
-            Close();
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
-
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             UserConfig def = UserConfigManager.CreateDefault();
-            _items.Clear();
-            foreach (ToolbarButtonSetting b in def.ToolbarButtons)
+            _loading = true;
+            try
             {
-                _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
+                _items.Clear();
+                foreach (ToolbarButtonSetting b in def.ToolbarButtons)
+                {
+                    _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
+                }
+                QrCodeCheckBox.IsChecked = def.ShowQrCode;
+                ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
+                EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
+                HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
+                AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
+                ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
+                PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
             }
-            QrCodeCheckBox.IsChecked = def.ShowQrCode;
-            ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
-            EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
-            HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
-            AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
-            ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
-            PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
+            finally
+            {
+                _loading = false;
+            }
+            SaveAndApply();
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            // 改动已即时保存，这里只关窗口；不用 DialogResult/IsCancel，
+            // 避免与 WPF 内建的关闭逻辑重复触发。
+            Close();
         }
     }
 

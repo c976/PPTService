@@ -103,6 +103,10 @@ namespace PPTService
         /// <summary>用户是否在设置里显式改过批注方式；改过之后 /debug 不再强制默认开启。</summary>
         private static bool _annotationUserOverride;
 
+        /// <summary>上次下发的「翻页按钮自动淡化」值：只在开关真的变化时才刷新淡化状态，
+        /// 避免实时设置时每次改动都重启 7 秒淡化计时。</summary>
+        private static bool? _lastAutoFadeState;
+
         public static UserConfig Load()
         {
             lock (SyncRoot)
@@ -208,8 +212,19 @@ namespace PPTService
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
                 ViewHelper.BottomArea.ApplyFunctionBarVisibility(cfg.HideFunctionBar);
             }
-            AnnotationController.SetEnabled(cfg.UseSelfAnnotation);
+            // 只在批注方式真的变化时重建/移除 Board：设置窗口实时生效时每次改动都会
+            // 走到这里，重复 SetEnabled 会重置当前页视图并造成闪烁。
+            if (AnnotationController.IsEnabled != cfg.UseSelfAnnotation)
+            {
+                AnnotationController.SetEnabled(cfg.UseSelfAnnotation);
+            }
             ViewHelper.MainWindow?.ApplyPageTurningLayout();
+            // 翻页按钮可能已处于淡化态：开关一改就立刻应用，不能等下次点击或下一场放映。
+            if (_lastAutoFadeState != cfg.AutoFadePageButtons)
+            {
+                _lastAutoFadeState = cfg.AutoFadePageButtons;
+                ViewHelper.MainWindow?.ApplyPageButtonFadeState(cfg.AutoFadePageButtons);
+            }
         }
 
 		/// <summary>

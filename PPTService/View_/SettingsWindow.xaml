@@ -7,8 +7,8 @@
         Foreground="{DynamicResource Theme.SettingsForeground}"
         WindowState="Maximized" Topmost="True" ResizeMode="NoResize"
         FontFamily="微软雅黑">
-  <!-- 原生按钮 / 下拉框 / 复选框保持系统默认配色，不套主题画刷；
-       只有窗口遮罩、底板、边框与文字跟随主题。 -->
+  <!-- 原生按钮 / 下拉框 / 复选框的背景与边框保持系统默认配色；
+       只把文字前景接到主题，保证深色下可读。所有改动即时生效，无需确定 / 应用。 -->
   <Grid>
     <Border Width="480" Height="580" Background="{DynamicResource Theme.SettingsBackground}" CornerRadius="10"
             BorderBrush="{DynamicResource Theme.BorderBrush}" BorderThickness="1"
@@ -24,11 +24,12 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,6">
-          <TextBlock Text="设置" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+          <TextBlock Text="设置（修改即时生效）" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
           <TextBlock Name="VersionTextBlock" FontSize="12" Foreground="{DynamicResource Theme.SettingsMutedText}" DockPanel.Dock="Right" VerticalAlignment="Center" />
         </DockPanel>
 
-        <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，拖动或 ▲▼ 排序）" Margin="0,0,0,6">
+        <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，拖动或 ▲▼ 排序）" Margin="0,0,0,6"
+                  Foreground="{DynamicResource Theme.SettingsForeground}">
           <ListBox Name="ToolbarListBox" Height="126" Margin="4" BorderThickness="0" Background="Transparent"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.PanningMode="None"
                    AllowDrop="True"
@@ -54,8 +55,10 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
-                  <CheckBox Grid.Column="0" IsChecked="{Binding IsVisible, Mode=TwoWay}" VerticalAlignment="Center" />
-                  <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="6,0" />
+                  <CheckBox Grid.Column="0" IsChecked="{Binding IsVisible, Mode=TwoWay}" VerticalAlignment="Center"
+                            Foreground="{DynamicResource Theme.SettingsForeground}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="6,0"
+                             Foreground="{DynamicResource Theme.SettingsForeground}" />
                   <Button Grid.Column="2" Content="▲" Width="26" Height="20" Padding="0" Margin="2,0" Click="MoveUp_Click" Tag="{Binding}" />
                   <Button Grid.Column="3" Content="▼" Width="26" Height="20" Padding="0" Margin="2,0" Click="MoveDown_Click" Tag="{Binding}" />
                 </Grid>
@@ -64,25 +67,31 @@
           </ListBox>
         </GroupBox>
 
-        <GroupBox Grid.Row="2" Header="批注方式" Margin="0,0,0,6">
+        <GroupBox Grid.Row="2" Header="批注方式" Margin="0,0,0,6"
+                  Foreground="{DynamicResource Theme.SettingsForeground}">
           <StackPanel Margin="4">
             <CheckBox Name="EnableSelfAnnotationCheckBox"
-                      Content="启用自实现批注功能"
-                      Margin="2" />
+                      Content="启用自实现批注功能" Margin="2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
             <TextBlock Text="不勾选时使用 Office / WPS 原生批注"
                        Margin="20,2,2,2" FontSize="11" Foreground="{DynamicResource Theme.SettingsMutedText}" TextWrapping="Wrap" />
           </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="3" Header="其它功能" Margin="0,0,0,6">
+        <GroupBox Grid.Row="3" Header="其它功能" Margin="0,0,0,6"
+                  Foreground="{DynamicResource Theme.SettingsForeground}">
           <StackPanel Margin="4">
-            <CheckBox Name="QrCodeCheckBox" Content="显示分享（创建二维码）按钮" Margin="2" />
-            <CheckBox Name="ShowLoadingCheckBox" Content="显示加载进度条界面" Margin="2" />
-            <CheckBox Name="HideFunctionBarCheckBox" Content="隐藏功能栏（笔 / 橡皮 / 板中板等按钮区域）" Margin="2" />
+            <CheckBox Name="QrCodeCheckBox" Content="显示分享（创建二维码）按钮" Margin="2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
+            <CheckBox Name="ShowLoadingCheckBox" Content="显示加载进度条界面" Margin="2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
+            <CheckBox Name="HideFunctionBarCheckBox" Content="隐藏功能栏（笔 / 橡皮 / 板中板等按钮区域）" Margin="2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
           </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="4" Header="外观" Margin="0,0,0,6">
+        <GroupBox Grid.Row="4" Header="外观" Margin="0,0,0,6"
+                  Foreground="{DynamicResource Theme.SettingsForeground}">
           <Grid Margin="4">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
@@ -93,13 +102,15 @@
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="界面主题：" VerticalAlignment="Center" Margin="2,3,8,3" />
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="界面主题：" VerticalAlignment="Center" Margin="2,3,8,3"
+                       Foreground="{DynamicResource Theme.SettingsForeground}" />
             <ComboBox Name="ThemeComboBox" Grid.Row="0" Grid.Column="1" Margin="2,2">
               <ComboBoxItem Content="浅色" Tag="Light" />
               <ComboBoxItem Content="深色" Tag="Dark" />
               <ComboBoxItem Content="跟随系统" Tag="System" />
             </ComboBox>
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="翻页按钮位置：" VerticalAlignment="Center" Margin="2,3,8,3" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="翻页按钮位置：" VerticalAlignment="Center" Margin="2,3,8,3"
+                       Foreground="{DynamicResource Theme.SettingsForeground}" />
             <ComboBox Name="PageTurningPositionComboBox" Grid.Row="1" Grid.Column="1" Margin="2,2">
               <ComboBoxItem Content="默认（WPS 侧边 / Office 底部）" Tag="Default" />
               <ComboBoxItem Content="底部" Tag="Bottom" />
@@ -107,7 +118,8 @@
               <ComboBoxItem Content="不显示" Tag="None" />
             </ComboBox>
             <CheckBox Name="AutoFadePageButtonsCheckBox" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                      Content="翻页按钮自动淡化（一段时间未点击后淡出）" Margin="2,5,2,2" />
+                      Content="翻页按钮自动淡化（一段时间未点击后淡出）" Margin="2,5,2,2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
           </Grid>
         </GroupBox>
 
@@ -117,11 +129,7 @@
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Button Name="ResetButton" Grid.Column="0" Content="恢复默认" Width="80" Margin="0,0,8,0" HorizontalAlignment="Left" Click="Reset_Click" />
-          <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <Button Name="OkButton" Content="确定" Width="70" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click" />
-            <Button Name="CancelButton" Content="取消" Width="70" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
-            <Button Name="ApplyButton" Content="应用" Width="70" Click="Apply_Click" />
-          </StackPanel>
+          <Button Name="CloseButton" Grid.Column="1" Content="关闭" Width="90" Click="Close_Click" />
         </Grid>
       </Grid>
     </Border>

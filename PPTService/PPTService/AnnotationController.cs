@@ -1,5 +1,7 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace PPTService
@@ -259,6 +261,45 @@ namespace PPTService
 				_board.SetInkColor(_color);
 				_board.SetInkThickness(_thickness);
 			}
+		}
+
+		/// <summary>
+		/// 判断一次鼠标按下的来源是否落在自实现批注的绘制层 Board 上。
+		/// 用来区分「用户确实要在幻灯片上落第一笔」与「误点弹窗 / 工具栏 / 窗口空白」：
+		/// 只有落在 Board 的按下才收起颜色盘 / 清屏滑杆，其余位置一律不关，避免误触。
+		/// </summary>
+		public static bool IsPointerOnAnnotationBoard(DependencyObject source)
+		{
+			var board = _board == null ? null : _board.InkBoard;
+			DependencyObject dep = source;
+			if (board != null)
+			{
+				while (dep != null)
+				{
+					if (ReferenceEquals(dep, board))
+					{
+						return true;
+					}
+					dep = VisualTreeHelper.GetParent(dep);
+				}
+				return false;
+			}
+			// Office 原生批注下没有批注层：退回「点击落在主窗口可视树」的判定，
+			// 保证点窗口外仍能收起弹窗。Popup 内容在独立 HWND 的可视树里（根不是
+			// Window），因此弹窗内空白不会命中；工具栏按钮要排除，否则会破坏开合 toggle。
+			while (dep != null)
+			{
+				if (dep is ButtonBase || dep is Slider || dep is Thumb)
+				{
+					return false;
+				}
+				if (dep is Window)
+				{
+					return true;
+				}
+				dep = VisualTreeHelper.GetParent(dep);
+			}
+			return false;
 		}
 
 		/// <summary>PPT 翻页（含不通过小工具的翻页）时切换到对应页的笔迹。</summary>

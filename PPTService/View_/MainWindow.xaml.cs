@@ -394,6 +394,19 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>设置里切换「自动淡化」后立即生效：关闭时立刻恢复不透明，开启时重启淡化计时。</summary>
+		public void ApplyPageButtonFadeState(bool autoFade)
+		{
+			if (autoFade)
+			{
+				PlayHiddenLeftCenterButtonGridStoryboard();
+				PlayHiddenRightCenterButtonGridStoryboard();
+				return;
+			}
+			KeepPageButtonsOpaque(LeftCenterButtonGrid, LeftBottomButtonGrid,
+				RightCenterButtonGrid, RightBottomButtonGrid);
+		}
+
 		/// <summary>放映中一段时间未点翻页按钮后淡化；受「自动淡化」设置控制。</summary>
 		private void KeepPageButtonsOpaque(params FrameworkElement[] targets)
 		{
@@ -847,14 +860,12 @@ namespace PPTService
 		/// </summary>
 		private void MainWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
 		{
-			DependencyObject dep = e.OriginalSource as DependencyObject;
-			while (dep != null)
+			// 只有明确落在批注绘制层的按下才收起弹窗：这一击会继续路由到 Board，
+			// 直接落第一笔 / 擦除。弹窗内空白、工具栏空白、主窗口空白、翻页区域
+			// 一律不关，避免误触把刚打开的颜色盘 / 清屏滑杆关掉。
+			if (!AnnotationController.IsPointerOnAnnotationBoard(e.OriginalSource as DependencyObject))
 			{
-				if (dep is ButtonBase || dep is Slider || dep is Thumb)
-				{
-					return;
-				}
-				dep = VisualTreeHelper.GetParent(dep);
+				return;
 			}
 			ViewHelper.BottomArea?.CloseToolPopups();
 		}
