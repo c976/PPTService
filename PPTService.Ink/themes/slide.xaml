@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:Cvte.Paint.Framework">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:PPTService.Paint.Framework">
   <Style x:Key="{x:Type p:Slide}" TargetType="{x:Type p:Slide}">
     <Setter Property="Background" Value="#FFFFFFFF" />
     <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />

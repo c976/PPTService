@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:paint="clr-namespace:Cvte.Paint.Framework" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:paint="clr-namespace:PPTService.Paint.Framework" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Style x:Key="{x:Type paint:Board}" TargetType="{x:Type paint:Board}">
     <Setter Property="Background" Value="#00FFFFFF" />
     <Setter Property="ClipToBounds" Value="True" />

@@ -101,6 +101,10 @@
       <Project>{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}</Project>
       <Name>PPTService.Collection</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PPTService.Ink.Hardware\PPTService.Ink.Hardware.csproj">
+      <Project>{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}</Project>
+      <Name>PPTService.Ink.Hardware</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">
       <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
       <Name>PPTService.Ink.Core</Name>

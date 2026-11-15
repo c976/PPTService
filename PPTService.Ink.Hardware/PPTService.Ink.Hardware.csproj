@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>PPTService.Ink.Hardware</RootNamespace>
+    <AssemblyName>PPTService.Ink.Hardware</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <LangVersion>6</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">
+      <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
+      <Name>PPTService.Ink.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EMRMode.cs" />
+    <Compile Include="EmrPenManager.cs" />
+    <Compile Include="InputDevice.cs" />
+    <Compile Include="InputDeviceInfo.cs" />
+    <Compile Include="RawTouchEngine\CVTouchInfoProvider.cs" />
+    <Compile Include="RawTouchEngine\RawTouch.cs" />
+    <Compile Include="RawTouchEngine\RawTouchEventArgs.cs" />
+    <Compile Include="RawTouchEngine\RawTouchRoutedEventHandler.cs" />
+    <Compile Include="RawTouchEngine\TouchArea.cs" />
+    <Compile Include="RawTouchEngine\TouchDebugger.cs" />
+    <Compile Include="RawTouchEngine\TouchSDK.cs" />
+    <Compile Include="SmartPen\SmartPen.cs" />
+    <Compile Include="SmartPen\SmartPenType.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

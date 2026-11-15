@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Paint.DesktopMode;
-using Cvte.Paint.Framework;
-using Cvte.Paint.Framework.Settings;
-using Cvte.Paint.Inks;
-using Cvte.Paint.Settings;
+using PPTService.Paint.DesktopMode;
+using PPTService.Paint.Framework;
+using PPTService.Paint.Framework.Settings;
+using PPTService.Paint.Inks;
+using PPTService.Paint.Settings;
 
 namespace PPTService
 {
@@ -63,7 +63,7 @@ namespace PPTService
 			};
 			board.Slides[0].Background = Brushes.Transparent;
 			InkBoard = board;
-			((Cvte.Paint.Framework.IPaintInitializer)new Cvte.Paint.Inks.Initializer()).Initialize(board);
+			((PPTService.Paint.Framework.IPaintInitializer)new PPTService.Paint.Inks.Initializer()).Initialize(board);
 			SetInkColor(Color.FromRgb(242, 24, 24));
 			// 默认鼠标模式：Board 不命中，点击穿透到下方 PPT（工具栏按钮仍在其之上可点）。
 			board.IsHitTestVisible = false;
@@ -113,7 +113,7 @@ namespace PPTService
 		{
 			// 完全限定：新增 PPTService.Ink.Core 程序集后 PPTService.Ink 成为命名空间，
 			// 简单名 Ink 会与之冲突（CS0118）。
-			InkBoard.CurrentSlide.RemoveAll<Cvte.Paint.Inks.Ink>();
+			InkBoard.CurrentSlide.RemoveAll<PPTService.Paint.Inks.Ink>();
 		}
 
 		public void Undo()

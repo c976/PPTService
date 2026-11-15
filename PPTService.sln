@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Defender", "PPTS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Ink.Core", "PPTService.Ink.Core\PPTService.Ink.Core.csproj", "{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Ink.Hardware", "PPTService.Ink.Hardware\PPTService.Ink.Hardware.csproj", "{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

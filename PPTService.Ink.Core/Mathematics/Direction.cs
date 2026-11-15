@@ -1,0 +1,18 @@
+﻿using System;
+
+namespace PPTService.Ink.Core.Mathematics
+{
+	[Obsolete("相关类型无法实现跨平台，因此请使用 CoreLib.Windows 中的同名类型。")]
+	public enum Direction
+	{
+		Nodirection,
+		Up,
+		Down,
+		Left,
+		Right,
+		LeftUp,
+		LeftDown,
+		RightUp,
+		RightDown
+	}
+}
