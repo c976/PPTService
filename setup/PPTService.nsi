@@ -36,7 +36,7 @@ SetCompressorDictSize 32
 ; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
 !include "${__FILEDIR__}\Version.nsh"
 !define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
-!define PRODUCT_WEB_SITE      "www.seewo.com"
+!define PRODUCT_WEB_SITE      "https://github.com/c976/PPTService"
 !define PRODUCT_GUID          "{FED7F3E7-97BC-4A64-9903-A783762634B3}"
 ; 旧 Seewo 版沿用的卸载 GUID：本项目改用新 GUID 后，
 ; 安装前仍需按此旧 ID 卸载原 Seewo 路径版，故单独保留。
