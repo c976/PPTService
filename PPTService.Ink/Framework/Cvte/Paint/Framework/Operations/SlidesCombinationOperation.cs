@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
 
 namespace Cvte.Paint.Framework.Operations
 {

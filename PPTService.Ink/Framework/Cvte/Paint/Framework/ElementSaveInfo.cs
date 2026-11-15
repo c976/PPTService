@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework.Animations;
-using Cvte.Storage;
-using Cvte.Storage.AdvancedSaveInfos;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.AdvancedSaveInfos;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework
 {
@@ -76,7 +76,7 @@ namespace Cvte.Paint.Framework
 
 		[SaveInfoMember("Thumbnail", Description = "元素缩略图")]
 		[CanBeNull]
-		public Cvte.Storage.Standard.Uri Thumbnail { get; set; }
+		public PPTService.Ink.Core.Storage.Standard.Uri Thumbnail { get; set; }
 
 		public ElementSaveInfo()
 		{

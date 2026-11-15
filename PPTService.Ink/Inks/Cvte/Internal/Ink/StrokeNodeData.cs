@@ -1,7 +1,7 @@
-using System.Windows;
-using Cvte.Windows.Mathematics;
+﻿using System.Windows;
+using PPTService.Ink.Core.Windows.Mathematics;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	internal struct StrokeNodeData
 	{

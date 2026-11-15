@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -53,11 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.ValueTuple"><HintPath>..\lib\System.ValueTuple.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
-    <Reference Include="Cvte.Core.cc"><HintPath>..\lib\Cvte.Core.cc.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
-    <Reference Include="Cvte.IO.cc"><HintPath>..\lib\Cvte.IO.cc.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
-    <Reference Include="Cvte.Storage"><HintPath>..\lib\Cvte.Storage.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
-    <Reference Include="Cvte.Windows.cc"><HintPath>..\lib\Cvte.Windows.cc.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
-    <Reference Include="Cvte.Windows.TextEditorPlus"><HintPath>..\lib\Cvte.Windows.TextEditorPlus.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DesktopMode\Cvte\Paint\DesktopMode\DefaultDesktopBoardModesProvider.cs" />
@@ -793,6 +788,12 @@
     <Resource Include="resources\cursor\we_s.cur"><LogicalName>resources/cursor/we_s.cur</LogicalName></Resource>
     <Resource Include="utils_\shaders\scaleshadereffect.ps"><LogicalName>utils_/shaders/scaleshadereffect.ps</LogicalName></Resource>
     <Resource Include="utils_\shaders\transformshadereffect.ps"><LogicalName>utils_/shaders/transformshadereffect.ps</LogicalName></Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">
+      <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
+      <Name>PPTService.Ink.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

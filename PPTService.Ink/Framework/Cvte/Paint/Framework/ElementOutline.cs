@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Windows.Mathematics;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Framework
 {

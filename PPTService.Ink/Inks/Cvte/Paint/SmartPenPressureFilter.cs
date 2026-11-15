@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Cvte.Paint.Framework;
@@ -7,8 +7,8 @@ using Cvte.Paint.Inks;
 using Cvte.Paint.Inks.Hardware;
 using Cvte.Paint.Inks.Hardware.SmartPen;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Input;
-using Cvte.Windows.Threading;
+using PPTService.Ink.Core.Windows.Input;
+using PPTService.Ink.Core.Windows.Threading;
 
 namespace Cvte.Paint
 {

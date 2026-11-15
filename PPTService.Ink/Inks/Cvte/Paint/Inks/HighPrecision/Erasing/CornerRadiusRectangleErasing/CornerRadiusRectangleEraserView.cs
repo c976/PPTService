@@ -1,7 +1,7 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using Cvte.Paint.Inks.Resources;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing.CornerRadiusRectangleErasing
 {

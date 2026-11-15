@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Cvte.Storage;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework.Animations
 {
@@ -27,10 +27,10 @@ namespace Cvte.Paint.Framework.Animations
 		public string TriggerSource { get; set; }
 
 		[SaveInfoMember("Duration", Description = "时长")]
-		public Cvte.Storage.Standard.TimeSpan Duration { get; set; }
+		public PPTService.Ink.Core.Storage.Standard.TimeSpan Duration { get; set; }
 
 		[SaveInfoMember("Delay", Description = "延时")]
-		public Cvte.Storage.Standard.TimeSpan Delay { get; set; }
+		public PPTService.Ink.Core.Storage.Standard.TimeSpan Delay { get; set; }
 
 		[SaveInfoMember("AccelerationRatio", Description = "加速比")]
 		public double AccelerationRatio { get; set; }

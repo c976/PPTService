@@ -1,7 +1,7 @@
-using Cvte.Paint.Framework;
+﻿using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Threading;
+using PPTService.Ink.Core.Windows.Threading;
 
 namespace Cvte.Paint.Inks.Hardware.SmartPen
 {

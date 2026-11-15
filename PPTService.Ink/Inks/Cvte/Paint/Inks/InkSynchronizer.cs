@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Inks.Visual_;
 
 namespace Cvte.Paint.Inks

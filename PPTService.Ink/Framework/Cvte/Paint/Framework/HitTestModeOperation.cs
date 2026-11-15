@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Linq;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Linq;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Linq;
 
 namespace Cvte.Paint.Framework
 {

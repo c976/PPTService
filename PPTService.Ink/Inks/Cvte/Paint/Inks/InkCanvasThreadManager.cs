@@ -1,8 +1,8 @@
-#define TRACE
+﻿#define TRACE
 using System;
 using System.Diagnostics;
 using System.Windows.Threading;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 
 namespace Cvte.Paint.Inks
 {

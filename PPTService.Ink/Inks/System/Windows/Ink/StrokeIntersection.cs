@@ -1,5 +1,5 @@
-using System.Collections.Generic;
-using Cvte.Internal.Ink;
+﻿using System.Collections.Generic;
+using PPTService.Ink.Core.Internal.Ink;
 
 namespace System.Windows.Ink
 {

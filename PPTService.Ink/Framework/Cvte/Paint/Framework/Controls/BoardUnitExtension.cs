@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
-using Cvte.ComponentModel;
+using PPTService.Ink.Core.ComponentModel;
 
 namespace Cvte.Paint.Framework.Controls
 {

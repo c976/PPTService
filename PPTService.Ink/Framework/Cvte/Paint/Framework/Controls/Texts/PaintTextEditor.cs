@@ -1,5 +1,5 @@
-using Cvte.Windows.TextEditorPlus;
-using Cvte.Windows.TextEditorPlus.Storage;
+﻿using PPTService.Ink.Core.Windows.TextEditorPlus;
+using PPTService.Ink.Core.Windows.TextEditorPlus.Storage;
 
 namespace Cvte.Paint.Framework.Controls.Texts
 {

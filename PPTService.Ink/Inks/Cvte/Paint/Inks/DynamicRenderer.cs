@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -11,9 +11,9 @@ using System.Windows.Input;
 using System.Windows.Input.StylusPlugIns;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Internal.Ink;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Internal.Ink;
 using Cvte.Paint.Inks.Visual_;
 using Cvte.Paint.Settings;
 

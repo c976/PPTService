@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using Cvte.Documents;
+using PPTService.Ink.Core.Documents;
 using Cvte.Paint.Framework.Settings;
 
 namespace Cvte.Paint.Framework

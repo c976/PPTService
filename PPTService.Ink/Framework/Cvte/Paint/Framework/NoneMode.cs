@@ -1,5 +1,5 @@
-using Cvte.ComponentModel;
-using Cvte.Windows.Notifications;
+﻿using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Windows.Notifications;
 
 namespace Cvte.Paint.Framework
 {

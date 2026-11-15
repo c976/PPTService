@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,12 +8,12 @@ using System.Runtime.ExceptionServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Diagnostics.Trace;
-using Cvte.IO;
-using Cvte.Linq;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Trace;
+using PPTService.Ink.Core.IO;
+using PPTService.Ink.Core.Linq;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

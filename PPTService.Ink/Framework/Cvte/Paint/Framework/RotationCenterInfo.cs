@@ -1,5 +1,5 @@
-using System;
-using Cvte.Diagnostics.Annotations;
+﻿using System;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 
 namespace Cvte.Paint.Framework
 {

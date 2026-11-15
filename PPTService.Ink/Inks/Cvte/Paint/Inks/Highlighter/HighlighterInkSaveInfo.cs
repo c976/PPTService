@@ -1,5 +1,5 @@
-using Cvte.Paint.Inks.Storage;
-using Cvte.Storage;
+﻿using Cvte.Paint.Inks.Storage;
+using PPTService.Ink.Core.Storage;
 
 namespace Cvte.Paint.Inks.Highlighter
 {

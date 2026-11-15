@@ -1,7 +1,7 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using Cvte.Paint.Framework;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Inks
 {

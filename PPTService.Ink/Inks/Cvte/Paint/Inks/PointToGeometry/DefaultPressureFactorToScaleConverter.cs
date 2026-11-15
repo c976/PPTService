@@ -1,4 +1,4 @@
-using Cvte.Internal.Ink;
+﻿using PPTService.Ink.Core.Internal.Ink;
 
 namespace Cvte.Paint.Inks.PointToGeometry
 {

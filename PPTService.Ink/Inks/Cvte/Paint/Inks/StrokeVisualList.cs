@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Inks.Visual_;
 
 namespace Cvte.Paint.Inks

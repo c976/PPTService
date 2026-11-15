@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using Cvte.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Mathematics;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	internal struct StrokeNode
 	{

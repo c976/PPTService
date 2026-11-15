@@ -1,4 +1,4 @@
-using Cvte.Diagnostics.Trace;
+﻿using PPTService.Ink.Core.Diagnostics.Trace;
 
 namespace Cvte.Paint.Framework.Settings
 {
@@ -12,7 +12,7 @@ namespace Cvte.Paint.Framework.Settings
 
 		public TraceSettings()
 		{
-			LogTracer = Cvte.Diagnostics.Trace.Tracer.BuildLogTracer("Paint");
+			LogTracer = PPTService.Ink.Core.Diagnostics.Trace.Tracer.BuildLogTracer("Paint");
 			Tracer = LogTracer;
 		}
 	}

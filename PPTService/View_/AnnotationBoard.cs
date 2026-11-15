@@ -111,7 +111,9 @@ namespace PPTService
 
 		public void CleanInk()
 		{
-			InkBoard.CurrentSlide.RemoveAll<Ink>();
+			// 完全限定：新增 PPTService.Ink.Core 程序集后 PPTService.Ink 成为命名空间，
+			// 简单名 Ink 会与之冲突（CS0118）。
+			InkBoard.CurrentSlide.RemoveAll<Cvte.Paint.Inks.Ink>();
 		}
 
 		public void Undo()

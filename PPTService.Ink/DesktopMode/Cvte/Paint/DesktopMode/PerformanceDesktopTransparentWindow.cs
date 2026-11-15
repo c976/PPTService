@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shell;
-using Cvte.Windows.Controls;
-using Cvte.Windows.Media;
-using Cvte.Windows.Native;
+using PPTService.Ink.Core.Windows.Controls;
+using PPTService.Ink.Core.Windows.Media;
+using PPTService.Ink.Core.Windows.Native;
 
 namespace Cvte.Paint.DesktopMode
 {

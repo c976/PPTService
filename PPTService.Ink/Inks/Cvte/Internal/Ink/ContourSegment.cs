@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	internal struct ContourSegment
 	{

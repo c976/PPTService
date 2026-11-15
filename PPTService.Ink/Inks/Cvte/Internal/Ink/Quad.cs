@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	internal struct Quad
 	{

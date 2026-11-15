@@ -1,6 +1,6 @@
-using System;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Windows.Media;
+﻿using System;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Windows.Media;
 
 namespace Cvte.Paint.Framework
 {

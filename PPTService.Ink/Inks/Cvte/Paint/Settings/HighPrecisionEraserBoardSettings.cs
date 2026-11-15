@@ -1,5 +1,5 @@
-using System;
-using Cvte.Diagnostics.Annotations;
+﻿using System;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Inks.HighPrecision.Erasing;

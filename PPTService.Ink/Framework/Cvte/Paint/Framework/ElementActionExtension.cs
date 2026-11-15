@@ -1,7 +1,8 @@
+﻿using PPTService.Ink.Core;
 using System;
 using System.Windows;
 using Cvte.Paint.Framework.ElementLockedActions;
-using Cvte.Storage;
+using PPTService.Ink.Core.Storage;
 
 namespace Cvte.Paint.Framework
 {

@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
-using Cvte.Documents;
+using PPTService.Ink.Core.Documents;
 
 namespace Cvte.Paint.Inks
 {

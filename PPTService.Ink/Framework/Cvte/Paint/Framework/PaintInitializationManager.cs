@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Cvte.ComponentModel;
+using PPTService.Ink.Core.ComponentModel;
 
 namespace Cvte.Paint.Framework
 {

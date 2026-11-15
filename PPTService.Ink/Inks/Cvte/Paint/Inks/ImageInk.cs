@@ -1,10 +1,10 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Inks.Storage;
-using Cvte.Storage;
+using PPTService.Ink.Core.Storage;
 
 namespace Cvte.Paint.Inks
 {

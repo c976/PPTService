@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -10,7 +10,7 @@ using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Operations;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Threading;
+using PPTService.Ink.Core.Windows.Threading;
 
 namespace Cvte.Paint.Inks
 {

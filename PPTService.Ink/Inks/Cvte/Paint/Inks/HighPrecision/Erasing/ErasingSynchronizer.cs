@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Documents;
+using PPTService.Ink.Core.Documents;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Operations;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing
 {

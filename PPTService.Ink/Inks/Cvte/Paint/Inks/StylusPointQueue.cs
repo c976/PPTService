@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Windows.Input;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 
 namespace Cvte.Paint.Inks
 {

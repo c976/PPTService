@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework.Settings;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

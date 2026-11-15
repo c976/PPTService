@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
@@ -7,7 +7,7 @@ using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Inks;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Shell;
+using PPTService.Ink.Core.Windows.Shell;
 
 namespace Cvte.Paint.DesktopMode
 {

@@ -1,17 +1,17 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
-using Cvte.Linq;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Elements;
 using Cvte.Paint.Framework.Operations;
 using Cvte.Paint.Framework.SelectionBoxs;
-using Cvte.Windows;
-using Cvte.Windows.Mathematics;
+using PPTService.Ink.Core.Windows;
+using PPTService.Ink.Core.Windows.Mathematics;
 
 namespace Cvte.Paint.Framework
 {

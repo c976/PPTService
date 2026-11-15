@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using Cvte.ComponentModel;
-using Cvte.Documents;
+﻿using System.Collections.Generic;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Documents;
 
 namespace Cvte.Paint.Framework.Operations
 {

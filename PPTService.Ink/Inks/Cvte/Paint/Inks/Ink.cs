@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,14 +8,14 @@ using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Cvte.Cache;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Cache;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Level;
 using Cvte.Paint.Inks.Storage;
-using Cvte.Storage;
-using Cvte.Windows.Mathematics;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Inks
 {

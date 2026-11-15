@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,8 +6,8 @@ using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Cvte.Collections;
-using Cvte.Internal.Ink;
+using PPTService.Ink.Core.Collections;
+using PPTService.Ink.Core.Internal.Ink;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing
 {

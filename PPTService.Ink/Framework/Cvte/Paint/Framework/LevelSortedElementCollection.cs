@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Diagnostics.Trace;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Trace;
 using Cvte.Paint.Framework.Level;
 
 namespace Cvte.Paint.Framework

@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Windows;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework.Settings;
-using Cvte.Windows;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

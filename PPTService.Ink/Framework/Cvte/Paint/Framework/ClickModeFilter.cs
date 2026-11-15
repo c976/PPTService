@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework.Controls;
 
 namespace Cvte.Paint.Framework

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Interop;
-using Cvte.ComponentModel;
+using PPTService.Ink.Core.ComponentModel;
 
 namespace Cvte.Paint.Inks.Hardware.SmartPen
 {

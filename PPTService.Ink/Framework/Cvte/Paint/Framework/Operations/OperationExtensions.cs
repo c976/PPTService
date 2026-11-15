@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Linq;
-using Cvte.ComponentModel;
-using Cvte.Contracts;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Contracts;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 
 namespace Cvte.Paint.Framework.Operations
 {

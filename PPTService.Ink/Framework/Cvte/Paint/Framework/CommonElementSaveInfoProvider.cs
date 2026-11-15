@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Diagnostics.Trace;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Trace;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework
 {
@@ -19,7 +19,7 @@ namespace Cvte.Paint.Framework
 			elementSaveInfo.Width = bounds.Width;
 			elementSaveInfo.Height = bounds.Height;
 			elementSaveInfo.Rotation = element.Rotation;
-			elementSaveInfo.Transform = (System.Windows.Media.Matrix.Identity.Equals(element.Transform) ? null : ((Cvte.Storage.Standard.Matrix)element.Transform));
+			elementSaveInfo.Transform = (System.Windows.Media.Matrix.Identity.Equals(element.Transform) ? null : ((PPTService.Ink.Core.Storage.Standard.Matrix)element.Transform));
 			elementSaveInfo.IsErased = element.IsErased;
 			elementSaveInfo.IsErasable = element.IsErasable;
 			elementSaveInfo.HasMask = element.HasMask;
@@ -37,7 +37,7 @@ namespace Cvte.Paint.Framework
 					elementSaveInfo.ClipGeometry = pathGeometry2.ToString();
 				}
 				System.Windows.Media.Matrix? matrix = ((MatrixTransform)(element.ClipGeometry?.Transform))?.Matrix;
-				elementSaveInfo.ClipMatrix = (matrix.HasValue ? ((Cvte.Storage.Standard.Matrix)matrix.GetValueOrDefault()) : null);
+				elementSaveInfo.ClipMatrix = (matrix.HasValue ? ((PPTService.Ink.Core.Storage.Standard.Matrix)matrix.GetValueOrDefault()) : null);
 			}
 			elementSaveInfo.RotateOrigin = element.LogicalOriginPoint;
 			RotationCenterInfo rotationCenterInfo = element.AsRotationCenterInfo();

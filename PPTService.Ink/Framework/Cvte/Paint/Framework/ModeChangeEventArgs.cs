@@ -1,3 +1,4 @@
+﻿using PPTService.Ink.Core;
 namespace Cvte.Paint.Framework
 {
 	public class ModeChangeEventArgs : ValueChangeEventArgs<Mode>

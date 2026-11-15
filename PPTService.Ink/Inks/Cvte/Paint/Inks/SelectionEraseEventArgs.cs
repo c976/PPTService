@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Inks
 {

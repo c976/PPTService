@@ -1,4 +1,4 @@
-namespace Cvte.Paint
+﻿namespace Cvte.Paint
 {
 	public interface IAdornerRender
 	{

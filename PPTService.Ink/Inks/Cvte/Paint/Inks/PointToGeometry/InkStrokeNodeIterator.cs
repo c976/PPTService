@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Internal.Ink;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Internal.Ink;
 
 namespace Cvte.Paint.Inks.PointToGeometry
 {
@@ -128,14 +128,14 @@ namespace Cvte.Paint.Inks.PointToGeometry
 			return PressureFactorToScaleConverter.PressureFactorToScalePressureFactor(stylusPointPressureFactor);
 		}
 
-		private static Cvte.Internal.Ink.StylusShape GetStylusShape(double inkThickness)
+		private static PPTService.Ink.Core.Internal.Ink.StylusShape GetStylusShape(double inkThickness)
 		{
-			return new Cvte.Internal.Ink.EllipseStylusShape(inkThickness, inkThickness);
+			return new PPTService.Ink.Core.Internal.Ink.EllipseStylusShape(inkThickness, inkThickness);
 		}
 
-		private static Cvte.Internal.Ink.StylusShape GetStylusShape(DrawingAttributes drawingAttribute)
+		private static PPTService.Ink.Core.Internal.Ink.StylusShape GetStylusShape(DrawingAttributes drawingAttribute)
 		{
-			Cvte.Internal.Ink.StylusShape obj = ((drawingAttribute.StylusTip != StylusTip.Rectangle) ? ((Cvte.Internal.Ink.StylusShape)new Cvte.Internal.Ink.EllipseStylusShape(drawingAttribute.Width, drawingAttribute.Height)) : ((Cvte.Internal.Ink.StylusShape)new Cvte.Internal.Ink.RectangleStylusShape(drawingAttribute.Width, drawingAttribute.Height)));
+			PPTService.Ink.Core.Internal.Ink.StylusShape obj = ((drawingAttribute.StylusTip != StylusTip.Rectangle) ? ((PPTService.Ink.Core.Internal.Ink.StylusShape)new PPTService.Ink.Core.Internal.Ink.EllipseStylusShape(drawingAttribute.Width, drawingAttribute.Height)) : ((PPTService.Ink.Core.Internal.Ink.StylusShape)new PPTService.Ink.Core.Internal.Ink.RectangleStylusShape(drawingAttribute.Width, drawingAttribute.Height)));
 			obj.Transform = drawingAttribute.StylusTipTransform;
 			return obj;
 		}

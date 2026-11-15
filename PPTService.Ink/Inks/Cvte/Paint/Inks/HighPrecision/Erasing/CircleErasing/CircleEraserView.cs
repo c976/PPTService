@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Windows.Media;
+using PPTService.Ink.Core.Windows.Media;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing.CircleErasing
 {

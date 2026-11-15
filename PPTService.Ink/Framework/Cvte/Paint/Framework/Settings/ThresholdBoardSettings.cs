@@ -1,5 +1,5 @@
-using System.Collections.Generic;
-using Cvte.Windows.Input;
+﻿using System.Collections.Generic;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework.Settings
 {

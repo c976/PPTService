@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,7 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Cvte.Paint.Framework.SelectionBoxs;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

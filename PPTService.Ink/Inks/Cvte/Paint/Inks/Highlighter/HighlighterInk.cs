@@ -1,11 +1,11 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
-using Cvte.Storage;
+using PPTService.Ink.Core.Storage;
 
 namespace Cvte.Paint.Inks.Highlighter
 {

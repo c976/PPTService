@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +8,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using Cvte.Diagnostics.Trace;
-using Cvte.Windows;
-using Cvte.Windows.Mathematics;
+using PPTService.Ink.Core.Diagnostics.Trace;
+using PPTService.Ink.Core.Windows;
+using PPTService.Ink.Core.Windows.Mathematics;
 
 namespace Cvte.Paint.Framework
 {

@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
-using Cvte.Linq;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Elements;
 
 namespace Cvte.Paint.Framework.Operations

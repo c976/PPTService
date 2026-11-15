@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Resources;
-using Cvte.Diagnostics.Trace;
+using PPTService.Ink.Core.Diagnostics.Trace;
 
 namespace Cvte.Paint.Framework
 {

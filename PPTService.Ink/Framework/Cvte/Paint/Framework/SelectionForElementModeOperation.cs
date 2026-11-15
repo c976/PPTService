@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using Cvte.Documents;
-using Cvte.Linq;
+using PPTService.Ink.Core.Documents;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Elements;
 using Cvte.Paint.Framework.Operations;
-using Cvte.Windows;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

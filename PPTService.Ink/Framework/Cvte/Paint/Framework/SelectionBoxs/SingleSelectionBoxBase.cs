@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,8 +8,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
-using Cvte.Linq;
-using Cvte.Windows.Mathematics;
+using PPTService.Ink.Core.Linq;
+using PPTService.Ink.Core.Windows.Mathematics;
 
 namespace Cvte.Paint.Framework.SelectionBoxs
 {

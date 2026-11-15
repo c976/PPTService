@@ -1,7 +1,7 @@
-using Cvte.Paint.Framework.Controls.Texts;
-using Cvte.Storage;
-using Cvte.Storage.Standard;
-using Cvte.Windows.TextEditorPlus.Storage;
+﻿using Cvte.Paint.Framework.Controls.Texts;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.Standard;
+using PPTService.Ink.Core.Windows.TextEditorPlus.Storage;
 
 namespace Cvte.Paint.Framework
 {

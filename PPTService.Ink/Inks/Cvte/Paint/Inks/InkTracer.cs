@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Cvte.Diagnostics.Trace;
+using PPTService.Ink.Core.Diagnostics.Trace;
 
 namespace Cvte.Paint.Inks
 {

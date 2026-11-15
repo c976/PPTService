@@ -1,8 +1,8 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Cvte.Internal.Ink;
+using PPTService.Ink.Core.Internal.Ink;
 using Cvte.Paint.Framework;
 
 namespace Cvte.Paint.Inks.Legacy

@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Windows;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Framework
 {

@@ -1,6 +1,6 @@
-using System.Windows.Ink;
+﻿using System.Windows.Ink;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	public sealed class RectangleStylusShape : StylusShape
 	{

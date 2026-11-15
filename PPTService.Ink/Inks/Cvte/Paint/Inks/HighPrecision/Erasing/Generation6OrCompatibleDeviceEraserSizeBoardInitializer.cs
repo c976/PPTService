@@ -1,11 +1,11 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Settings;
-using Cvte.Windows;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing
 {

@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using Cvte.Paint.Framework.Settings;
-using Cvte.Windows.Mathematics;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Framework
 {

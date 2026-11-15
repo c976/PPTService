@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using Cvte.Windows;
+using PPTService.Ink.Core.Windows;
 
 namespace Cvte.Paint.Framework
 {

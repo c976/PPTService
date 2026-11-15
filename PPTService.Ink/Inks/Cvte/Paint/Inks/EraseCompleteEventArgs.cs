@@ -1,5 +1,5 @@
-using System.Collections.Generic;
-using Cvte.Diagnostics.Annotations;
+﻿using System.Collections.Generic;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
 
 namespace Cvte.Paint.Inks

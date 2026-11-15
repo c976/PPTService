@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
-using Cvte.Documents;
+using PPTService.Ink.Core.Documents;
 
 namespace Cvte.Paint.Framework.Operations
 {

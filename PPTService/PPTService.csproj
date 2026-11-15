@@ -91,31 +91,6 @@
     </Reference>
     <!-- PPTService.Ink 的原版白板基类链（SafeWindow / Win32 等）所在程序集，
          AnnotationBoard 直接引用其 Board / Initializer / 模式提供器等类型时必须显式引用，否则 CS0012。 -->
-    <Reference Include="Cvte.Core.cc">
-      <HintPath>..\lib\Cvte.Core.cc.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Cvte.IO.cc">
-      <HintPath>..\lib\Cvte.IO.cc.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Cvte.Storage">
-      <HintPath>..\lib\Cvte.Storage.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Cvte.Windows.cc">
-      <HintPath>..\lib\Cvte.Windows.cc.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Cvte.Windows.TextEditorPlus">
-      <HintPath>..\lib\Cvte.Windows.TextEditorPlus.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PPTService.Core\PPTService.Core.csproj">
@@ -125,6 +100,10 @@
     <ProjectReference Include="..\PPTService.Collection\PPTService.Collection.csproj">
       <Project>{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}</Project>
       <Name>PPTService.Collection</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">
+      <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
+      <Name>PPTService.Ink.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\PPTService.Ink\PPTService.Ink.csproj">
       <Project>{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}</Project>

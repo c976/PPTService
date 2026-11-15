@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Linq;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Elements;
 using Cvte.Paint.Framework.Operations;
 

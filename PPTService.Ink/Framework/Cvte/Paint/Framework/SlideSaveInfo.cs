@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Storage;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework
 {
@@ -47,7 +47,7 @@ namespace Cvte.Paint.Framework
 		public string TransitionKey { get; set; }
 
 		[SaveInfoMember("Duration", Description = "切页动画时长")]
-		public Cvte.Storage.Standard.TimeSpan Duration { get; set; }
+		public PPTService.Ink.Core.Storage.Standard.TimeSpan Duration { get; set; }
 
 		[SaveInfoMember("AnimationOrders", Description = "动画顺序")]
 		public IList<string> AnimationOrders { get; set; }

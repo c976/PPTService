@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing
 {

@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Windows.Localization;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Windows.Localization;
 
 namespace Cvte.Paint.Framework.Elements
 {

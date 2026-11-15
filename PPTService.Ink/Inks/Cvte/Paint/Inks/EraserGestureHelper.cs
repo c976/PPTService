@@ -1,18 +1,18 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Input.StylusPlugIns;
-using Cvte.Cache;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.Cache;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Inks.Hardware.RawTouchEngine;
 using Cvte.Paint.Settings;
-using Cvte.Reflection;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Reflection;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Inks
 {

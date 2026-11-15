@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Windows.Media;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework
 {
@@ -81,7 +81,7 @@ namespace Cvte.Paint.Framework
 				OffsetY = OffsetY
 			};
 			System.Windows.Media.Matrix? matrix = ShadowTransform?.Matrix;
-			perspectiveShadowSaveInfo.ShadowMatrix = (matrix.HasValue ? ((Cvte.Storage.Standard.Matrix)matrix.GetValueOrDefault()) : null);
+			perspectiveShadowSaveInfo.ShadowMatrix = (matrix.HasValue ? ((PPTService.Ink.Core.Storage.Standard.Matrix)matrix.GetValueOrDefault()) : null);
 			return perspectiveShadowSaveInfo;
 		}
 

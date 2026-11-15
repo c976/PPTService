@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Cvte.IO;
-using Cvte.Windows;
+using PPTService.Ink.Core.IO;
+using PPTService.Ink.Core.Windows;
 
 namespace Cvte.Paint.Inks.Hardware.RawTouchEngine
 {
@@ -52,10 +52,48 @@ namespace Cvte.Paint.Inks.Hardware.RawTouchEngine
 			}
 		}
 
-		// ILSpy 未能还原原程序集里 Initialize 的本地函数体（希沃 RawTouch 硬件轮询）。
-		// 移植到 PPT 小工具时不走希沃硬件通道，这里保留空的占位实现以保证源码可编译。
+		// 依据完整反编译源码（E:\wb\DesktopAnnotation\Cvte.Paint.Inks\...\CVTouchInfoProvider.cs）
+		// 补全 <Initialize>g__Initialize|6_0 局部函数体：ILSpy 在 C#6 模式下曾丢失该方法体。
+		// 局部函数引用的 DeviceInfo / MultiTouhCallbackDelegate / HotplugCallbackDelegate
+		// 均为本类静态字段，故提升为静态方法后无参数。
 		private static void InitializeWorker()
 		{
+			try
+			{
+				Log.Info("TouchSDK initializing...");
+				Application.Current.Dispatcher.BeginInvoke((Action)delegate
+				{
+					Application.Current.Exit += delegate
+					{
+						Unload();
+					};
+				});
+				TouchSDK.InitTouch(DeviceInfo, 0, MultiTouhCallbackDelegate, HotplugCallbackDelegate, IntPtr.Zero);
+				int touchDeviceCount = TouchSDK.GetTouchDeviceCount();
+				Log.Info($"TouchSDK device count = {touchDeviceCount}");
+				int num = 0;
+				for (int i = 0; i < touchDeviceCount; i++)
+				{
+					try
+					{
+						TouchSDK.EnableRawData(DeviceInfo[i]);
+						TouchSDK.EnableTouchWidthData(DeviceInfo[i]);
+					}
+					catch (Exception ex)
+					{
+						InkTracer.LogTracer.Error($"TouchSDK DeviceInfo #{i} initializing failed" + ex.ToString());
+					}
+					num++;
+				}
+				HasInitialized = true;
+				IsCVTouchFrame = num > 0;
+				Log.Info($"TouchSDK initialized...{num}/{touchDeviceCount}");
+			}
+			catch (Exception e2)
+			{
+				IsCVTouchFrame = false;
+				Log.Error(e2);
+			}
 		}
 
 		private static void HotplugCallback(TouchSDK.DeviceInfo devInfo, byte attached, IntPtr callbackobject)

@@ -1,3 +1,4 @@
+﻿using PPTService.Ink.Core;
 using System;
 
 namespace Cvte.Paint.Framework.ElementLockedActions

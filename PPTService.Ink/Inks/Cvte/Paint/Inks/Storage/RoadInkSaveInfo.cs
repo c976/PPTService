@@ -1,6 +1,6 @@
-using Cvte.Paint.Framework;
-using Cvte.Storage;
-using Cvte.Storage.Standard;
+﻿using Cvte.Paint.Framework;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Inks.Storage
 {

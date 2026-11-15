@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Linq;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Mathematics.Geometries;
+using PPTService.Ink.Core.Windows.Mathematics.Geometries;
 
 namespace Cvte.Paint.Inks
 {
@@ -93,7 +93,7 @@ namespace Cvte.Paint.Inks
 				return point;
 			}
 			Rect selfCentreRect = GetSelfCentreRect(_beginPoint, _strokeWidth, _strokeHeight);
-			Point? point2 = LineSegmentInterscetsWithRect(new Cvte.Windows.Mathematics.Geometries.LineSegment(_beginPoint.ToPoint(), point.ToPoint()), selfCentreRect);
+			Point? point2 = LineSegmentInterscetsWithRect(new PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment(_beginPoint.ToPoint(), point.ToPoint()), selfCentreRect);
 			if (!point2.HasValue)
 			{
 				return null;
@@ -136,21 +136,21 @@ namespace Cvte.Paint.Inks
 			return new Rect(point.X - width / 2.0, point.Y - height / 2.0, width, height);
 		}
 
-		private static Point? LineSegmentInterscetsWithRect(Cvte.Windows.Mathematics.Geometries.LineSegment s, Rect rect)
+		private static Point? LineSegmentInterscetsWithRect(PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment s, Rect rect)
 		{
 			if (!s.IsValid)
 			{
 				return null;
 			}
-			foreach (Cvte.Windows.Mathematics.Geometries.LineSegment item in new List<Cvte.Windows.Mathematics.Geometries.LineSegment>
+			foreach (PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment item in new List<PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment>
 			{
-				new Cvte.Windows.Mathematics.Geometries.LineSegment(rect.TopRight, rect.BottomRight),
-				new Cvte.Windows.Mathematics.Geometries.LineSegment(rect.BottomRight, rect.BottomLeft),
-				new Cvte.Windows.Mathematics.Geometries.LineSegment(rect.TopLeft, rect.TopRight),
-				new Cvte.Windows.Mathematics.Geometries.LineSegment(rect.BottomLeft, rect.TopLeft)
+				new PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment(rect.TopRight, rect.BottomRight),
+				new PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment(rect.BottomRight, rect.BottomLeft),
+				new PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment(rect.TopLeft, rect.TopRight),
+				new PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment(rect.BottomLeft, rect.TopLeft)
 			})
 			{
-				Point? result = Cvte.Windows.Mathematics.Geometries.LineSegment.Intersect(item, s);
+				Point? result = PPTService.Ink.Core.Windows.Mathematics.Geometries.LineSegment.Intersect(item, s);
 				if (result.HasValue)
 				{
 					return result;

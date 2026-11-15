@@ -1,19 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Operations;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Settings;
-using Cvte.Windows.Input;
-using Cvte.Windows.Mathematics;
-using Cvte.Windows.Threading;
+using PPTService.Ink.Core.Windows.Input;
+using PPTService.Ink.Core.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Threading;
 
 namespace Cvte.Paint.Inks
 {

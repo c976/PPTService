@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 
-namespace Cvte.Internal.Ink
+namespace PPTService.Ink.Core.Internal.Ink
 {
 	internal class StrokeNodeIterator
 	{

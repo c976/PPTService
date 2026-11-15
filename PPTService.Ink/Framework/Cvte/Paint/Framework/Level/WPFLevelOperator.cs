@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Cvte.Windows.Threading;
+using PPTService.Ink.Core.Windows.Threading;
 
 namespace Cvte.Paint.Framework.Level
 {

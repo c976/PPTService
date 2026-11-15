@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -7,8 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media;
-using Cvte.ComponentModel;
-using Cvte.Windows;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Windows;
 
 namespace Cvte.Paint.Framework.Controls
 {

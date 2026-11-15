@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,15 +10,15 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Input.StylusPlugIns;
 using System.Windows.Media;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Linq;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Elements;
 using Cvte.Paint.Framework.Exceptions;
 using Cvte.Paint.Framework.Level;
 using Cvte.Paint.Framework.SelectionBoxs;
-using Cvte.Storage;
-using Cvte.Storage.Standard;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Storage.Standard;
 
 namespace Cvte.Paint.Framework
 {
@@ -722,7 +722,7 @@ namespace Cvte.Paint.Framework
 				{
 					ClearValue(SpecialSlide.KeepIndependentSizeProperty);
 				}
-				Background = saveInfo.Background ?? ((Cvte.Storage.Standard.Brush)Brushes.White);
+				Background = saveInfo.Background ?? ((PPTService.Ink.Core.Storage.Standard.Brush)Brushes.White);
 				Id = saveInfo.Id ?? Guid.NewGuid().ToString();
 				if (integrity == SaveInfoIntegrity.Full)
 				{

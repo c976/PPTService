@@ -1,18 +1,18 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Operations;
 using Cvte.Paint.Framework.Settings;
 using Cvte.Paint.Inks.HighPrecision.Erasing.CircleErasing;
 using Cvte.Paint.Inks.HighPrecision.Erasing.CornerRadiusRectangleErasing;
 using Cvte.Paint.Settings;
-using Cvte.Windows;
+using PPTService.Ink.Core.Windows;
 
 namespace Cvte.Paint.Inks.HighPrecision.Erasing
 {

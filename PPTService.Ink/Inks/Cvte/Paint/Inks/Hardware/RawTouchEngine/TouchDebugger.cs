@@ -1,5 +1,5 @@
-using System;
-using Cvte.Diagnostics.Trace;
+﻿using System;
+using PPTService.Ink.Core.Diagnostics.Trace;
 
 namespace Cvte.Paint.Inks.Hardware.RawTouchEngine
 {

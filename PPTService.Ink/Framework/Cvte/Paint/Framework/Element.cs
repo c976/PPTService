@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,11 +10,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows.Media;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
 using Cvte.Paint.Framework.Level;
-using Cvte.Windows.Controls;
-using Cvte.Windows.Mathematics;
+using PPTService.Ink.Core.Windows.Controls;
+using PPTService.Ink.Core.Windows.Mathematics;
 
 namespace Cvte.Paint.Framework
 {

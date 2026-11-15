@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Windows.Input;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Windows.Input;
 
 namespace Cvte.Paint.Framework
 {

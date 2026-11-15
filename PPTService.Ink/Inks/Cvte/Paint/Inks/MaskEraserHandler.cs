@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using Cvte.Documents;
+using PPTService.Ink.Core.Documents;
 using Cvte.Paint.Framework;
 using Cvte.Paint.Framework.Operations;
 

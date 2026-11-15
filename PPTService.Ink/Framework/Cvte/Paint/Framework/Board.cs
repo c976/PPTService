@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,15 +8,15 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input.StylusPlugIns;
-using Cvte.ComponentModel;
-using Cvte.Diagnostics.Annotations;
-using Cvte.Documents;
-using Cvte.Linq;
+using PPTService.Ink.Core.ComponentModel;
+using PPTService.Ink.Core.Diagnostics.Annotations;
+using PPTService.Ink.Core.Documents;
+using PPTService.Ink.Core.Linq;
 using Cvte.Paint.Framework.Input;
 using Cvte.Paint.Framework.Operations;
 using Cvte.Paint.Framework.Settings;
-using Cvte.Storage;
-using Cvte.Windows.Media;
+using PPTService.Ink.Core.Storage;
+using PPTService.Ink.Core.Windows.Media;
 
 namespace Cvte.Paint.Framework
 {
