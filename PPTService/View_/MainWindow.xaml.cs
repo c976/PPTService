@@ -172,6 +172,12 @@ namespace PPTService
 
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e)
 		{
+			// Office 原生批注下点击 PPT 放映窗口不会进入本窗口的路由事件，
+			// 用全局鼠标按下兜底收起工具栏弹窗（处理器内部只在该模式生效）。
+			if (MouseHelper.Instance != null)
+			{
+				MouseHelper.Instance.Down += GlobalMouseDownForOfficeAnnotation;
+			}
 			// 翻页按钮位置交由用户配置决定（默认沿用程序原逻辑），运行时切换也复用此方法。
 			ApplyPageTurningLayout();
 			BottomCenterButtonGrid.Children.Add(ViewHelper.BottomArea);
@@ -858,6 +864,36 @@ namespace PPTService
 		/// 让这次鼠标按下继续路由到批注层 Board，实现「点窗口外的第一击即落笔 / 擦除」。
 		/// 工具栏按钮交给各自 Click 处理开合，避免抢先关闭导致「再点一次又打开」。
 		/// </summary>
+		/// <summary>
+		/// Office 原生批注模式的兜底：点击落在 PPT 放映窗口时本窗口收不到
+		/// PreviewMouseDown，颜色盘无法靠路由事件收起。全局鼠标轮询不依赖窗口
+		/// 消息路由，这里据此收起弹窗；仍排除弹窗与工具栏区域以免误触。
+		/// 自实现批注由 PreviewMouseDown 的「落在 Board」判定处理，本方法不介入。
+		/// </summary>
+		private void GlobalMouseDownForOfficeAnnotation(object sender, MouseHelperEventArgs e)
+		{
+			if (UserConfigManager.Load().UseSelfAnnotation)
+			{
+				return;
+			}
+			BottomArea area = ViewHelper.BottomArea;
+			if (area == null || !area.HasOpenToolPopup)
+			{
+				return;
+			}
+			double factor = ScreenHelper.DpiFactor;
+			if (factor <= 0.0)
+			{
+				factor = 1.0;
+			}
+			Point screen = new Point(e.MousePoint.X * factor, e.MousePoint.Y * factor);
+			if (area.IsScreenPointInToolArea(screen))
+			{
+				return;
+			}
+			area.CloseToolPopups();
+		}
+
 		private void MainWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			// 只有明确落在批注绘制层的按下才收起弹窗：这一击会继续路由到 Board，

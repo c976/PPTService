@@ -150,6 +150,8 @@ namespace PPTService
 		private void Select_OnClick(object sender, RoutedEventArgs e)
 		{
 			EraserSliderPopup.IsOpen = false;
+			// 切到「选择」时也收起笔颜色/粗细面板，避免面板残留。
+			ColorDiskPopup.IsOpen = false;
 			if (IsSelfAnnotationActive)
 			{
 				// 鼠标模式：批注窗口穿透，点击落到 PPT。
@@ -214,6 +216,8 @@ namespace PPTService
 
 		private void Rubber_OnClick(object sender, RoutedEventArgs e)
 		{
+			// 颜色盘打开时切到橡皮：先收起，再走各分支的橡皮/清屏滑杆逻辑。
+			ColorDiskPopup.IsOpen = false;
 			if (IsInnerBoardSelfAnnotation)
 			{
 				// 板中板：走新白板引擎的手势橡皮，不触碰 Office 指针。
@@ -751,6 +755,50 @@ namespace PPTService
 			{
 				EraserSliderPopup.IsOpen = false;
 			}
+		}
+
+		/// <summary>是否有工具栏弹窗处于打开状态。</summary>
+		public bool HasOpenToolPopup
+		{
+			get { return ColorDiskPopup.IsOpen || EraserSliderPopup.IsOpen; }
+		}
+
+		/// <summary>
+		/// 屏幕物理像素坐标是否落在「弹窗或工具栏」区域内。
+		/// Office 原生批注下点击 PPT 放映窗口时 MainWindow 收不到路由事件，
+		/// 只能靠全局鼠标按下收起弹窗；仍要排除误点弹窗/工具栏本身。
+		/// </summary>
+		public bool IsScreenPointInToolArea(Point physicalScreenPoint)
+		{
+			if (IsPointInPopup(ColorDiskPopup, physicalScreenPoint) ||
+				IsPointInPopup(EraserSliderPopup, physicalScreenPoint))
+			{
+				return true;
+			}
+			if (RootGrid != null && PresentationSource.FromVisual(RootGrid) != null)
+			{
+				Point origin = RootGrid.PointToScreen(new Point(0.0, 0.0));
+				Size size = new Size(RootGrid.ActualWidth * ScreenHelper.DpiFactor,
+					RootGrid.ActualHeight * ScreenHelper.DpiFactor);
+				if (new Rect(origin, size).Contains(physicalScreenPoint))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private static bool IsPointInPopup(Popup popup, Point physicalScreenPoint)
+		{
+			FrameworkElement child = popup == null || !popup.IsOpen ? null : popup.Child as FrameworkElement;
+			if (child == null || PresentationSource.FromVisual(child) == null)
+			{
+				return false;
+			}
+			Point origin = child.PointToScreen(new Point(0.0, 0.0));
+			Size size = new Size(child.ActualWidth * ScreenHelper.DpiFactor,
+				child.ActualHeight * ScreenHelper.DpiFactor);
+			return new Rect(origin, size).Contains(physicalScreenPoint);
 		}
 
 		public void ApplyFunctionBarVisibility(bool hide)
