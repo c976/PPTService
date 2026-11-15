@@ -67,14 +67,14 @@
         <GoToStateAction StateName="Adaptive3800" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
       </pptService:AdaptiveTrigger>
     </i:Interaction.Triggers>
-    <pptService:ImageButton Click="Previous_Click" Grid.Column="0" Background="#A0FFFFFF" BorderThickness="1" NormalSource="{StaticResource ImageSource.HorizontalPreviousSlideNormal}" PressedSource="{StaticResource ImageSource.HorizontalPreviousSlideSelected}" />
+    <pptService:ImageButton Click="Previous_Click" Grid.Column="0" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.HorizontalPreviousSlideNormal}" PressedSource="{StaticResource ImageSource.HorizontalPreviousSlideSelected}" />
     <Grid Name="PlaceholderGrid" Column="1" Width="4" />
-    <pptService:ImageButton Click="Thumbnail_Click" Grid.Column="2" Background="#A0FFFFFF" BorderThickness="1">
+    <pptService:ImageButton Click="Thumbnail_Click" Grid.Column="2" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1">
       <ContentControl.Content>
-        <TextBlock Name="RightSlideIndexTextBlock" FontFamily="微软雅黑" Foreground="#666666" HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False" FocusVisualStyle="{x:Null}" />
+        <TextBlock Name="RightSlideIndexTextBlock" FontFamily="微软雅黑" Foreground="{DynamicResource Theme.PrimaryText}" HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False" FocusVisualStyle="{x:Null}" />
       </ContentControl.Content>
     </pptService:ImageButton>
     <Grid Name="PlaceholderGrid1" Column="3" Width="4" />
-    <pptService:ImageButton Click="Next_Click" Grid.Column="4" Background="#A0FFFFFF" BorderThickness="1" NormalSource="{StaticResource ImageSource.HorizontalNextSlideNormal}" PressedSource="{StaticResource ImageSource.HorizontalNextSlideSelected}" />
+    <pptService:ImageButton Click="Next_Click" Grid.Column="4" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.HorizontalNextSlideNormal}" PressedSource="{StaticResource ImageSource.HorizontalNextSlideSelected}" />
   </Grid>
 </UserControl>

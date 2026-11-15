@@ -272,6 +272,7 @@
     <Compile Include="View_\InkBoardStyleFallback.cs" />
     <Compile Include="PPTService\DebugMode.cs" />
     <Compile Include="PPTService\UserConfig.cs" />
+    <Compile Include="PPTService\ThemeManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Images_\images.xaml">

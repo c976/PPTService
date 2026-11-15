@@ -135,7 +135,7 @@
           <Ellipse Name="InnerRightBottomThumbBorder" Style="{StaticResource ThumbEllipseStyle}" Width="{Binding Width, ElementName=InnerLeftTopThumbBorder}" Height="{Binding Height, ElementName=InnerLeftTopThumbBorder}" />
         </Border>
       </Grid>
-      <Border Name="ButtonBorder" Width="40" Height="80" Background="#FFFFFF" CornerRadius="4" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="#CCCCCC" HorizontalAlignment="Right" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
+      <Border Name="ButtonBorder" Width="40" Height="80" Background="{DynamicResource Theme.SettingsControl}" CornerRadius="4" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="{DynamicResource Theme.BorderBrush}" HorizontalAlignment="Right" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
         <UIElement.RenderTransform>
           <TransformGroup>
             <ScaleTransform />

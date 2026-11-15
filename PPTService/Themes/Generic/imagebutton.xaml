@@ -8,7 +8,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type pptService:ImageButton}">
-          <Border Name="RootBorder" Background="{TemplateBinding Control.Background}" CornerRadius="6" BorderThickness="{TemplateBinding Control.BorderThickness}" BorderBrush="#80666666" SnapsToDevicePixels="True">
+          <Border Name="RootBorder" Background="{TemplateBinding Control.Background}" CornerRadius="6" BorderThickness="{TemplateBinding Control.BorderThickness}" BorderBrush="{DynamicResource Theme.BorderBrush}" SnapsToDevicePixels="True">
             <VisualStateManager.VisualStateGroups>
               <VisualStateGroup x:Name="AdaptiveStates">
                 <VisualState x:Name="Adaptive0">

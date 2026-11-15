@@ -132,9 +132,10 @@ namespace PPTService
 				IsShowing = true;
 				Show();
 				ChangeWindowRect();
-				// 每次打开都同步主工具栏当前选择的颜色 / 粗细。
+				// 每一次进入板中板都重置为「画笔」：同步当前颜色 / 粗细、清除橡皮态、切到 GotoInk。
+				// 不依赖 ShowStoryBoard 的 Completed 回调，避免动画被打断时停留在上次的橡皮 / 选择模式。
 				_board.SetInkThickness(AnnotationController.CurrentThickness);
-				_board.SetInkColor(AnnotationController.CurrentColor);
+				SetPen(AnnotationController.CurrentColor);
 				(Resources["ShowStoryBoard"] as Storyboard)?.Begin();
 			}
 		}
@@ -192,28 +193,10 @@ namespace PPTService
 
 		private void UpdateState()
 		{
-			if (UserConfigManager.Load().UseSelfAnnotation)
-			{
-				// 自实现批注：Office 指针类型为 None、PptOperator.PointerColor 不可信，
-				// 统一取 AnnotationController.CurrentColor；且进入板中板默认切到笔模式。
-				SetPen(AnnotationController.CurrentColor);
-				return;
-			}
-			// 以下为原 Office 批注路径，模式 / 颜色仍按 Office 指针状态，只是落到新白板引擎。
-			switch (PptOperator.Instance.PointerType)
-			{
-			case PpSlideShowPointerType.ppSlideShowPointerPen:
-				SetPen(PptOperator.Instance.PointerColor);
-				break;
-			case PpSlideShowPointerType.ppSlideShowPointerEraser:
-				SetRubber();
-				break;
-			default:
-				// 程序内部切到画笔，不弹笔设置面板（面板只由用户点笔按钮触发）。
-				ViewHelper.BottomArea.PenClick(false);
-				SetPen(PptOperator.Instance.PointerColor);
-				break;
-			}
+			// 每一次进入板中板一律重置为画笔（与 ShowWindow 一致）。
+			// 原实现会按 Office 指针类型在动画结束后切到橡皮 / 选择，导致「进入后不是笔」；
+			// 自实现批注下 Office 指针为 None、PointerColor 不可信，统一用 AnnotationController 真值源。
+			SetPen(AnnotationController.CurrentColor);
 		}
 
 		private void ShowStoryBoard_OnCompleted(object sender, EventArgs e)

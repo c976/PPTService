@@ -21,8 +21,8 @@
       <RowDefinition />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
-    <Border Name="MessageBorder" Grid.Row="0" Background="#19000000" CornerRadius="6" HorizontalAlignment="Center" VerticalAlignment="Bottom" Opacity="0">
-      <TextBlock Name="MessageTextBlock" FontSize="18" Margin="30 10 30 10" Foreground="#666666" Text="{Binding Message}" />
+    <Border Name="MessageBorder" Grid.Row="0" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="6" HorizontalAlignment="Center" VerticalAlignment="Bottom" Opacity="0">
+      <TextBlock Name="MessageTextBlock" FontSize="18" Margin="30 10 30 10" Foreground="{DynamicResource Theme.PrimaryText}" Text="{Binding Message}" />
     </Border>
     <Grid Name="PerchGrid" Row="1" Height="80" Opacity="0" />
   </Grid>

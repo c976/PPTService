@@ -25,7 +25,7 @@
       </Storyboard>
     </ResourceDictionary>
   </FrameworkElement.Resources>
-  <Grid Name="QrGrid" Background="#66000000">
+  <Grid Name="QrGrid" Background="{DynamicResource Theme.MaskBackground}">
     <Button Name="CloseButton" Opacity="0.01" />
     <Border Name="QrBorder" Width="600" Height="600" Background="#FFFFFFFF" CornerRadius="6" VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5" IsManipulationEnabled="True" ManipulationStarting="QrBorder_OnManipulationStarting" ManipulationDelta="QrBorder_OnManipulationDelta" MouseWheel="QrBorder_OnMouseWheel">
       <UIElement.RenderTransform>

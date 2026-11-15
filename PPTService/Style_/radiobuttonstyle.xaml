@@ -11,7 +11,7 @@
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type RadioButton}">
           <Grid Background="#00FFFFFF">
-            <Path Height="24" Width="24" StrokeThickness="0" Fill="{TemplateBinding Control.Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding Path=(pptService:ControlHelper.Geometry), RelativeSource={RelativeSource TemplatedParent}}" />
+            <Path Height="24" Width="24" StrokeThickness="0" Fill="{DynamicResource Theme.PrimaryText}" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding Path=(pptService:ControlHelper.Geometry), RelativeSource={RelativeSource TemplatedParent}}" />
             <Ellipse Name="CheckedEllipse" Height="40" Width="40" StrokeThickness="2" Stroke="#0F80FB" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="#00FFFFFF" Visibility="Collapsed" />
           </Grid>
           <ControlTemplate.Triggers>

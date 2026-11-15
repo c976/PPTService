@@ -125,7 +125,7 @@
         <!-- 新批注引擎（PPTService.Ink 的 Board）宿主：Board 由 InnerBoardWindow 构造时挂入。
              放在页码按钮之前，保证页码按钮永远在笔迹层之上可点；白底由 InkCanvasBorder 提供。 -->
         <Grid Name="BoardHost" />
-        <Border Name="SlideIndexButtonBorder" Height="50" Width="150" CornerRadius="6" Margin="10" BorderThickness="1" Background="#FFFFFFFF" BorderBrush="#80666666" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+        <Border Name="SlideIndexButtonBorder" Height="50" Width="150" CornerRadius="6" Margin="10" BorderThickness="1" Background="{DynamicResource Theme.PopupBackground}" BorderBrush="{DynamicResource Theme.BorderBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Right">
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition />
@@ -133,7 +133,7 @@
               <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <pptService:ImageButton x:Name="Previous" Click="Previous_Click" Grid.Column="0" NormalSource="{StaticResource ImageSource.HPreviousSlideNormal}" PressedSource="{StaticResource ImageSource.HPreviousSlideSelected}" />
-            <TextBlock Name="Index" Grid.Column="1" Text="1/1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="#666666" />
+            <TextBlock Name="Index" Grid.Column="1" Text="1/1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="{DynamicResource Theme.PrimaryText}" />
             <pptService:ImageButton x:Name="Add" Click="Next_OnClick" Grid.Column="2" Visibility="Visible" NormalSource="{StaticResource ImageSource.AddSlideNormal}" PressedSource="{StaticResource ImageSource.AddSlideSelected}" />
             <pptService:ImageButton x:Name="Next" Click="Next_OnClick" Grid.Column="2" Visibility="Collapsed" NormalSource="{StaticResource ImageSource.HNextSlideNormal}" PressedSource="{StaticResource ImageSource.HNextSlideSelected}" />
           </Grid>

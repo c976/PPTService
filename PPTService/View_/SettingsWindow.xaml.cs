@@ -15,6 +15,22 @@ namespace PPTService
         private ToolbarItemVm _dragItem;
         private Point _dragStartPoint;
 
+        // 下拉框用「索引 <-> 配置值」映射，避免 SelectedValuePath 在内联 ComboBoxItem
+        // 上偶发匹配不到、导致保存时把用户设置重置成默认值。
+        private static readonly string[] ThemeValues = { "Light", "Dark", "System" };
+        private static readonly string[] PagePosValues = { "Default", "Bottom", "Both", "None" };
+
+        private static int ValueIndex(string[] values, string value)
+        {
+            int i = Array.IndexOf(values, value);
+            return i >= 0 ? i : 0;
+        }
+
+        private static string ValueAt(string[] values, int index, string fallback)
+        {
+            return (index >= 0 && index < values.Length) ? values[index] : fallback;
+        }
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -34,22 +50,10 @@ namespace PPTService
             QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
             ShowLoadingCheckBox.IsChecked = cfg.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
-            if (cfg.PageTurningPosition == "Bottom")
-            {
-                RbBottom.IsChecked = true;
-            }
-            else if (cfg.PageTurningPosition == "Both")
-            {
-                RbBoth.IsChecked = true;
-            }
-            else if (cfg.PageTurningPosition == "None")
-            {
-                RbNone.IsChecked = true;
-            }
-            else
-            {
-                RbDefault.IsChecked = true;
-            }
+            HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
+            PageTurningTranslucentCheckBox.IsChecked = cfg.PageTurningTranslucent;
+            ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
+            PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
         }
 
         private static string ToolbarName(string id)
@@ -186,22 +190,10 @@ namespace PPTService
             cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
             cfg.ShowLoadingSpinner = ShowLoadingCheckBox.IsChecked == true;
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
-            if (RbBottom.IsChecked == true)
-            {
-                cfg.PageTurningPosition = "Bottom";
-            }
-            else if (RbBoth.IsChecked == true)
-            {
-                cfg.PageTurningPosition = "Both";
-            }
-            else if (RbNone.IsChecked == true)
-            {
-                cfg.PageTurningPosition = "None";
-            }
-            else
-            {
-                cfg.PageTurningPosition = "Default";
-            }
+            cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
+            cfg.PageTurningTranslucent = PageTurningTranslucentCheckBox.IsChecked == true;
+            cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
+            cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
             return cfg;
         }
 
@@ -236,7 +228,10 @@ namespace PPTService
             QrCodeCheckBox.IsChecked = def.ShowQrCode;
             ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
-            RbDefault.IsChecked = true;
+            HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
+            PageTurningTranslucentCheckBox.IsChecked = def.PageTurningTranslucent;
+            ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
+            PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
         }
     }
 

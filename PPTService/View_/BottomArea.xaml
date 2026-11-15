@@ -32,9 +32,9 @@
         <Setter Property="Template">
           <Setter.Value>
             <ControlTemplate TargetType="{x:Type Slider}">
-              <Border Name="RootBorder" CornerRadius="30" Width="196" Height="60" Background="#EBEBED">
+              <Border Name="RootBorder" CornerRadius="30" Width="196" Height="60" Background="{DynamicResource Theme.SliderBackground}">
                 <Grid Name="ThumbGrid" Margin="6 5">
-                  <TextBlock Name="HintText" Margin="0 0 18 0" FontSize="18" Foreground="#989898" HorizontalAlignment="Right" VerticalAlignment="Center" Text="滑动清屏" />
+                  <TextBlock Name="HintText" Margin="0 0 10 0" FontSize="15" Foreground="{DynamicResource Theme.HintText}" HorizontalAlignment="Right" VerticalAlignment="Center" Text="滑动清除笔迹" />
                   <Track Name="PART_Track">
                     <Track.Thumb>
                       <Thumb Name="Thumb" Focusable="False">
@@ -152,7 +152,7 @@
         <ColumnDefinition Width="50" />
         <ColumnDefinition Width="50" />
       </Grid.ColumnDefinitions>
-      <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
+      <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
       <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.SettingsNormal}" PressedSource="{StaticResource ImageSource.SettingsPressed}" />
       <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
     </Grid>
@@ -165,7 +165,7 @@
         <ColumnDefinition Width="50" />
         <ColumnDefinition Width="50" />
       </Grid.ColumnDefinitions>
-      <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="#A0FFFFFF" BorderThickness="1" BorderBrush="#80666666" />
+      <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
       <CheckBox Name="SelectCheckBox" Grid.Column="0" IsChecked="True" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.SelectNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.SelectSelected}" Click="Select_OnClick" />
       <Button Name="PenButton" Grid.Column="1" Style="{StaticResource NormalButtonStyle}" Click="Pen_OnClick" PreviewMouseDown="PenButton_PreviewMouseDown">
         <ContentControl.Content>
@@ -243,7 +243,7 @@
                 <ScaleTransform ScaleX="0" ScaleY="0" />
               </TransformGroup>
             </UIElement.RenderTransform>
-            <Border Name="PenPopupRootBorder" Background="#E6FFFFFF" CornerRadius="4" Height="192" Width="280">
+            <Border Name="PenPopupRootBorder" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4" Height="192" Width="280">
               <StackPanel Name="PenPopupStackPanel" Orientation="Horizontal">
                 <UniformGrid Name="ThicknessGrid" Rows="3" Columns="1" VerticalAlignment="Center" Margin="32 0" RadioButton.Click="ThicknessRadioButton_OnClick">
                   <RadioButton Style="{StaticResource Style.ToggleButton.PenThickness}" pptService:ControlHelper.Geometry="{StaticResource Geometry.PenThickness.Light}" Tag="{x:Static pptService:PenSettings.PenLightWeight}" IsChecked="True" />
@@ -271,7 +271,7 @@
       <!-- 橡皮已选中时再次点击橡皮弹出（1:1 移植自桌面批注 DesktopEraserPopupBorder）：
            水平滑杆，拇指为 eraserthumb 图标，滑到底（≥0.8）清当前页。 -->
       <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
-        <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="#E6FFFFFF" CornerRadius="4">
+        <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4">
           <Slider Name="EraserSlide" Maximum="1" Style="{StaticResource Style.Slider.Eraser}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
           <UIElement.Effect>
             <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
@@ -281,7 +281,7 @@
     </Grid>
     <Grid Name="PlaceholderGrid" Column="3" Width="4" />
     <Grid Name="ExitGrid" Column="4" Width="50">
-      <pptService:ImageButton Click="Exit_OnClick" Background="#A0FFFFFF" BorderThickness="1" NormalSource="{StaticResource ImageSource.ExitNormal}" PressedSource="{StaticResource ImageSource.ExitSelected}" />
+      <pptService:ImageButton Click="Exit_OnClick" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.ExitNormal}" PressedSource="{StaticResource ImageSource.ExitSelected}" />
     </Grid>
   </Grid>
 </UserControl>

@@ -93,13 +93,13 @@
             </Grid.RowDefinitions>
             <Grid Name="PerchGrid" Row="0" Height="8" Background="#00FFFFFF" />
             <Grid Name="SlideIndexBackgroundGrid" Row="0" RowSpan="2" Height="13" Width="20" Margin="3 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="#A0666666" Fill="#FFFFFFFF" Stretch="Fill" />
+              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 2 0 0" Width="15" HorizontalAlignment="Left" VerticalAlignment="Top">
               <TextBlock Name="SlideTextBlock" FontSize="6" HorizontalAlignment="Center" Text="{Binding Index}" />
             </Grid>
-            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="#80666666">
-              <Grid Background="#FFFFFFFF">
+            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}">
+              <Grid Background="{DynamicResource Theme.SettingsControl}">
                 <Image Name="SlideImage" Stretch="Fill" Source="{Binding BitmapImage}" />
                 <Border Name="InnerSlideBorder" BorderThickness="1" BorderBrush="#FFFFFFFF" SnapsToDevicePixels="True" />
               </Grid>
@@ -140,13 +140,13 @@
             </Grid.RowDefinitions>
             <Grid Name="PerchGrid" Row="0" Height="15" Background="#00FFFFFF" />
             <Grid Name="SlideIndexBackgroundGrid" Row="0" RowSpan="2" Height="19" Width="40" Margin="3 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="#A0666666" Fill="#FFFFFFFF" Stretch="Fill" />
+              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 2 0 0" Width="30" HorizontalAlignment="Left" VerticalAlignment="Top">
               <TextBlock Name="SlideTextBlock" HorizontalAlignment="Center" Text="{Binding Index}" />
             </Grid>
-            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="#80666666">
-              <Grid Background="#FFFFFFFF">
+            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}">
+              <Grid Background="{DynamicResource Theme.SettingsControl}">
                 <Image Name="SlideImage" Stretch="Fill" Source="{Binding BitmapImage}" />
                 <Border Name="InnerSlideBorder" BorderThickness="1" BorderBrush="#FFFFFFFF" SnapsToDevicePixels="True" />
               </Grid>
@@ -187,13 +187,13 @@
             </Grid.RowDefinitions>
             <Grid Name="PerchGrid" Row="0" Height="25" Background="#00FFFFFF" />
             <Grid Name="SlideIndexBackgroundGrid" Row="0" RowSpan="2" Height="29" Width="60" Margin="3 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="#A0666666" Fill="#FFFFFFFF" Stretch="Fill" />
+              <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 1 0 0" Width="45" HorizontalAlignment="Left" VerticalAlignment="Top">
               <TextBlock Name="SlideTextBlock" FontSize="21" HorizontalAlignment="Center" Text="{Binding Index}" />
             </Grid>
-            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="#80666666" SnapsToDevicePixels="True">
-              <Grid Background="#FFFFFFFF">
+            <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}" SnapsToDevicePixels="True">
+              <Grid Background="{DynamicResource Theme.SettingsControl}">
                 <Image Name="SlideImage" Stretch="Fill" Source="{Binding BitmapImage}" />
                 <Border Name="InnerSlideBorder" BorderThickness="1" BorderBrush="#FFFFFFFF" SnapsToDevicePixels="True" />
               </Grid>

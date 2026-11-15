@@ -132,8 +132,9 @@ namespace PPTService
 		{
 			InitializeComponent();
 			DataContext = this;
-			// 笔设置面板关闭后把绘制焦点还给幻灯片（或板中板），避免关闭后再点一次才落笔。
-			ColorDiskPopup.Closed += ColorDiskPopup_OnClosed;
+			// 颜色盘与清屏滑杆一样完全交给 StaysOpen="False" 管理：
+			// 不在 Closed 里做 SetForegroundWindow 之类的抢焦点动作，否则点击窗口外
+			// 关闭面板的那一次鼠标按下会被吞掉，用户还得再点一次才能写第一笔。
 			// 滑动清屏滑杆任意方式关闭（失焦自动 / 手动 / 清屏完成）都收起真值标记，
 			// 让「再点橡皮」的 toggle 判断始终基于真实状态，不受 StaysOpen 时序影响。
 			EraserSliderPopup.Closed += (object s, EventArgs e) => { _eraserSliderOpen = false; };
@@ -343,12 +344,11 @@ namespace PPTService
 						// PptOperator.PointerColor（自实现批注下不可信，常为黑）覆盖。
 						PenBrush = new SolidColorBrush(brush.Color);
 					}
-					ColorDiskPopup.IsOpen = false;
+					// 与清屏滑杆一致：选完颜色保持面板打开，用户可以继续调粗细或换色；
+					// 也不做 SetForegroundWindow（抢焦点会吞掉「点击窗口外」的那一笔）。
 					return;
 				}
 				SetPenColor(radioButton.Background.ToString());
-				ColorDiskPopup.IsOpen = false;
-				BringSlideToForeground();
 			}
 		}
 
@@ -376,9 +376,8 @@ namespace PPTService
 			{
 				ViewHelper.InnerBoardWindow.SetPenThickness(thickness);
 			}
-			// 选完粗细即收起面板，并把焦点还给绘制目标，下一次点击直接落笔。
-			ColorDiskPopup.IsOpen = false;
-			BringSlideToForeground();
+			// 与选颜色一致：选完粗细保持面板打开，不做抢焦点动作，
+			// 用户点击窗口外的那一次鼠标按下即可直接落第一笔。
 		}
 
 		/// <summary>打开「滑动清屏」滑杆，并关闭其它工具栏弹窗。</summary>
@@ -476,13 +475,8 @@ namespace PPTService
 			(Resources["ShowColorDiskStoryBoard"] as Storyboard)?.Begin();
 		}
 
-		private void ColorDiskPopup_OnClosed(object sender, EventArgs e)
-		{
-			// 面板关闭后把绘制焦点还给幻灯片（或板中板），下一次点击直接落笔，无需再点一次获取焦点。
-			BringSlideToForeground();
-		}
-
-		/// <summary>将前台焦点交还给绘制目标：板中板打开时交还板中板窗口，否则交还放映窗口。</summary>
+		/// <summary>将前台焦点交还给绘制目标：板中板打开时交还板中板窗口，否则交还放映窗口。
+		/// 仅由「滑动清屏」完成后调用；颜色盘关闭时不要调用，否则会吞掉点击窗口外的第一笔。</summary>
 		private void BringSlideToForeground()
 		{
 			if (PptOperator.Instance == null || !PptOperator.Instance.IsShowing)
@@ -731,6 +725,26 @@ namespace PPTService
 				Owner = ViewHelper.MainWindow
 			};
 			settingsWindow.ShowDialog();
+		}
+
+		/// <summary>
+		/// 整体隐藏 / 显示「功能栏」——即中央可改位置的那部分（选择 / 画笔 / 橡皮 /
+		/// 放大镜 / 板中板及其背景、颜色盘、清屏滑杆）。左侧 ShareGrid（设置 + 二维码）
+		/// 与右侧 ExitGrid（结束放映）不受影响，始终保留，隐藏后仍可进设置改回来。
+		/// </summary>
+		public void ApplyFunctionBarVisibility(bool hide)
+		{
+			if (BottomCenterButtonGrid == null)
+			{
+				return;
+			}
+			if (hide)
+			{
+				// 收起挂在功能区内的两个弹窗，避免隐藏后残留 IsOpen 状态。
+				ColorDiskPopup.IsOpen = false;
+				EraserSliderPopup.IsOpen = false;
+			}
+			BottomCenterButtonGrid.Visibility = hide ? Visibility.Collapsed : Visibility.Visible;
 		}
 
 		/// <summary>

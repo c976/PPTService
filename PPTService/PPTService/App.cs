@@ -67,6 +67,8 @@ namespace PPTService
 		private void StartProcess()
 		{
 			AppPath.ClearTempFolder();
+			// 在任何窗口 XAML 解析之前建立主题画刷，保证 DynamicResource 首次就能取到配色。
+			ThemeManager.Apply(UserConfigManager.Load());
 			ConfigHelper.Instance = new ConfigHelper();
 			_pptOperator = new PptOperator();
 			PptOperator.Instance = _pptOperator;

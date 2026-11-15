@@ -51,6 +51,18 @@ namespace PPTService
 		/// </summary>
 		public bool ShowLoadingSpinner { get; set; }
 
+		/// <summary>
+		/// 界面主题：Light（默认，浅色）/ Dark（深色）/ System（跟随系统）。
+		/// 由 ThemeManager 解析并下发到 Application.Resources 的主题画刷。
+		/// </summary>
+		public string Theme { get; set; }
+
+		/// <summary>是否隐藏整个功能栏（笔 / 橡皮 / 放大镜 / 板中板等按钮区域）。默认 false。</summary>
+		public bool HideFunctionBar { get; set; }
+
+		/// <summary>翻页按钮是否使用半透明显示。true（默认）= 半透明底板；false = 不透明底板。</summary>
+		public bool PageTurningTranslucent { get; set; }
+
 		// 兼容旧版配置字段（Auto/Custom/Wps/Office），反序列化时忽略，不再使用。
         public string PageTurningMode { get; set; }
         public string WpsPageTurningPosition { get; set; }
@@ -64,6 +76,9 @@ namespace PPTService
 			ShowLoadingSpinner = true;
 			// 默认开启自实现批注（压感软笔 / 手势橡皮 / 板中板）。
 			UseSelfAnnotation = true;
+			Theme = ThemeManager.ThemeLight;
+			HideFunctionBar = false;
+			PageTurningTranslucent = true;
 		}
     }
 
@@ -114,6 +129,8 @@ namespace PPTService
 			{
 				cfg.PageTurningPosition = "Default";
 			}
+			// 规范化主题取值（旧配置文件可能没有该字段，保持构造函数里的浅色默认值）。
+			cfg.Theme = ThemeManager.Normalize(cfg.Theme);
                 // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
                 // 不写回 UserConfig.json，不影响正常启动。用户在设置里改过后以用户选择为准。
                 if (DebugMode.IsEnabled && !_annotationUserOverride)
@@ -140,7 +157,10 @@ namespace PPTService
 			ShowQrCode = true,
 			PageTurningPosition = "Default",
 			UseSelfAnnotation = true,
-			ShowLoadingSpinner = true
+			ShowLoadingSpinner = true,
+			Theme = ThemeManager.ThemeLight,
+			HideFunctionBar = false,
+			PageTurningTranslucent = true
 		};
         }
 
@@ -176,9 +196,12 @@ namespace PPTService
         public static void ApplyCurrent()
         {
             UserConfig cfg = Load();
+            // 主题画刷先刷新：设置窗口与其它界面重绘时立刻取到新配色。
+            ThemeManager.Apply(cfg);
             if (ViewHelper.BottomArea != null)
             {
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
+                ViewHelper.BottomArea.ApplyFunctionBarVisibility(cfg.HideFunctionBar);
             }
             AnnotationController.SetEnabled(cfg.UseSelfAnnotation);
             ViewHelper.MainWindow?.ApplyPageTurningLayout();

@@ -67,14 +67,14 @@
         <GoToStateAction StateName="Adaptive3800" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
       </pptService:AdaptiveTrigger>
     </i:Interaction.Triggers>
-    <pptService:ImageButton Click="Previous_Click" Grid.Row="0" Background="#A0FFFFFF" BorderThickness="1" NormalSource="{StaticResource ImageSource.PreviousSlideNormal}" PressedSource="{StaticResource ImageSource.PreviousSlideSelected}" />
+    <pptService:ImageButton Click="Previous_Click" Grid.Row="0" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.PreviousSlideNormal}" PressedSource="{StaticResource ImageSource.PreviousSlideSelected}" />
     <Grid Name="PlaceholderGrid" Row="1" Height="4" />
-    <pptService:ImageButton Click="Thumbnail_Click" Grid.Row="2" Background="#A0FFFFFF" BorderThickness="1">
+    <pptService:ImageButton Click="Thumbnail_Click" Grid.Row="2" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1">
       <ContentControl.Content>
-        <TextBlock Name="RightSlideIndexTextBlock" FontFamily="微软雅黑" Foreground="#666666" HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False" FocusVisualStyle="{x:Null}" />
+        <TextBlock Name="RightSlideIndexTextBlock" FontFamily="微软雅黑" Foreground="{DynamicResource Theme.PrimaryText}" HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False" FocusVisualStyle="{x:Null}" />
       </ContentControl.Content>
     </pptService:ImageButton>
     <Grid Name="PlaceholderGrid1" Row="3" Height="4" />
-    <pptService:ImageButton Click="Next_Click" Grid.Row="4" Background="#A0FFFFFF" BorderThickness="1" NormalSource="{StaticResource ImageSource.NextSlideNormal}" PressedSource="{StaticResource ImageSource.NextSlideSelected}" />
+    <pptService:ImageButton Click="Next_Click" Grid.Row="4" Background="{DynamicResource Theme.PageButtonBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.NextSlideNormal}" PressedSource="{StaticResource ImageSource.NextSlideSelected}" />
   </Grid>
 </UserControl>
