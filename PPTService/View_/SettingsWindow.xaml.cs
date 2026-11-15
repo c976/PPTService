@@ -13,8 +13,9 @@ namespace PPTService
     {
         private ObservableCollection<ToolbarItemVm> _items;
 
-        // 初始化 / 恢复默认时批量改控件值，期间不能触发「即时保存」。
-        private bool _loading;
+        // 初始化（含 XAML 解析时 Slider.ValueChanged）/ 恢复默认时批量改控件值，
+        // 期间不能触发「即时保存」。字段初始为 true，覆盖 InitializeComponent 阶段。
+        private bool _loading = true;
 
         private ToolbarItemVm _dragItem;
         private Point _dragStartPoint;
@@ -74,6 +75,26 @@ namespace PPTService
             SettingChanged(sender, e);
         }
 
+        /// <summary>
+        /// 透明度滑条：拖动过程中即时改写画刷，不重排工具栏 / 翻页按钮。
+        /// 只保存配置并刷新主题，避免每个 1% 步进都走一遍完整 ApplyCurrent。
+        /// </summary>
+        private void ToolbarOpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            int value = (int)Math.Round(ToolbarOpacitySlider.Value);
+            if (ToolbarOpacityValueTextBlock != null)
+            {
+                ToolbarOpacityValueTextBlock.Text = value + "%";
+            }
+            if (_loading)
+            {
+                return;
+            }
+            UserConfig cfg = BuildConfig();
+            UserConfigManager.Save(cfg);
+            ThemeManager.Apply(cfg);
+        }
+
         /// <summary>任何改动立即写入配置并应用到运行中的界面，无需「确定 / 应用」。</summary>
         private void SaveAndApply()
         {
@@ -98,6 +119,8 @@ namespace PPTService
             AutoFadePageButtonsCheckBox.IsChecked = cfg.AutoFadePageButtons;
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
+            ToolbarOpacitySlider.Value = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
+            ToolbarOpacityValueTextBlock.Text = (int)ToolbarOpacitySlider.Value + "%";
         }
 
         private static string ToolbarName(string id)
@@ -304,6 +327,8 @@ namespace PPTService
             cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
             cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
             cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
+            cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(
+                (int)Math.Round(ToolbarOpacitySlider.Value));
             return cfg;
         }
 
@@ -325,6 +350,8 @@ namespace PPTService
                 AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
                 ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
                 PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
+                ToolbarOpacitySlider.Value = def.ToolbarOpacity;
+                ToolbarOpacityValueTextBlock.Text = def.ToolbarOpacity + "%";
             }
             finally
             {

@@ -10,7 +10,7 @@
   <!-- 原生按钮 / 下拉框 / 复选框的背景与边框保持系统默认配色；
        只把文字前景接到主题，保证深色下可读。所有改动即时生效，无需确定 / 应用。 -->
   <Grid>
-    <Border Width="480" Height="580" Background="{DynamicResource Theme.SettingsBackground}" CornerRadius="10"
+    <Border Width="480" Height="612" Background="{DynamicResource Theme.SettingsBackground}" CornerRadius="10"
             BorderBrush="{DynamicResource Theme.BorderBrush}" BorderThickness="1"
             HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True">
       <Grid Margin="14">
@@ -101,6 +101,7 @@
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Grid.Column="0" Text="界面主题：" VerticalAlignment="Center" Margin="2,3,8,3"
                        Foreground="{DynamicResource Theme.SettingsForeground}" />
@@ -117,7 +118,22 @@
               <ComboBoxItem Content="侧边" Tag="Both" />
               <ComboBoxItem Content="不显示" Tag="None" />
             </ComboBox>
-            <CheckBox Name="AutoFadePageButtonsCheckBox" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="工具栏透明度：" VerticalAlignment="Center" Margin="2,3,8,3"
+                       Foreground="{DynamicResource Theme.SettingsForeground}" />
+            <Grid Grid.Row="2" Grid.Column="1" Margin="2,2">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Slider Name="ToolbarOpacitySlider" Grid.Column="0" Minimum="20" Maximum="100"
+                      SmallChange="1" LargeChange="5" TickFrequency="1" IsSnapToTickEnabled="True"
+                      Value="70" VerticalAlignment="Center" Margin="0,0,8,0"
+                      ValueChanged="ToolbarOpacitySlider_ValueChanged" />
+              <TextBlock Name="ToolbarOpacityValueTextBlock" Grid.Column="1" Width="38" Text="70%"
+                         VerticalAlignment="Center" HorizontalAlignment="Right"
+                         Foreground="{DynamicResource Theme.SettingsForeground}" />
+            </Grid>
+            <CheckBox Name="AutoFadePageButtonsCheckBox" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                       Content="翻页按钮自动淡化（一段时间未点击后淡出）" Margin="2,5,2,2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
           </Grid>

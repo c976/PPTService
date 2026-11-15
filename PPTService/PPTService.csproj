@@ -130,6 +130,15 @@
       <Project>{7C1E9A44-3B62-4D18-9E57-2A6F0D8C5B31}</Project>
       <Name>PPTService.Ink</Name>
     </ProjectReference>
+    <!-- 守护进程独立 WinExe：只建立构建顺序依赖，保证单独编译 PPTService 时也会先编出
+         PPTService.Defender.exe。它的 OutputPath 已指向主项目 bin\Release，
+         不作为程序集引用、也不再复制输出，避免源/目标同路径的复制冲突。 -->
+    <ProjectReference Include="..\PPTService.Defender\PPTService.Defender.csproj">
+      <Project>{9C2B4E1A-7D35-4F8B-9C6E-1A2B3C4D5E6F}</Project>
+      <Name>PPTService.Defender</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LinqToVisualTree\EnumerableTreeExtensions.cs" />

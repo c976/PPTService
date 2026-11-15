@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService", "PPTService\PPTService.csproj", "{99047B2A-FF82-512F-AAF9-EF96B9ABD6A6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9C2B4E1A-7D35-4F8B-9C6E-1A2B3C4D5E6F} = {9C2B4E1A-7D35-4F8B-9C6E-1A2B3C4D5E6F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPTService.Core", "PPTService.Core\PPTService.Core.csproj", "{B6E1C4D2-7A35-4F89-9C10-3D5E8A2F1B74}"
 EndProject

@@ -21,6 +21,21 @@ namespace PPTService
     /// </summary>
     public class UserConfig
     {
+        /// <summary>工具栏背景不透明度允许的最小值（百分比）。</summary>
+        public const int MinToolbarOpacity = 20;
+
+        /// <summary>工具栏背景不透明度允许的最大值（百分比）。</summary>
+        public const int MaxToolbarOpacity = 100;
+
+        /// <summary>工具栏背景不透明度默认值（百分比）。</summary>
+        public const int DefaultToolbarOpacity = 70;
+
+        /// <summary>
+        /// 工具栏相关半透明底板（工具栏面板 / 退出按钮 / 翻页按钮 / 颜色盘与清屏滑杆弹窗等）
+        /// 统一使用的不透明度，百分比 20–100，默认 70。由 ThemeManager 换算成画刷 alpha。
+        /// </summary>
+        public int ToolbarOpacity { get; set; }
+
         /// <summary>
         /// 工具栏中央功能按钮列表，顺序即显示顺序；Visible 控制显隐。
         /// 仅包含这 5 个功能按钮：Select / Pen / Rubber / Magnifier / InnerBoard（板中板）。
@@ -67,6 +82,14 @@ namespace PPTService
 		/// </summary>
 		public bool AutoFadePageButtons { get; set; }
 
+        /// <summary>把配置里的透明度规范到 20–100；旧配置缺字段或值非法时回落到默认 70。</summary>
+        public static int NormalizeToolbarOpacity(int value)
+        {
+            return (value < MinToolbarOpacity || value > MaxToolbarOpacity)
+                ? DefaultToolbarOpacity
+                : value;
+        }
+
         // 兼容旧版配置字段，反序列化时忽略，不再使用。
         public string PageTurningMode { get; set; }
         public string WpsPageTurningPosition { get; set; }
@@ -84,6 +107,7 @@ namespace PPTService
 			Theme = ThemeManager.ThemeLight;
 			HideFunctionBar = false;
 			AutoFadePageButtons = true;
+			ToolbarOpacity = DefaultToolbarOpacity;
 		}
     }
 
@@ -140,6 +164,8 @@ namespace PPTService
 			}
 			// 规范化主题取值（旧配置文件可能没有该字段，保持构造函数里的浅色默认值）。
 			cfg.Theme = ThemeManager.Normalize(cfg.Theme);
+			// 旧配置文件没有透明度字段时保持构造函数里的 70；越界值回落到 70。
+			cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
                 // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
                 // 不写回 UserConfig.json，不影响正常启动。用户在设置里改过后以用户选择为准。
                 if (DebugMode.IsEnabled && !_annotationUserOverride)
@@ -169,7 +195,8 @@ namespace PPTService
 			ShowLoadingSpinner = true,
 			Theme = ThemeManager.ThemeLight,
 			HideFunctionBar = false,
-			AutoFadePageButtons = true
+			AutoFadePageButtons = true,
+			ToolbarOpacity = UserConfig.DefaultToolbarOpacity
 		};
         }
 

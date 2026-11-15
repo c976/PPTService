@@ -13,6 +13,10 @@ namespace PPTService
 	/// 按用户定版要求：**WPF 原生按钮 / 下拉框 / 复选框等控件一律保持系统默认配色**，
 	/// 不覆盖 SystemColors，也不给它们套主题画刷；板中板白板画布恒为白色。
 	///
+	/// 工具栏相关的半透明底板（PanelBackground / PopupBackground / PageButtonBackground）
+	/// 统一使用用户设置的「工具栏透明度」（20–100%，默认 70%），只改变画刷 alpha，
+	/// RGB 仍由明暗主题决定；设置窗口底板、二维码遮罩、滑杆轨道、白板画布不参与。
+	///
 	/// 切换主题时替换画刷对象（ResourceDictionary 会冻结放进去的 Freezable，
 	/// 不能直接改已冻结画刷的 Color），并重新挂载资源字典以触发 ResourcesChanged，
 	/// 让所有 {DynamicResource Theme.*}（含 DrawingImage 里的图标画刷）即时刷新。
@@ -40,12 +44,13 @@ namespace PPTService
 			"Theme.SettingsControl",        // 缩略图底板 / 放大镜按钮条
 			"Theme.SettingsMutedText",      // 说明性文字
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
-			"Theme.PageButtonBackground",   // 翻页按钮底板（固定半透明）
+			"Theme.PageButtonBackground",   // 翻页按钮底板（跟随工具栏透明度）
 			"Theme.IconBrush"               // 工具栏矢量图标：浅色深灰 / 深色浅灰
 		};
 
 		private static ResourceDictionary _brushes;
 		private static string _theme = ThemeLight;
+		private static int _toolbarOpacity = UserConfig.DefaultToolbarOpacity;
 		private static bool _systemEventsHooked;
 
 		public static string Normalize(string theme)
@@ -57,15 +62,22 @@ namespace PPTService
 			return ThemeLight;
 		}
 
-		/// <summary>按当前用户配置应用主题（启动时与设置「应用 / 确定」时调用）。</summary>
+		/// <summary>按当前用户配置应用主题与工具栏透明度（启动时、设置改动时调用）。</summary>
 		public static void Apply(UserConfig cfg)
 		{
-			Apply(cfg == null ? ThemeLight : cfg.Theme);
+			Apply(cfg == null ? ThemeLight : cfg.Theme,
+				cfg == null ? UserConfig.DefaultToolbarOpacity : cfg.ToolbarOpacity);
 		}
 
 		public static void Apply(string theme)
 		{
+			Apply(theme, UserConfig.DefaultToolbarOpacity);
+		}
+
+		public static void Apply(string theme, int toolbarOpacity)
+		{
 			_theme = Normalize(theme);
+			_toolbarOpacity = UserConfig.NormalizeToolbarOpacity(toolbarOpacity);
 			HookSystemEvents();
 			Refresh();
 		}
@@ -111,6 +123,8 @@ namespace PPTService
 			}
 			EnsureDictionary();
 			bool dark = IsDark(_theme);
+			// 工具栏相关底板统一使用同一个 alpha；RGB 仍随明暗主题变化。
+			byte panelAlpha = (byte)Math.Round(_toolbarOpacity * 255.0 / 100.0);
 			// 图标里以 <SolidColorBrush Color="#FF666666"> 形式写的深灰（带 Transform，
 			// 不便改成 Brush 属性）用 Color 级资源跟随主题。
 			app.Resources["Theme.IconColor"] = dark
@@ -118,8 +132,8 @@ namespace PPTService
 				: Color.FromRgb(0x66, 0x66, 0x66);
 			if (dark)
 			{
-				Set("Theme.PanelBackground", 0xCC, 0x2B, 0x2B, 0x31);
-				Set("Theme.PopupBackground", 0xF2, 0x2B, 0x2B, 0x31);
+				Set("Theme.PanelBackground", panelAlpha, 0x2B, 0x2B, 0x31);
+				Set("Theme.PopupBackground", panelAlpha, 0x2B, 0x2B, 0x31);
 				Set("Theme.SliderBackground", 0xFF, 0x4A, 0x4A, 0x52);
 				Set("Theme.PrimaryText", 0xFF, 0xEC, 0xEC, 0xEC);
 				Set("Theme.HintText", 0xFF, 0xB4, 0xB4, 0xB4);
@@ -129,13 +143,13 @@ namespace PPTService
 				Set("Theme.SettingsControl", 0xFF, 0x35, 0x35, 0x3C);
 				Set("Theme.SettingsMutedText", 0xFF, 0xA8, 0xA8, 0xA8);
 				Set("Theme.MaskBackground", 0xB3, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", 0xA0, 0x2B, 0x2B, 0x31);
+				Set("Theme.PageButtonBackground", panelAlpha, 0x2B, 0x2B, 0x31);
 				Set("Theme.IconBrush", 0xFF, 0xD8, 0xD8, 0xD8);
 			}
 			else
 			{
-				Set("Theme.PanelBackground", 0xA0, 0xFF, 0xFF, 0xFF);
-				Set("Theme.PopupBackground", 0xE6, 0xFF, 0xFF, 0xFF);
+				Set("Theme.PanelBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
+				Set("Theme.PopupBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
 				Set("Theme.SliderBackground", 0xFF, 0xEB, 0xEB, 0xED);
 				Set("Theme.PrimaryText", 0xFF, 0x66, 0x66, 0x66);
 				Set("Theme.HintText", 0xFF, 0x98, 0x98, 0x98);
@@ -145,7 +159,7 @@ namespace PPTService
 				Set("Theme.SettingsControl", 0xFF, 0xF7, 0xF7, 0xF7);
 				Set("Theme.SettingsMutedText", 0xFF, 0x80, 0x80, 0x80);
 				Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", 0xA0, 0xFF, 0xFF, 0xFF);
+				Set("Theme.PageButtonBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
 				Set("Theme.IconBrush", 0xFF, 0x66, 0x66, 0x66);
 			}
 			// 只替换字典里的画刷对象不会让「已解析」的 DynamicResource 重新查找。
