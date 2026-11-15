@@ -50,7 +50,8 @@ SetCompressorDictSize 32
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 UninstallCaption "$(STR_AppName) 卸载"
 BrandingText "${PRODUCT_PUBLISHER}"
-OutFile "${__FILEDIR__}\PPTServiceUltraSetup.exe"
+; 输出文件名带产品版本号，便于区分每次构建（PRODUCT_VERSION 来自 Version.nsh）
+OutFile "${__FILEDIR__}\PPTServiceUltraSetup_${PRODUCT_VERSION}.exe"
 Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
 UninstallIcon "${__FILEDIR__}\Skin\Icons\Uninstall.ico"
 
@@ -68,7 +69,7 @@ VIAddVersionKey /LANG=2052 "FileVersion"      "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=2052 "ProductVersion"   "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=2052 "LegalCopyright"   "Copyright (C) The PPTServiceUltra Project."
 VIAddVersionKey /LANG=2052 "LegalTrademarks"  "${PRODUCT_PUBLISHER}"
-VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceUltraSetup.exe"
+VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceUltraSetup_${PRODUCT_VERSION}.exe"
 
 ; -----------------------------------------------------------------------------
 ;  MUI 现代界面（卸载部分使用）

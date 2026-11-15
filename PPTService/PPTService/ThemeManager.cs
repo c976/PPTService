@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.Win32;
@@ -123,8 +123,8 @@ namespace PPTService
 			}
 			EnsureDictionary();
 			bool dark = IsDark(_theme);
-			// 工具栏相关底板统一使用同一个 alpha；RGB 仍随明暗主题变化。
-			byte panelAlpha = (byte)Math.Round(_toolbarOpacity * 255.0 / 100.0);
+			// 工具栏相关底板统一使用同一个 alpha（RGB 仍随明暗主题变化）；
+			// 只有「背景」画刷读取工具栏透明度，文字 / 图标一律由 SetContent 固定 0xFF。
 			// 图标里以 <SolidColorBrush Color="#FF666666"> 形式写的深灰（带 Transform，
 			// 不便改成 Brush 属性）用 Color 级资源跟随主题。
 			app.Resources["Theme.IconColor"] = dark
@@ -132,35 +132,35 @@ namespace PPTService
 				: Color.FromRgb(0x66, 0x66, 0x66);
 			if (dark)
 			{
-				Set("Theme.PanelBackground", panelAlpha, 0x2B, 0x2B, 0x31);
-				Set("Theme.PopupBackground", panelAlpha, 0x2B, 0x2B, 0x31);
-				Set("Theme.SliderBackground", 0xFF, 0x4A, 0x4A, 0x52);
-				Set("Theme.PrimaryText", 0xFF, 0xEC, 0xEC, 0xEC);
-				Set("Theme.HintText", 0xFF, 0xB4, 0xB4, 0xB4);
+				SetBackground("Theme.PanelBackground", 0x2B, 0x2B, 0x31);
+				SetBackground("Theme.PopupBackground", 0x2B, 0x2B, 0x31);
+				SetContent("Theme.SliderBackground", 0x4A, 0x4A, 0x52);
+				SetContent("Theme.PrimaryText", 0xEC, 0xEC, 0xEC);
+				SetContent("Theme.HintText", 0xB4, 0xB4, 0xB4);
 				Set("Theme.BorderBrush", 0x80, 0xB0, 0xB0, 0xB0);
-				Set("Theme.SettingsBackground", 0xFF, 0x23, 0x23, 0x28);
-				Set("Theme.SettingsForeground", 0xFF, 0xF0, 0xF0, 0xF0);
-				Set("Theme.SettingsControl", 0xFF, 0x35, 0x35, 0x3C);
-				Set("Theme.SettingsMutedText", 0xFF, 0xA8, 0xA8, 0xA8);
+				SetContent("Theme.SettingsBackground", 0x23, 0x23, 0x28);
+				SetContent("Theme.SettingsForeground", 0xF0, 0xF0, 0xF0);
+				SetContent("Theme.SettingsControl", 0x35, 0x35, 0x3C);
+				SetContent("Theme.SettingsMutedText", 0xA8, 0xA8, 0xA8);
 				Set("Theme.MaskBackground", 0xB3, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", panelAlpha, 0x2B, 0x2B, 0x31);
-				Set("Theme.IconBrush", 0xFF, 0xD8, 0xD8, 0xD8);
+				SetBackground("Theme.PageButtonBackground", 0x2B, 0x2B, 0x31);
+				SetContent("Theme.IconBrush", 0xD8, 0xD8, 0xD8);
 			}
 			else
 			{
-				Set("Theme.PanelBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
-				Set("Theme.PopupBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
-				Set("Theme.SliderBackground", 0xFF, 0xEB, 0xEB, 0xED);
-				Set("Theme.PrimaryText", 0xFF, 0x66, 0x66, 0x66);
-				Set("Theme.HintText", 0xFF, 0x98, 0x98, 0x98);
+				SetBackground("Theme.PanelBackground", 0xFF, 0xFF, 0xFF);
+				SetBackground("Theme.PopupBackground", 0xFF, 0xFF, 0xFF);
+				SetContent("Theme.SliderBackground", 0xEB, 0xEB, 0xED);
+				SetContent("Theme.PrimaryText", 0x66, 0x66, 0x66);
+				SetContent("Theme.HintText", 0x98, 0x98, 0x98);
 				Set("Theme.BorderBrush", 0x80, 0x66, 0x66, 0x66);
-				Set("Theme.SettingsBackground", 0xFF, 0xFF, 0xFF, 0xFF);
-				Set("Theme.SettingsForeground", 0xFF, 0x1A, 0x1A, 0x1A);
-				Set("Theme.SettingsControl", 0xFF, 0xF7, 0xF7, 0xF7);
-				Set("Theme.SettingsMutedText", 0xFF, 0x80, 0x80, 0x80);
+				SetContent("Theme.SettingsBackground", 0xFF, 0xFF, 0xFF);
+				SetContent("Theme.SettingsForeground", 0x1A, 0x1A, 0x1A);
+				SetContent("Theme.SettingsControl", 0xF7, 0xF7, 0xF7);
+				SetContent("Theme.SettingsMutedText", 0x80, 0x80, 0x80);
 				Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", panelAlpha, 0xFF, 0xFF, 0xFF);
-				Set("Theme.IconBrush", 0xFF, 0x66, 0x66, 0x66);
+				SetBackground("Theme.PageButtonBackground", 0xFF, 0xFF, 0xFF);
+				SetContent("Theme.IconBrush", 0x66, 0x66, 0x66);
 			}
 			// 只替换字典里的画刷对象不会让「已解析」的 DynamicResource 重新查找。
 			// 移出再挂回同一个字典可触发 ResourcesChanged，让所有引用（含设置窗口
@@ -182,6 +182,24 @@ namespace PPTService
 				// 不会因为 DynamicResource 取到透明画刷而「看不见」。
 				_brushes[key] = new SolidColorBrush(Colors.White);
 			}
+		}
+
+		/// <summary>工具栏背景不透明度换算成画刷 alpha（20–100% → 51–255）。</summary>
+		private static byte BackgroundAlpha()
+		{
+			return (byte)Math.Round(UserConfig.NormalizeToolbarOpacity(_toolbarOpacity) * 255.0 / 100.0);
+		}
+
+		/// <summary>背景画刷：alpha 只由工具栏透明度决定，不影响文字与图标。</summary>
+		private static void SetBackground(string key, byte r, byte g, byte b)
+		{
+			Set(key, BackgroundAlpha(), r, g, b);
+		}
+
+		/// <summary>文字 / 图标画刷：alpha 恒为 0xFF，永远不随背景透明度变化。</summary>
+		private static void SetContent(string key, byte r, byte g, byte b)
+		{
+			Set(key, 0xFF, r, g, b);
 		}
 
 		private static void Set(string key, byte a, byte r, byte g, byte b)

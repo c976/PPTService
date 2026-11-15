@@ -1,0 +1,175 @@
+name: Release PPTService
+
+# 发布工作流只能从 GitHub Actions 页面手动运行（Run workflow），不会在 push 后自动触发。
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: '发布版本号 / tag（留空则使用编译时生成的 PRODUCT_VERSION）'
+        required: false
+        default: ''
+
+# 创建 Release 需要写权限
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+    # Release 说明需要完整提交历史与所有 tag，必须是 fetch-depth: 0
+    - name: Checkout repository (full history + tags)
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    # 修复 .NET Framework 4.5 引用程序集缺失 (解决 MSB3644 错误)
+    - name: Inject .NET Framework 4.5 Reference Assemblies
+      shell: pwsh
+      run: |
+        $net45SdkUrl = 'https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3'
+        $sdkSystemPath = 'C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework'
+        $tempZip = Join-Path $env:TEMP 'net45sdk.zip'
+        $tempExtract = Join-Path $env:TEMP 'net45sdk'
+
+        Write-Host "Downloading .NET 4.5 Reference Assemblies..."
+        Invoke-WebRequest -Uri $net45SdkUrl -OutFile $tempZip
+
+        Write-Host "Extracting..."
+        Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+
+        Write-Host "Moving to system directory..."
+        $v45Path = Join-Path $sdkSystemPath 'v4.5'
+        if (Test-Path $v45Path) {
+            Remove-Item -Path $v45Path -Recurse -Force
+        }
+
+        $sourcePath = Join-Path $tempExtract 'build\.NETFramework\v4.5'
+        Move-Item -Path $sourcePath -Destination $sdkSystemPath -Force
+        Write-Host "Successfully injected .NET 4.5 Reference Assemblies."
+
+    - name: Build solution (Release)
+      run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /m /verbosity:minimal
+
+    # 安装 NSIS 3.11 完整版，并覆盖 log 补丁包（makensis.exe / zlib1.dll / Stubs 均为 log 构建）
+    # 注意：SourceForge 下载必须用 curl.exe（Invoke-WebRequest 会拿到 HTML 而非 zip）
+    - name: Install NSIS 3.11 (log build)
+      shell: pwsh
+      run: |
+        $nsisRoot = Join-Path $env:RUNNER_TEMP 'nsis-3.11'
+        $fullZip   = Join-Path $env:RUNNER_TEMP 'nsis-3.11.zip'
+        $logZip    = Join-Path $env:RUNNER_TEMP 'nsis-3.11-log.zip'
+
+        curl.exe -L --retry 3 -o $fullZip "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11.zip"
+        curl.exe -L --retry 3 -o $logZip  "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11-log.zip"
+
+        Expand-Archive -Path $fullZip -DestinationPath $env:RUNNER_TEMP -Force
+        Expand-Archive -Path $logZip -DestinationPath $nsisRoot -Force
+
+        Add-Content $env:GITHUB_PATH "$nsisRoot\Bin"
+        Write-Host "NSIS installed at $nsisRoot\Bin"
+
+    - name: Run build.cmd (NSIS)
+      shell: cmd
+      run: |
+        cd setup
+        call build.cmd
+
+    # 手动填写的 tag 优先，否则用编译生成的 PRODUCT_VERSION；安装包文件名带版本号，用通配符定位。
+    - name: Resolve release tag and installer
+      id: release_info
+      env:
+        RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
+      shell: pwsh
+      run: |
+        $versionFile = './setup/Version.nsh'
+        if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTService.nsi' }
+        $content = Get-Content -Path $versionFile -Raw
+        if ($content -match '(?m)^\s*!define\s+PRODUCT_VERSION\s+"([^"]+)"') {
+          $version = $Matches[1]
+        } else {
+          throw "Cannot find PRODUCT_VERSION in $versionFile"
+        }
+        $inputTag = $env:RELEASE_TAG_INPUT
+        if ([string]::IsNullOrWhiteSpace($inputTag)) { $tag = $version } else { $tag = $inputTag.Trim() }
+
+        $asset = Get-ChildItem -Path './setup' -Filter 'PPTServiceUltraSetup_*.exe' |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+        if (-not $asset) { throw 'Installer not found (setup/PPTServiceUltraSetup_*.exe)' }
+
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "asset=$asset"
+        Write-Host "Release tag: $tag"
+        Write-Host "Installer:   $asset"
+
+    # Release 正文：自「上一次发布的 Release」以来的所有提交，每行 "- 提交信息"。
+    # git 的 %s 只取 subject（首行），多行提交信息天然只保留第一行。
+    - name: Build release notes from commits since last release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+      shell: pwsh
+      run: |
+        # 下面几个 gh / git 命令「找不到」是正常分支，靠 $LASTEXITCODE 判断，
+        # 不能被 GitHub pwsh 默认的「原生命令出错即终止」打断。
+        $ErrorActionPreference = 'Continue'
+        $PSNativeCommandUseErrorActionPreference = $false
+
+        $repo = $env:GITHUB_REPOSITORY
+        $tag  = $env:RELEASE_TAG
+
+        # GitHub API 按创建时间倒序返回 Release；排除草稿与本次要发布的 tag 本身。
+        $published = @()
+        $raw = gh api "repos/$repo/releases?per_page=100" --jq '.[] | select(.draft == false) | .tag_name' 2>$null
+        if ($LASTEXITCODE -eq 0 -and $raw) { $published = @($raw) }
+
+        $base = $null
+        foreach ($t in $published) {
+          $t = ([string]$t).Trim()
+          if (-not $t -or $t -eq $tag) { continue }
+          git rev-parse -q --verify "refs/tags/$t" 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) { $base = $t; break }
+        }
+
+        if ($base) {
+          Write-Host "Previous release: $base"
+          $lines = git log "$base..HEAD" '--pretty=format:- %s'
+        } else {
+          Write-Host "No previous release found - listing all commits"
+          $lines = git log '--pretty=format:- %s'
+        }
+        $notes = (@($lines) | Where-Object { $_ }) -join "`n"
+        if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "- $tag" }
+
+        Set-Content -Path './release-notes.md' -Value $notes -Encoding utf8
+        Write-Host '----- release notes -----'
+        Write-Host $notes
+
+    - name: Publish release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+        RELEASE_ASSET: ${{ steps.release_info.outputs.asset }}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Continue'
+        $PSNativeCommandUseErrorActionPreference = $false
+
+        $tag       = $env:RELEASE_TAG
+        $asset     = $env:RELEASE_ASSET
+        $notesFile = './release-notes.md'
+
+        $null = gh release view $tag --json tagName 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "Release $tag already exists - replacing asset and notes."
+          gh release upload $tag $asset --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          gh release edit $tag --notes-file $notesFile
+        } else {
+          gh release create $tag $asset --title "PPTServiceUltra $tag" --notes-file $notesFile --latest
+        }
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
