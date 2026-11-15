@@ -15,6 +15,12 @@ namespace PPTService
         private ToolbarItemVm _dragItem;
         private Point _dragStartPoint;
 
+        // 触控拖动排序：WPF 的 OLE 拖放（DragDrop.DoDragDrop）在触摸下不可靠，
+        // 触摸路径改为直接按触点命中的行重排集合，不经过拖放。
+        private bool _touchDragging;
+        private ToolbarItemVm _touchDragItem;
+        private Point _touchStartPoint;
+
         // 下拉框用「索引 <-> 配置值」映射，避免 SelectedValuePath 在内联 ComboBoxItem
         // 上偶发匹配不到、导致保存时把用户设置重置成默认值。
         private static readonly string[] ThemeValues = { "Light", "Dark", "System" };
@@ -51,7 +57,7 @@ namespace PPTService
             ShowLoadingCheckBox.IsChecked = cfg.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
             HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
-            PageTurningTranslucentCheckBox.IsChecked = cfg.PageTurningTranslucent;
+            AutoFadePageButtonsCheckBox.IsChecked = cfg.AutoFadePageButtons;
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
         }
@@ -97,10 +103,14 @@ namespace PPTService
             }
         }
 
-        #region 拖拽排序
+        #region 鼠标拖拽排序
 
         private void ToolbarListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (_touchDragging)
+            {
+                return;
+            }
             if (IsInteractiveChild(e.OriginalSource as DependencyObject))
             {
                 return;
@@ -111,7 +121,7 @@ namespace PPTService
 
         private void ToolbarListBox_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (_dragItem == null)
+            if (_touchDragging || _dragItem == null)
             {
                 return;
             }
@@ -150,6 +160,66 @@ namespace PPTService
             e.Handled = true;
         }
 
+        #endregion
+
+        #region 触控拖动排序
+
+        private void ToolbarListBox_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            if (IsInteractiveChild(e.OriginalSource as DependencyObject))
+            {
+                _touchDragItem = null;
+                return;
+            }
+            _touchDragItem = GetItemFromSource(e.OriginalSource) ?? (ToolbarListBox.SelectedItem as ToolbarItemVm);
+            _touchStartPoint = e.GetTouchPoint(ToolbarListBox).Position;
+            _touchDragging = _touchDragItem != null;
+        }
+
+        private void ToolbarListBox_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            if (!_touchDragging || _touchDragItem == null)
+            {
+                return;
+            }
+            Point pos = e.GetTouchPoint(ToolbarListBox).Position;
+            if (Math.Abs(pos.Y - _touchStartPoint.Y) < 10)
+            {
+                return;
+            }
+            ToolbarItemVm target = null;
+            VisualTreeHelper.HitTest(ToolbarListBox, null, delegate (HitTestResult result)
+            {
+                DependencyObject dep = result.VisualHit;
+                while (dep != null && !(dep is ListBoxItem))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+                target = (dep as ListBoxItem)?.DataContext as ToolbarItemVm;
+                return HitTestResultBehavior.Stop;
+            }, new PointHitTestParameters(pos));
+            if (target != null && target != _touchDragItem)
+            {
+                int oldIndex = _items.IndexOf(_touchDragItem);
+                int newIndex = _items.IndexOf(target);
+                if (oldIndex >= 0 && newIndex >= 0)
+                {
+                    _items.Move(oldIndex, newIndex);
+                    // 更新基准点，允许一次长按拖动连续跨多行。
+                    _touchStartPoint = pos;
+                }
+            }
+            e.Handled = true;
+        }
+
+        private void ToolbarListBox_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            _touchDragItem = null;
+            _touchDragging = false;
+        }
+
+        #endregion
+
         private ToolbarItemVm GetItemFromSource(object originalSource)
         {
             DependencyObject dep = originalSource as DependencyObject;
@@ -178,8 +248,6 @@ namespace PPTService
             return false;
         }
 
-        #endregion
-
         private UserConfig BuildConfig()
         {
             UserConfig cfg = new UserConfig();
@@ -191,7 +259,7 @@ namespace PPTService
             cfg.ShowLoadingSpinner = ShowLoadingCheckBox.IsChecked == true;
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
             cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
-            cfg.PageTurningTranslucent = PageTurningTranslucentCheckBox.IsChecked == true;
+            cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
             cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
             cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
             return cfg;
@@ -229,7 +297,7 @@ namespace PPTService
             ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
             HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
-            PageTurningTranslucentCheckBox.IsChecked = def.PageTurningTranslucent;
+            AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
         }

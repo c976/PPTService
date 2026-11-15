@@ -60,13 +60,18 @@ namespace PPTService
 		/// <summary>是否隐藏整个功能栏（笔 / 橡皮 / 放大镜 / 板中板等按钮区域）。默认 false。</summary>
 		public bool HideFunctionBar { get; set; }
 
-		/// <summary>翻页按钮是否使用半透明显示。true（默认）= 半透明底板；false = 不透明底板。</summary>
-		public bool PageTurningTranslucent { get; set; }
+		/// <summary>
+		/// 放映中翻页按钮是否「自动淡化」：一段时间（约 7 秒）没有点击翻页按钮后，
+		/// 左右/底部翻页按钮淡出到 0.3 透明度，直到用户再次点击才恢复不透明。
+		/// true（默认）= 沿用原版自动淡化；false = 始终保持不透明。
+		/// </summary>
+		public bool AutoFadePageButtons { get; set; }
 
-		// 兼容旧版配置字段（Auto/Custom/Wps/Office），反序列化时忽略，不再使用。
+        // 兼容旧版配置字段，反序列化时忽略，不再使用。
         public string PageTurningMode { get; set; }
         public string WpsPageTurningPosition { get; set; }
         public string OfficePageTurningPosition { get; set; }
+        public bool PageTurningTranslucent { get; set; }
 
 		public UserConfig()
 		{
@@ -78,7 +83,7 @@ namespace PPTService
 			UseSelfAnnotation = true;
 			Theme = ThemeManager.ThemeLight;
 			HideFunctionBar = false;
-			PageTurningTranslucent = true;
+			AutoFadePageButtons = true;
 		}
     }
 
@@ -160,7 +165,7 @@ namespace PPTService
 			ShowLoadingSpinner = true,
 			Theme = ThemeManager.ThemeLight,
 			HideFunctionBar = false,
-			PageTurningTranslucent = true
+			AutoFadePageButtons = true
 		};
         }
 

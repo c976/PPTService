@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
@@ -282,6 +282,7 @@ namespace PPTService
 
 		private void Magnifier_Click(object sender, RoutedEventArgs e)
 		{
+			CloseToolPopups();
 			PlayHiddenAllAreaStoryBoard();
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionMagnifier);
 		}
@@ -708,6 +709,7 @@ namespace PPTService
 
 		private void Share_OnClick(object sender, RoutedEventArgs e)
 		{
+			CloseToolPopups();
 			// 模拟放映没有真实 PPT 文件，避免触发二维码上传逻辑。
 			if (DebugMode.IsEnabled)
 			{
@@ -718,6 +720,7 @@ namespace PPTService
 
 		private void Settings_OnClick(object sender, RoutedEventArgs e)
 		{
+			CloseToolPopups();
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionRecommendation);
 			// 原「关于/版本」按钮改为打开设置窗口（含版本信息显示）
 			SettingsWindow settingsWindow = new SettingsWindow
@@ -732,6 +735,24 @@ namespace PPTService
 		/// 放大镜 / 板中板及其背景、颜色盘、清屏滑杆）。左侧 ShareGrid（设置 + 二维码）
 		/// 与右侧 ExitGrid（结束放映）不受影响，始终保留，隐藏后仍可进设置改回来。
 		/// </summary>
+		/// <summary>
+		/// 点击工具栏弹窗之外的区域时收起颜色盘 / 清屏滑杆。
+		/// 由 MainWindow 的 PreviewMouseDown 调用：这里只关弹窗、绝不 e.Handled，
+		/// 让这一次鼠标按下继续路由到批注层 Board，实现「点窗口外的第一击就落笔 / 擦除」。
+		/// Popup 保持 StaysOpen=True（自身不拦截外部鼠标事件），关闭完全由这里驱动。
+		/// </summary>
+		public void CloseToolPopups()
+		{
+			if (ColorDiskPopup != null)
+			{
+				ColorDiskPopup.IsOpen = false;
+			}
+			if (EraserSliderPopup != null)
+			{
+				EraserSliderPopup.IsOpen = false;
+			}
+		}
+
 		public void ApplyFunctionBarVisibility(bool hide)
 		{
 			if (BottomCenterButtonGrid == null)

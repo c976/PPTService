@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.Win32;
@@ -9,11 +8,14 @@ namespace PPTService
 	/// <summary>
 	/// 界面主题：浅色 / 深色 / 跟随系统。
 	///
-	/// 通过 Application.Resources 里的一组 DynamicResource 画刷统一驱动工具栏、翻页按钮、
-	/// 颜色盘 / 清屏滑杆弹窗、设置窗口、二维码窗口、消息提示等界面配色。
-	/// 切换主题时直接改画刷对象的 Color，所有 {DynamicResource Theme.*} 引用即时刷新，
-	/// 无需重建窗口。板中板的白板画布（InkCanvasBorder）是书写区域，不参与主题，
-	/// 始终保持白色以保证彩色笔迹可读。
+	/// 通过 Application.Resources 里的一组 DynamicResource 画刷统一驱动工具栏面板、
+	/// 颜色盘 / 清屏滑杆弹窗、翻页按钮底板、图标、设置窗口底板与文字等配色。
+	/// 按用户定版要求：**WPF 原生按钮 / 下拉框 / 复选框等控件一律保持系统默认配色**，
+	/// 不覆盖 SystemColors，也不给它们套主题画刷；板中板白板画布恒为白色。
+	///
+	/// 切换主题时替换画刷对象（ResourceDictionary 会冻结放进去的 Freezable，
+	/// 不能直接改已冻结画刷的 Color），并重新挂载资源字典以触发 ResourcesChanged，
+	/// 让所有 {DynamicResource Theme.*}（含 DrawingImage 里的图标画刷）即时刷新。
 	///
 	/// 「跟随系统」读取 HKCU\...\Themes\Personalize\AppsUseLightTheme，
 	/// 并订阅 SystemEvents.UserPreferenceChanged，在系统主题变化后自动重新应用。
@@ -27,7 +29,7 @@ namespace PPTService
 		// 自定义画刷键：XAML 里统一用 {DynamicResource Theme.Xxx} 引用。
 		private static readonly string[] BrushKeys =
 		{
-			"Theme.PanelBackground",        // 工具栏面板 / 退出按钮 / 翻页按钮底板
+			"Theme.PanelBackground",        // 工具栏面板 / 退出按钮
 			"Theme.PopupBackground",        // 颜色盘 / 清屏滑杆弹窗 / 消息提示
 			"Theme.SliderBackground",       // 清屏滑杆轨道
 			"Theme.PrimaryText",            // 页码 / 主要文字
@@ -35,30 +37,15 @@ namespace PPTService
 			"Theme.BorderBrush",            // 面板描边
 			"Theme.SettingsBackground",     // 设置窗口底板
 			"Theme.SettingsForeground",     // 设置窗口文字
-			"Theme.SettingsControl",        // 按钮 / 下拉框 / 列表项 / 缩略图底板
+			"Theme.SettingsControl",        // 缩略图底板 / 放大镜按钮条
 			"Theme.SettingsMutedText",      // 说明性文字
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
-			"Theme.PageButtonBackground"    // 翻页按钮（明暗主题 + 半透明开关共同决定）
-		};
-
-		// WPF 原生控件（Button / ComboBox / CheckBox / GroupBox / ListBox 等）
-		// 的默认模板取自 SystemColors，深色主题下需覆盖这些键才能一起变深。
-		private static readonly object[] SystemColorKeys =
-		{
-			SystemColors.WindowBrushKey,
-			SystemColors.ControlBrushKey,
-			SystemColors.ControlTextBrushKey,
-			SystemColors.WindowTextBrushKey,
-			SystemColors.HighlightBrushKey,
-			SystemColors.HighlightTextBrushKey,
-			SystemColors.ControlLightBrushKey,
-			SystemColors.ControlDarkBrushKey
+			"Theme.PageButtonBackground",   // 翻页按钮底板（固定半透明）
+			"Theme.IconBrush"               // 工具栏矢量图标：浅色深灰 / 深色浅灰
 		};
 
 		private static ResourceDictionary _brushes;
-		private static ResourceDictionary _systemColors;
 		private static string _theme = ThemeLight;
-		private static bool _translucentPageButtons = true;
 		private static bool _systemEventsHooked;
 
 		public static string Normalize(string theme)
@@ -73,14 +60,12 @@ namespace PPTService
 		/// <summary>按当前用户配置应用主题（启动时与设置「应用 / 确定」时调用）。</summary>
 		public static void Apply(UserConfig cfg)
 		{
-			Apply(cfg == null ? ThemeLight : cfg.Theme,
-				cfg == null || cfg.PageTurningTranslucent);
+			Apply(cfg == null ? ThemeLight : cfg.Theme);
 		}
 
-		public static void Apply(string theme, bool translucentPageButtons)
+		public static void Apply(string theme)
 		{
 			_theme = Normalize(theme);
-			_translucentPageButtons = translucentPageButtons;
 			HookSystemEvents();
 			Refresh();
 		}
@@ -124,9 +109,13 @@ namespace PPTService
 			{
 				return;
 			}
-			EnsureDictionary(app);
+			EnsureDictionary();
 			bool dark = IsDark(_theme);
-			byte pageAlpha = (byte)(_translucentPageButtons ? 0xA0 : 0xFF);
+			// 图标里以 <SolidColorBrush Color="#FF666666"> 形式写的深灰（带 Transform，
+			// 不便改成 Brush 属性）用 Color 级资源跟随主题。
+			app.Resources["Theme.IconColor"] = dark
+				? Color.FromRgb(0xD8, 0xD8, 0xD8)
+				: Color.FromRgb(0x66, 0x66, 0x66);
 			if (dark)
 			{
 				Set("Theme.PanelBackground", 0xCC, 0x2B, 0x2B, 0x31);
@@ -140,9 +129,8 @@ namespace PPTService
 				Set("Theme.SettingsControl", 0xFF, 0x35, 0x35, 0x3C);
 				Set("Theme.SettingsMutedText", 0xFF, 0xA8, 0xA8, 0xA8);
 				Set("Theme.MaskBackground", 0xB3, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", pageAlpha, 0x2B, 0x2B, 0x31);
-
-				OverrideSystemColors(true);
+				Set("Theme.PageButtonBackground", 0xA0, 0x2B, 0x2B, 0x31);
+				Set("Theme.IconBrush", 0xFF, 0xD8, 0xD8, 0xD8);
 			}
 			else
 			{
@@ -157,52 +145,17 @@ namespace PPTService
 				Set("Theme.SettingsControl", 0xFF, 0xF7, 0xF7, 0xF7);
 				Set("Theme.SettingsMutedText", 0xFF, 0x80, 0x80, 0x80);
 				Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
-				Set("Theme.PageButtonBackground", pageAlpha, 0xFF, 0xFF, 0xFF);
-
-				OverrideSystemColors(false);
+				Set("Theme.PageButtonBackground", 0xA0, 0xFF, 0xFF, 0xFF);
+				Set("Theme.IconBrush", 0xFF, 0x66, 0x66, 0x66);
 			}
+			// 只替换字典里的画刷对象不会让「已解析」的 DynamicResource 重新查找。
+			// 移出再挂回同一个字典可触发 ResourcesChanged，让所有引用（含设置窗口
+			// 打开期间）立刻取到新画刷，无需关掉窗口重开。
+			app.Resources.MergedDictionaries.Remove(_brushes);
+			app.Resources.MergedDictionaries.Add(_brushes);
 		}
 
-		/// <summary>浅色时移除覆盖，恢复系统默认画刷；深色时压入深色画刷。</summary>
-		private static void OverrideSystemColors(bool dark)
-		{
-			foreach (object key in SystemColorKeys)
-			{
-				if (!dark)
-				{
-					((IDictionary)_systemColors).Remove(key);
-					continue;
-				}
-				SolidColorBrush brush;
-				if (key.Equals(SystemColors.HighlightBrushKey))
-				{
-					brush = new SolidColorBrush(Color.FromRgb(0x0F, 0x80, 0xFB));
-				}
-				else if (key.Equals(SystemColors.HighlightTextBrushKey))
-				{
-					brush = new SolidColorBrush(Colors.White);
-				}
-				else if (key.Equals(SystemColors.ControlLightBrushKey))
-				{
-					brush = new SolidColorBrush(Color.FromRgb(0x4A, 0x4A, 0x52));
-				}
-				else if (key.Equals(SystemColors.ControlDarkBrushKey))
-				{
-					brush = new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x22));
-				}
-				else if (key.Equals(SystemColors.ControlTextBrushKey) || key.Equals(SystemColors.WindowTextBrushKey))
-				{
-					brush = new SolidColorBrush(Color.FromRgb(0xF0, 0xF0, 0xF0));
-				}
-				else
-				{
-					brush = new SolidColorBrush(Color.FromRgb(0x35, 0x35, 0x3C));
-				}
-				_systemColors[key] = brush;
-			}
-		}
-
-		private static void EnsureDictionary(Application app)
+		private static void EnsureDictionary()
 		{
 			if (_brushes != null)
 			{
@@ -215,18 +168,13 @@ namespace PPTService
 				// 不会因为 DynamicResource 取到透明画刷而「看不见」。
 				_brushes[key] = new SolidColorBrush(Colors.White);
 			}
-			app.Resources.MergedDictionaries.Add(_brushes);
-			// SystemColors 键必须放在应用资源根字典：原生控件模板用
-			// {StaticResource {x:Static SystemColors.XxxKey}}，只查根级资源更可靠。
-			_systemColors = app.Resources;
 		}
 
 		private static void Set(string key, byte a, byte r, byte g, byte b)
 		{
 			// ResourceDictionary 会自动冻结（Freeze）放进去的 Freezable，
 			// 已冻结的画刷不能改 Color 属性（抛 InvalidOperationException）。
-			// 因此每次刷新都替换整支画刷对象；DynamicResource 引用会重新解析到新画刷，
-			// 实现运行时换肤即时生效。
+			// 因此每次刷新都替换整支画刷对象，再由 Refresh() 重新挂载字典触发刷新。
 			_brushes[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
 		}
 

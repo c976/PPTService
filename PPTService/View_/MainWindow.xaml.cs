@@ -11,6 +11,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -84,6 +86,7 @@ namespace PPTService
 			_releaseTimer.Tick += ReleaseTimerTick;
 			Loaded += MainWindow_Loaded;
 			PreviewKeyDown += MainWindow_KeyDown;
+			PreviewMouseDown += MainWindow_PreviewMouseDown;
 			SizeChanged += MainWindow_SizeChanged;
 			LocationChanged += MainWindow_LocationChanged;
 			ManipulationBoundaryFeedback += (object s, ManipulationBoundaryFeedbackEventArgs e) =>
@@ -391,13 +394,38 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>放映中一段时间未点翻页按钮后淡化；受「自动淡化」设置控制。</summary>
+		private void KeepPageButtonsOpaque(params FrameworkElement[] targets)
+		{
+			foreach (FrameworkElement target in targets)
+			{
+				if (target == null)
+				{
+					continue;
+				}
+				// 移除正在运行的淡化动画，避免 7 秒后仍把按钮降到 0.3。
+				target.BeginAnimation(UIElement.OpacityProperty, null);
+				target.Opacity = 1.0;
+			}
+		}
+
 		public void PlayHiddenLeftCenterButtonGridStoryboard()
 		{
+			if (!UserConfigManager.Load().AutoFadePageButtons)
+			{
+				KeepPageButtonsOpaque(LeftCenterButtonGrid, LeftBottomButtonGrid);
+				return;
+			}
 			(Resources["HiddenLeftCenterButtonGridStoryBoard"] as Storyboard)?.Begin();
 		}
 
 		public void PlayHiddenRightCenterButtonGridStoryboard()
 		{
+			if (!UserConfigManager.Load().AutoFadePageButtons)
+			{
+				KeepPageButtonsOpaque(RightCenterButtonGrid, RightBottomButtonGrid);
+				return;
+			}
 			(Resources["HiddenRightCenterButtonGridStoryBoard"] as Storyboard)?.Begin();
 		}
 
@@ -810,6 +838,25 @@ namespace PPTService
 					}
 				}
 			});
+		}
+
+		/// <summary>
+		/// 弹窗（笔颜色盘 / 清屏滑杆）打开时点击其外部：只收起弹窗、不处理事件，
+		/// 让这次鼠标按下继续路由到批注层 Board，实现「点窗口外的第一击即落笔 / 擦除」。
+		/// 工具栏按钮交给各自 Click 处理开合，避免抢先关闭导致「再点一次又打开」。
+		/// </summary>
+		private void MainWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			DependencyObject dep = e.OriginalSource as DependencyObject;
+			while (dep != null)
+			{
+				if (dep is ButtonBase || dep is Slider || dep is Thumb)
+				{
+					return;
+				}
+				dep = VisualTreeHelper.GetParent(dep);
+			}
+			ViewHelper.BottomArea?.CloseToolPopups();
 		}
 
 		private void MainWindow_KeyDown(object sender, KeyEventArgs e)

@@ -207,12 +207,12 @@
                             </DrawingGroup>
                             <DrawingGroup>
                               <DrawingGroup.Children>
-                                <GeometryDrawing Brush="#FF666666">
+                                <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
                                   <GeometryDrawing.Geometry>
                                     <PathGeometry FillRule="Nonzero" Figures="M1.4,20L1.3,3.7C1.3,3.2 1.5,2.7 1.9,2.3 2.3,1.9 2.8,1.7 3.3,1.7L7.3,1.7C8.4,1.7,9.3,2.6,9.3,3.7L9.4,20 1.4,20z" />
                                   </GeometryDrawing.Geometry>
                                 </GeometryDrawing>
-                                <GeometryDrawing Brush="#FF666666">
+                                <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
                                   <GeometryDrawing.Geometry>
                                     <PathGeometry FillRule="Nonzero" Figures="M2.6,3C2.7,2.9,2.9,2.7,3.3,2.7L7.3,2.7C7.9,2.7,8.3,3.1,8.3,3.7L8.4,19 2.5,19 2.3,3.7C2.3,3.3,2.5,3.1,2.6,3 M1.2,1.6C0.6,2.1,0.3,2.9,0.3,3.7L0.4,21 10.3,21 10.3,3.7C10.3,2,8.9,0.7,7.3,0.7L3.3,0.7C2.4,0.7,1.7,1,1.2,1.6L1.2,1.6z" />
                                   </GeometryDrawing.Geometry>
@@ -235,7 +235,7 @@
       <CheckBox Name="InnerBoardCheckBox" Grid.Column="4" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.PlateNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.PlateSelected}" Click="InnerBoard_Click" />
       <!-- 笔设置面板（1:1 移植自桌面批注 DesktopPenPopupBorder）：
            左侧 3 档粗细（笔形图标），右侧 3x3 颜色块。 -->
-      <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="280" Height="192" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
+      <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="280" Height="192" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
         <Grid Background="#00FFFFFF">
           <Grid Name="ColorDiskStoryBoardGrid" RenderTransformOrigin="0.5,1">
             <UIElement.RenderTransform>
@@ -270,7 +270,7 @@
       </Popup>
       <!-- 橡皮已选中时再次点击橡皮弹出（1:1 移植自桌面批注 DesktopEraserPopupBorder）：
            水平滑杆，拇指为 eraserthumb 图标，滑到底（≥0.8）清当前页。 -->
-      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="False" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
+      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
         <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4">
           <Slider Name="EraserSlide" Maximum="1" Style="{StaticResource Style.Slider.Eraser}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
           <UIElement.Effect>
