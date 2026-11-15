@@ -77,8 +77,10 @@
                     </Storyboard>
                   </ResourceDictionary>
                 </FrameworkElement.Resources>
-                <Image Name="PART_NormalImage" Source="{TemplateBinding pptService:ImageButton.NormalSource}" Stretch="Fill" SnapsToDevicePixels="True" UseLayoutRounding="True" />
-                <Image Name="PART_PressedImage" Source="{TemplateBinding pptService:ImageButton.PressedSource}" Stretch="Fill" Opacity="0" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                <!-- Uniform：按钮格子在任何自适应状态下都不是正方形时也不拉伸变形
+                     （原为 Fill，1366 等小分辨率下 50x30 的格子会把图标压成横扁形） -->
+                <Image Name="PART_NormalImage" Source="{TemplateBinding pptService:ImageButton.NormalSource}" Stretch="Uniform" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                <Image Name="PART_PressedImage" Source="{TemplateBinding pptService:ImageButton.PressedSource}" Stretch="Uniform" Opacity="0" SnapsToDevicePixels="True" UseLayoutRounding="True" />
               </Grid>
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Grid>

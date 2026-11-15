@@ -69,14 +69,18 @@
       <VisualStateGroup x:Name="AdaptiveStates">
         <VisualState x:Name="Adaptive0">
           <Storyboard>
+            <!-- 原版把工具栏压到 30 高、同时把各按钮组压成 30 宽的方格；
+                 后续改动删掉了「宽度」动画却留下「高度 30」，格子变成 50x30，
+                 ImageButton 图标因此被横向拉扁。这里让高度/退出格宽度与 50 的列宽一致，
+                 使所有按钮格子保持正方形（与 >=1440 分辨率外观统一）。 -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="2" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -92,12 +96,8 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="210" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="144" />
-            </DoubleAnimationUsingKeyFrames>
+            <!-- 颜色盘弹窗尺寸不再随分辨率缩放：Popup 与内层 PenPopupRootBorder
+                 都固定为 280x192，早期 210x144 会把右侧/底部内容裁掉（1366 下显示不全）。 -->
           </Storyboard>
         </VisualState>
         <VisualState x:Name="Adaptive1440" />
@@ -126,12 +126,7 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="420" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ColorDiskPopup" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="288" />
-            </DoubleAnimationUsingKeyFrames>
+            <!-- 颜色盘保持 280x192，不随分辨率放大，避免 Popup 与内容尺寸不一致。 -->
           </Storyboard>
         </VisualState>
       </VisualStateGroup>
