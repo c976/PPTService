@@ -84,6 +84,68 @@ namespace PPTService
 		private static IntPtr _attachedOwner;
 
 		/// <summary>
+		/// 应用「批注窗口层级」用户开关，即时生效且可反复调用。
+		/// false（默认）= 解除全局置顶、附着到 PPT 放映窗口（Owner）；
+		/// true = 回退旧版全局置顶（Topmost），不使用 Owner。
+		/// </summary>
+		public static void ApplyWindowLayerMode(Window window)
+		{
+			if (window == null)
+			{
+				return;
+			}
+			bool legacy = UserConfigManager.Load().LegacyTopmostWindow;
+			IntPtr hwnd = new WindowInteropHelper(window).Handle;
+			if (legacy)
+			{
+				// 从「附属 PPT」切到旧版：先卸掉 Owner，否则 owner 仍会约束 z 序。
+				DetachFromPpt(window);
+				if (hwnd == IntPtr.Zero)
+				{
+					return;
+				}
+				try
+				{
+					// WPF 的 Topmost 属性会同步设置 WS_EX_TOPMOST；
+					// 再显式推一次 HWND_TOPMOST，保证立即压到最上层。
+					if (!window.Topmost)
+					{
+						window.Topmost = true;
+					}
+					WindowsApi.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0003);
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine("Enable legacy topmost failed: " + ex);
+				}
+				return;
+			}
+
+			// 从旧版切回默认：先清全局置顶位，再（若正在放映）重新挂 Owner。
+			try
+			{
+				if (window.Topmost)
+				{
+					window.Topmost = false;
+				}
+				if (hwnd != IntPtr.Zero)
+				{
+					uint exStyle = WindowsApi.GetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle);
+					if ((exStyle & WindowsApi.WindowFlags.WsExTopmost) != 0u)
+					{
+						WindowsApi.SetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle,
+							exStyle & ~WindowsApi.WindowFlags.WsExTopmost);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("Disable legacy topmost failed: " + ex);
+			}
+			MakeAppAbovePpt(window);
+		}
+
+		/// <summary>
 		/// 让覆盖层「只附着在 PPT 放映窗口上」，而不是全局置顶。
 		///
 		/// 用 Win32 Owner 关系（WindowInteropHelper.Owner）：owned window 始终位于 owner 之上，
@@ -104,6 +166,18 @@ namespace PPTService
 			IntPtr hwnd = new WindowInteropHelper(window).Handle;
 			if (hwnd == IntPtr.Zero)
 			{
+				return;
+			}
+			// 旧版全局置顶模式：不挂 Owner；若之前处于附属模式则解除，并保持置顶位。
+			if (UserConfigManager.Load().LegacyTopmostWindow)
+			{
+				if (_attachedWindow == hwnd || _attachedOwner != IntPtr.Zero)
+				{
+					DetachFromPpt(window);
+				}
+				// 旧版行为：每次 tick 都把窗口推回 HWND_TOPMOST（不移动/不改尺寸/不抢焦点），
+				// 这样即使第三方置顶窗口抢占了层级，下一 tick 也会恢复成批注窗口在上。
+				WindowsApi.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0003);
 				return;
 			}
 			IntPtr owner = PptOperator.Instance == null

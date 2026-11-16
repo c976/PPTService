@@ -142,7 +142,8 @@ namespace PPTService
 			uint exStyle = WindowsApi.GetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle);
 			exStyle |= WindowsApi.WindowFlags.WsExToolWindow;
 			exStyle &= ~WindowsApi.WindowFlags.WsExAppWindow;
-			// 批注层不再全局置顶；靠 Owner 关系保持在 PPT 放映窗口之上。
+			// 默认靠 Owner 关系保持在 PPT 放映窗口之上，不进全局置顶组；
+			// 「批注窗口始终置顶（兼容旧版）」开关打开时，Loaded 阶段会重新置上该位。
 			exStyle &= ~WindowsApi.WindowFlags.WsExTopmost;
 			WindowsApi.SetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle, exStyle);
 			// SWP_FRAMECHANGED 让样式立即生效（NOMOVE/NOSIZE/NOZORDER/NOACTIVATE 保持位置与层级）。

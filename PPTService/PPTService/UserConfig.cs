@@ -82,6 +82,15 @@ namespace PPTService
 		/// </summary>
 		public bool AutoFadePageButtons { get; set; }
 
+		/// <summary>
+		/// 批注窗口层级兼容开关：
+		/// false（默认）= 批注窗口作为 PPT 放映窗口的 Owner 附属窗口，只在 PPT 之上、
+		/// 不进入全局置顶组（第三方窗口可正常盖住它、Win+Tab 随 PPT 分组）；
+		/// true = 回退到旧版全局置顶（Topmost），批注窗口永远压在所有窗口之上。
+		/// 用于个别放映环境下附属窗口层级异常时的回退。
+		/// </summary>
+		public bool LegacyTopmostWindow { get; set; }
+
         /// <summary>把配置里的透明度规范到 20–100；旧配置缺字段或值非法时回落到默认 70。</summary>
         public static int NormalizeToolbarOpacity(int value)
         {
@@ -108,6 +117,7 @@ namespace PPTService
 			HideFunctionBar = false;
 			AutoFadePageButtons = true;
 			ToolbarOpacity = DefaultToolbarOpacity;
+			LegacyTopmostWindow = false;
 		}
     }
 
@@ -196,7 +206,8 @@ namespace PPTService
 			Theme = ThemeManager.ThemeLight,
 			HideFunctionBar = false,
 			AutoFadePageButtons = true,
-			ToolbarOpacity = UserConfig.DefaultToolbarOpacity
+			ToolbarOpacity = UserConfig.DefaultToolbarOpacity,
+			LegacyTopmostWindow = false
 		};
         }
 
@@ -263,6 +274,9 @@ namespace PPTService
                 _lastAutoFadeState = cfg.AutoFadePageButtons;
                 ViewHelper.MainWindow?.ApplyPageButtonFadeState(cfg.AutoFadePageButtons);
             }
+            // 窗口层级兼容开关：即时切换「附属 PPT 放映窗口」/「旧版全局置顶」。
+            // 内部幂等，放映未开始时仅记录状态，等 ShowBegin 再按此层级挂接。
+            WindowStateHelper.ApplyWindowLayerMode(ViewHelper.MainWindow);
         }
 
 		/// <summary>

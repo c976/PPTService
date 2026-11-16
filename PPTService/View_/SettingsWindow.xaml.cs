@@ -192,6 +192,7 @@ namespace PPTService
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
             HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
             AutoFadePageButtonsCheckBox.IsChecked = cfg.AutoFadePageButtons;
+            LegacyTopmostWindowCheckBox.IsChecked = cfg.LegacyTopmostWindow;
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
             ToolbarOpacitySlider.Value = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
@@ -400,6 +401,7 @@ namespace PPTService
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
             cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
             cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
+            cfg.LegacyTopmostWindow = LegacyTopmostWindowCheckBox.IsChecked == true;
             cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
             cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
             cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(
@@ -423,6 +425,7 @@ namespace PPTService
                 EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
                 HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
                 AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
+                LegacyTopmostWindowCheckBox.IsChecked = def.LegacyTopmostWindow;
                 ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
                 PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
                 ToolbarOpacitySlider.Value = def.ToolbarOpacity;
