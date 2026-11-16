@@ -25,11 +25,11 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,6">
-          <TextBlock Text="设置（修改即时生效）" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+          <TextBlock Text="设置" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
           <TextBlock Name="VersionTextBlock" FontSize="12" Foreground="{DynamicResource Theme.SettingsMutedText}" DockPanel.Dock="Right" VerticalAlignment="Center" />
         </DockPanel>
 
-        <GroupBox Grid.Row="1" Header="工具栏按钮（勾选显示，拖动或 ▲▼ 排序）" Margin="0,0,0,6"
+        <GroupBox Grid.Row="1" Header="功能栏按钮（勾选显示，拖动或 ▲▼ 排序）" Margin="0,0,0,6"
                   Foreground="{DynamicResource Theme.SettingsForeground}">
           <ListBox Name="ToolbarListBox" Height="126" Margin="4" BorderThickness="0" Background="Transparent"
                    ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.PanningMode="None"
@@ -86,7 +86,7 @@
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
             <CheckBox Name="ShowLoadingCheckBox" Content="显示加载进度条界面" Margin="2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
-            <CheckBox Name="HideFunctionBarCheckBox" Content="隐藏功能栏（笔 / 橡皮 / 板中板等按钮区域）" Margin="2"
+            <CheckBox Name="HideFunctionBarCheckBox" Content="隐藏功能栏" Margin="2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
           </StackPanel>
         </GroupBox>
@@ -141,7 +141,7 @@
                          Foreground="{DynamicResource Theme.SettingsForeground}" />
             </Grid>
             <CheckBox Name="AutoFadePageButtonsCheckBox" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                      Content="翻页按钮自动淡化（一段时间未点击后淡出）" Margin="2,5,2,2"
+                      Content="翻页按钮自动淡化" Margin="2,5,2,2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
           </Grid>
         </GroupBox>

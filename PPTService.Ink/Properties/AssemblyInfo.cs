@@ -2,12 +2,14 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
-// Merged from the net45 Seewo desktop-annotation libraries:
-//   PPTService.Paint.Framework / PPTService.Paint.Inks / PPTService.Paint.DesktopMode
-// Original namespaces and implementation are kept as-is.
-[assembly: AssemblyTitle("PPTService.Ink")]
-[assembly: AssemblyDescription("Seewo desktop annotation board (pressure-sensitive pen & gesture eraser)")]
-[assembly: AssemblyProduct("PPTService.Ink")]
+[assembly: AssemblyTitle("PPTServiceUltra Ink")]
+[assembly: AssemblyDescription("PPT小工具增强版")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("The PPTServiceUltra Project")]
+[assembly: AssemblyProduct("PPTServiceUltra")]
+[assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
+[assembly: AssemblyTrademark("")]
+
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: ComVisible(false)]

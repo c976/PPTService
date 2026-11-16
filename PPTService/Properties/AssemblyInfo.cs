@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
 
-[assembly: AssemblyTitle("PPTService")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("PPTServiceUltra")]
+[assembly: AssemblyDescription("PPT小工具增强版")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PPTService")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("The PPTServiceUltra Project")]
+[assembly: AssemblyProduct("PPTServiceUltra")]
+[assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]

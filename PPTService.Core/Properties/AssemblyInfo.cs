@@ -1,9 +1,14 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("PPTService.Core")]
-[assembly: AssemblyDescription("Reachable PPTService.Core library sources integrated into one assembly")]
-[assembly: AssemblyProduct("PPTService.Core")]
+[assembly: AssemblyTitle("PPTServiceUltra Core")]
+[assembly: AssemblyDescription("PPT小工具增强版")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("The PPTServiceUltra Project")]
+[assembly: AssemblyProduct("PPTServiceUltra")]
+[assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
+[assembly: AssemblyTrademark("")]
+
 // 与主程序同源：Version.targets 生成的 GitVersionInfo.g.cs（含 git 短 hash）
 [assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
 [assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
