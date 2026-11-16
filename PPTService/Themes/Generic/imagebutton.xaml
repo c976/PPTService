@@ -78,9 +78,12 @@
                   </ResourceDictionary>
                 </FrameworkElement.Resources>
                 <!-- Uniform：按钮格子在任何自适应状态下都不是正方形时也不拉伸变形
-                     （原为 Fill，1366 等小分辨率下 50x30 的格子会把图标压成横扁形） -->
-                <Image Name="PART_NormalImage" Source="{TemplateBinding pptService:ImageButton.NormalSource}" Stretch="Uniform" SnapsToDevicePixels="True" UseLayoutRounding="True" />
-                <Image Name="PART_PressedImage" Source="{TemplateBinding pptService:ImageButton.PressedSource}" Stretch="Uniform" Opacity="0" SnapsToDevicePixels="True" UseLayoutRounding="True" />
+                     （原为 Fill，1366 等小分辨率下 50x30 的格子会把图标压成横扁形）。
+                     图标是 DrawingImage 矢量：高 DPI（如 250% = 2.5x 非整数倍）下
+                     SnapsToDevicePixels 会强制把矢量边缘吸附到物理像素，产生阶梯锯齿；
+                     移除后交给 WPF 矢量抗锯齿，边缘更平滑。 -->
+                <Image Name="PART_NormalImage" Source="{TemplateBinding pptService:ImageButton.NormalSource}" Stretch="Uniform" UseLayoutRounding="True" />
+                <Image Name="PART_PressedImage" Source="{TemplateBinding pptService:ImageButton.PressedSource}" Stretch="Uniform" Opacity="0" UseLayoutRounding="True" />
               </Grid>
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Grid>

@@ -69,18 +69,39 @@
       <VisualStateGroup x:Name="AdaptiveStates">
         <VisualState x:Name="Adaptive0">
           <Storyboard>
-            <!-- 原版把工具栏压到 30 高、同时把各按钮组压成 30 宽的方格；
-                 后续改动删掉了「宽度」动画却留下「高度 30」，格子变成 50x30，
-                 ImageButton 图标因此被横向拉扁。这里让高度/退出格宽度与 50 的列宽一致，
-                 使所有按钮格子保持正方形（与 >=1440 分辨率外观统一）。 -->
+            <!-- 1366x768 等 <1440 分辨率：工具栏按钮格子统一缩到 30x30，
+                 与两侧翻页按钮（LeftArea/RightArea 的 RootGrid 在 Adaptive0 也是 30 宽）
+                 保持同样大小。此前只把高度改回 50、列宽仍 50，导致工具栏相对翻页按钮过大。
+                 高度与所有列宽一起改，格子仍是正方形，图标用 Stretch=Uniform 不会拉扁。 -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol0" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol1" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol0" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol1" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol2" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol3" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol4" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="30" />
+            </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="2" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -103,9 +124,34 @@
         <VisualState x:Name="Adaptive1440" />
         <VisualState x:Name="Adaptive3800">
           <Storyboard>
+            <!-- 4K 100% 缩放：列宽必须与格子高度(100)、ExitGrid(100) 一起放大到 100。
+                 此前列宽停在 50，而按钮样式在 Adaptive3800 把图标 Margin 设为 25，
+                 图标可用空间 = 50 - 25*2 = 0，导致设置/笔等图标完全不显示；
+                 翻页按钮与退出按钮因格子本身放大到 100 才正常。 -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol0" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol1" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol0" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol1" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol2" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol3" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol4" Storyboard.TargetProperty="Width">
+              <DiscreteObjectKeyFrame KeyTime="0" Value="100" />
+            </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="8" />
             </DoubleAnimationUsingKeyFrames>
@@ -144,8 +190,8 @@
     </i:Interaction.Triggers>
     <Grid Name="ShareGrid" Column="0">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="50" />
-        <ColumnDefinition Width="50" />
+        <ColumnDefinition x:Name="ShareCol0" Width="50" />
+        <ColumnDefinition x:Name="ShareCol1" Width="50" />
       </Grid.ColumnDefinitions>
       <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
       <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.SettingsNormal}" PressedSource="{StaticResource ImageSource.SettingsPressed}" />
@@ -154,11 +200,11 @@
     <Grid Column="1" Width="4" />
     <Grid Name="BottomCenterButtonGrid" Column="2" Background="#00FFFFFF" Focusable="False" HorizontalAlignment="Center">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="50" />
-        <ColumnDefinition Width="50" />
-        <ColumnDefinition Width="50" />
-        <ColumnDefinition Width="50" />
-        <ColumnDefinition Width="50" />
+        <ColumnDefinition x:Name="ToolCol0" Width="50" />
+        <ColumnDefinition x:Name="ToolCol1" Width="50" />
+        <ColumnDefinition x:Name="ToolCol2" Width="50" />
+        <ColumnDefinition x:Name="ToolCol3" Width="50" />
+        <ColumnDefinition x:Name="ToolCol4" Width="50" />
       </Grid.ColumnDefinitions>
       <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
       <CheckBox Name="SelectCheckBox" Grid.Column="0" IsChecked="True" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.SelectNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.SelectSelected}" Click="Select_OnClick" />
