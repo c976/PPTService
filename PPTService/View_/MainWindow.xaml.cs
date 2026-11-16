@@ -292,6 +292,7 @@ namespace PPTService
 				{
 					_releaseTimer?.Stop();
 					Show();
+					Log.WriteDebug($"[SHOW] Show() done, IsShowing={PptOperator.Instance?.IsShowing} hwnd={PptOperator.Instance?.SlideShowWindowIntPtr} this={new WindowInteropHelper(this).Handle}");
 					// 显示态先行：XAML 初始 Opacity="0"，必须尽早置 1。
 					// 下面 SetPageIndex / ShowRangeType 等会访问 COM，放映刚启动时
 					// 可能被 RPC_E_CALL_REJECTED 拒绝而抛异常；整个回调只在更外层的
@@ -518,11 +519,19 @@ namespace PPTService
 			}
 		}
 
+		// 显隐诊断：仅在判定结果相对上一次变化时才写，避免每 300ms 刷屏。
+		private bool? _lastDiagOpacityVisible;
+
 		private void UpdateWindowOpacity()
 		{
 			if (!_isAnalyzing)
 			{
 				bool pptShowingState = WindowStateHelper.GetPptShowingState(this);
+				if (_lastDiagOpacityVisible != pptShowingState)
+				{
+					_lastDiagOpacityVisible = pptShowingState;
+					Log.WriteDebug($"[VIS] pptShowing={pptShowingState} IsShowing={PptOperator.Instance?.IsShowing} hwnd={PptOperator.Instance?.SlideShowWindowIntPtr} Opacity(before)={Opacity}");
+				}
 				if (IsTransparent & pptShowingState)
 				{
 					UpdatePageIndex();

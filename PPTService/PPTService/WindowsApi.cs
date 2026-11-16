@@ -196,6 +196,11 @@ namespace PPTService
 		[DllImport("user32.dll")]
 		public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
 
+		/// <summary>hWndInsertAfter 传 HWND 句柄（如把本窗口插到 owner 之上）的版本。
+		/// 与上一重载仅第 2 参数类型不同（IntPtr vs int），构成重载。</summary>
+		[DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+		public static extern IntPtr SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
+
 		/// <summary>判断 HWND 是否仍有效（放映窗口关闭后要及时解除 Owner 关系）。</summary>
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]

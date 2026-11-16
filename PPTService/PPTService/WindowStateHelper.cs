@@ -195,6 +195,14 @@ namespace PPTService
 			}
 			if (_attachedWindow == hwnd && _attachedOwner == owner)
 			{
+				// Owner 关系已建立，但 PowerPoint 放映窗口是 topmost，放映过程中会
+				// 反复把自己提到最前，连带把作为 owned window 的覆盖层压到它下面。
+				// 用户右键放映窗口 = 激活 owner，Windows 此时会把 owned window 带回
+				// owner 之上，于是工具栏「冒出来」——正是「放 PPT 后看不到批注栏，
+				// 右键一下才显示」。所以每次 tick 都要把本窗口重新插到 owner 之上
+				// （HWND_TOPMOST=-1 会全局置顶，这里用 owner 作为插入点，只保证
+				// 在放映窗口之上、不抢其它程序焦点）。幂等分支不可直接 return。
+				KeepAboveOwner(hwnd, owner);
 				return;
 			}
 			try
@@ -209,11 +217,27 @@ namespace PPTService
 					WindowsApi.SetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle,
 						exStyle & ~WindowsApi.WindowFlags.WsExTopmost);
 				}
+				KeepAboveOwner(hwnd, owner);
+				Log.WriteDebug($"[ZORDER] attach owner={owner} overlay={hwnd} topmost={(WindowsApi.GetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle) & WindowsApi.WindowFlags.WsExTopmost) != 0u}");
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine("Attach to slide show window failed: " + ex);
+				Log.WriteDebug("Attach to slide show window failed: " + ex);
 			}
+		}
+
+		/// <summary>
+		/// 把覆盖层插到放映窗口 owner 之上（紧邻其上），但不用 HWND_TOPMOST ——
+		/// 这样它只压在 PPT 放映窗口之上，不进入全局置顶组，第三方置顶窗口仍可盖住它。
+		/// SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE：只调 z 序，不改尺寸/位置/焦点。
+		/// </summary>
+		private static void KeepAboveOwner(IntPtr hwnd, IntPtr owner)
+		{
+			if (hwnd == IntPtr.Zero || owner == IntPtr.Zero)
+			{
+				return;
+			}
+			WindowsApi.SetWindowPos(hwnd, owner, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
 		}
 
 		/// <summary>放映结束 / 放映窗口销毁前解除 Owner，避免本窗口被连带销毁。</summary>

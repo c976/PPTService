@@ -19,6 +19,10 @@ namespace PPTService
 
 		public static void WriteDebug(string info)
 		{
+			// 诊断用：WriteDebug 历史上是空实现。放映态显示问题（工具栏偶发不显示、
+			// 右键才出现）排查需要这些状态轨迹，故改为真正落盘；调用点均做了节流，
+			// 只在状态变化或关键事件时写，不会刷屏。
+			Write(DebugFilePath, info);
 		}
 
 		private static void Write(string filePath, string str)
