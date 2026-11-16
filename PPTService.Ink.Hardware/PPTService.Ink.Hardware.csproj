@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="EMRMode.cs" />
     <Compile Include="EmrPenManager.cs" />
     <Compile Include="InputDevice.cs" />
@@ -61,4 +63,6 @@
     <Compile Include="SmartPen\SmartPenType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- 与主程序同源的 git 动态版本号 / 短 hash -->
+  <Import Project="..\Version.targets" />
 </Project>

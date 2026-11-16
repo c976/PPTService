@@ -10,7 +10,10 @@ using System.Windows;
 [assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+// 版本号 / git 短 hash 由仓库根 Version.targets 生成，与主程序完全同源。
+[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
+[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]
 [assembly: ComVisible(false)]
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]

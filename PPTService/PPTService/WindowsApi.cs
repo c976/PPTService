@@ -127,6 +127,9 @@ namespace PPTService
 			/// <summary>WS_EX_APPWINDOW：若存在会强制出现在 Alt+Tab，需清掉。</summary>
 			public const uint WsExAppWindow = 262144u;
 
+			/// <summary>WS_EX_TOPMOST：全局置顶。批注层不再使用，否则会盖住用户其它窗口。</summary>
+			public const uint WsExTopmost = 8u;
+
 			/// <summary>WM_SYSCOMMAND 的关闭命令（系统菜单 / 标题栏关闭 / 任务栏）。</summary>
 			public const int WmSysCommand = 274;
 
@@ -192,6 +195,14 @@ namespace PPTService
 
 		[DllImport("user32.dll")]
 		public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, int wFlags);
+
+		/// <summary>判断 HWND 是否仍有效（放映窗口关闭后要及时解除 Owner 关系）。</summary>
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool IsWindow(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetForegroundWindow();
 
 		[DllImport("user32", EntryPoint = "mouse_event")]
 		public static extern int Mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);

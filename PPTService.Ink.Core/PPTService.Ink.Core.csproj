@@ -178,6 +178,8 @@
     <Compile Include="Contracts\ReturnValueException.cs" />
     <Compile Include="Core\AppInfo.cs" />
     <Compile Include="Core\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="Core\AssemblyInfoAttribute.cs" />
     <Compile Include="Core\ConcurrentEventAggregator.cs" />
     <Compile Include="Core\EnumerableExtensions.cs" />
@@ -1174,4 +1176,6 @@
     <Resource Include="resources\cursors\verticaltext.cur"><LogicalName>resources/cursors/verticaltext.cur</LogicalName></Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- 与主程序同源的 git 动态版本号 / 短 hash -->
+  <Import Project="..\Version.targets" />
 </Project>

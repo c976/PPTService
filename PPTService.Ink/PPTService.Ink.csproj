@@ -721,6 +721,8 @@
     <Compile Include="Inks\System\Windows\Ink\MatrixTypes.cs" />
     <Compile Include="Inks\System\Windows\Ink\StrokeIntersection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="themes\board.xaml">
@@ -789,4 +791,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- 与主程序同源的 git 动态版本号 / 短 hash -->
+  <Import Project="..\Version.targets" />
 </Project>

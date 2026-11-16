@@ -13,8 +13,10 @@ using System.Windows.Markup;
 [assembly: AssemblyConfiguration("Release")]
 [assembly: AssemblyCopyright("Copyright © 2014-2020 Guangzhou Shirui Electronics Co.,Ltd, All Rights Reserved.")]
 [assembly: AssemblyDescription("Integrated CoreLib sources required by PPTService.Ink")]
-[assembly: AssemblyFileVersion("10.0.0.0")]
-[assembly: AssemblyInformationalVersion("10.0.0")]
+// 版本号 / git 短 hash 由仓库根 Version.targets 生成，与主程序完全同源。
+[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
+[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]
 [assembly: AssemblyProduct("PPTService.Ink.Core")]
 [assembly: AssemblyTitle("PPTService.Ink.Core")]
-[assembly: AssemblyVersion("10.0.0.0")]
+[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]

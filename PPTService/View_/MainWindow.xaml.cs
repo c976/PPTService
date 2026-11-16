@@ -142,6 +142,8 @@ namespace PPTService
 			uint exStyle = WindowsApi.GetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle);
 			exStyle |= WindowsApi.WindowFlags.WsExToolWindow;
 			exStyle &= ~WindowsApi.WindowFlags.WsExAppWindow;
+			// 批注层不再全局置顶；靠 Owner 关系保持在 PPT 放映窗口之上。
+			exStyle &= ~WindowsApi.WindowFlags.WsExTopmost;
 			WindowsApi.SetWindowLong(hwnd, WindowsApi.WindowFlags.GwlExstyle, exStyle);
 			// SWP_FRAMECHANGED 让样式立即生效（NOMOVE/NOSIZE/NOZORDER/NOACTIVATE 保持位置与层级）。
 			WindowsApi.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x0037);
@@ -289,7 +291,11 @@ namespace PPTService
 				{
 					_releaseTimer?.Stop();
 					Show();
-					Activate();
+					// 不再 Activate() 抢前台：把焦点留给 PPT 放映窗口，翻页笔 / 方向键
+					// 由 PowerPoint 原生处理（debug 由模拟放映窗口处理），也不会把用户
+					// 刚打开的第三方窗口焦点顶掉。z 序改由 Owner 关系保证「只在 PPT 之上」。
+					WindowStateHelper.MakeAppAbovePpt(this);
+					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 					AdjustFontSizeAndStyle();
 					ViewHelper.BottomArea?.InitializeBottomArea();
 					_currentPageIndex = PptOperator.Instance.CurrentShowPosition;
@@ -634,6 +640,8 @@ namespace PPTService
 			{
 				SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 				{
+					// 放映窗口即将销毁：先解除 Owner，避免系统连带销毁本窗口（下次放映还要复用）。
+					WindowStateHelper.DetachFromPpt(this);
 					if (ConfigHelper.Instance.IsNeedStart() || !IsTransparent)
 					{
 						Opacity = 0.0;
@@ -901,6 +909,17 @@ namespace PPTService
 			// 一律不关，避免误触把刚打开的颜色盘 / 清屏滑杆关掉。
 			if (!AnnotationController.IsPointerOnAnnotationBoard(e.OriginalSource as DependencyObject))
 			{
+				// 批注 Board 在笔 / 橡皮模式下会捕获鼠标与触控。若一次书写结束后捕获
+				// 未被释放，后续点击工具栏 / 翻页按钮会被 Board 吞掉，表现为「画过一笔
+				// 之后翻页按钮、翻页笔都不响应」。点击非绘制区时主动清掉残留捕获。
+				if (Mouse.Captured != null)
+				{
+					Mouse.Capture(null);
+				}
+				if (Stylus.Captured != null)
+				{
+					Stylus.Capture(null);
+				}
 				return;
 			}
 			ViewHelper.BottomArea?.CloseToolPopups();

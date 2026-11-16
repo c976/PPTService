@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
     共享构建版本生成：PPTService / PPTService.Core / PPTService.Collection 三个项目共同导入。
     每个项目在编译前生成自己的 Properties\GitVersionInfo.g.cs（namespace PPTService，internal），
     因此 exe 与两个 dll 拥有完全相同的 ProductVersion / Hash / InformationalVersion。
 
-    build.number 保存「本次构建使用的 build 号」。构建成功后由主程序项目（IsVersionOwner=true）
+    version.prefix 保存版本前缀（如 1.0.0）；build.number 保存「本次构建使用的 build 号」。
+    完整版本 = 前缀 + build 号，构建成功后由主程序项目（IsVersionOwner=true）
     统一 +1 写回，供下一次构建使用。递增放在构建之后，保证同一次构建中三个项目读到同一个值，
     也避免 /m 并行构建或项目依赖顺序导致版本不一致 / 重复递增。
 
@@ -17,7 +18,9 @@
     只使用 MSBuild 4.0 / VS2015 支持的任务参数（未使用 15+ 新增参数）。
   -->
   <PropertyGroup>
-    <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
+    <!-- 版本前缀（x.y.z）集中在仓库根 version.prefix 维护；
+         文件不存在时回落 1.0.0，命令行 -p:VersionPrefix=2.0.0 可临时覆盖。 -->
+    <VersionPrefixFile>$(MSBuildProjectDirectory)\..\version.prefix</VersionPrefixFile>
     <BuildNumberFile>$(MSBuildProjectDirectory)\..\build.number</BuildNumberFile>
     <NsisVersionFile>$(MSBuildProjectDirectory)\..\setup\Version.nsh</NsisVersionFile>
     <GitVersionFile>$(MSBuildProjectDirectory)\Properties\GitVersionInfo.g.cs</GitVersionFile>
@@ -29,12 +32,19 @@
   <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild;CoreCompile"
           Condition=" '$(DesignTimeBuild)' != 'true' ">
     <ItemGroup>
+      <VersionPrefixLine Remove="@(VersionPrefixLine)" />
       <GitHashLine Remove="@(GitHashLine)" />
       <GitVersionLine Remove="@(GitVersionLine)" />
       <BuildNumberLine Remove="@(BuildNumberLine)" />
       <NsisVersionLine Remove="@(NsisVersionLine)" />
     </ItemGroup>
+    <!-- 版本前缀：读 version.prefix（单行），命令行 -p:VersionPrefix 优先。 -->
+    <ReadLinesFromFile File="$(VersionPrefixFile)" Condition="Exists('$(VersionPrefixFile)')">
+      <Output TaskParameter="Lines" ItemName="VersionPrefixLine" />
+    </ReadLinesFromFile>
     <PropertyGroup>
+      <VersionPrefix Condition=" '$(VersionPrefix)' == '' and '@(VersionPrefixLine)' != '' ">@(VersionPrefixLine)</VersionPrefix>
+      <VersionPrefix Condition=" '$(VersionPrefix)' == '' ">1.0.0</VersionPrefix>
       <GitShortHash>unknown</GitShortHash>
       <BuildNumber>795</BuildNumber>
     </PropertyGroup>

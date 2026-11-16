@@ -142,8 +142,15 @@ jobs:
           Write-Host "No previous release found - listing all commits"
           $lines = git log '--pretty=format:- %s'
         }
-        $notes = (@($lines) | Where-Object { $_ }) -join "`n"
-        if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "- $tag" }
+        $changelog = (@($lines) | Where-Object { $_ }) -join "`n"
+        if ([string]::IsNullOrWhiteSpace($changelog)) { $changelog = "- $tag" }
+
+        # 旧版 action 的「编译来源」信息也要保留：基于 xx 分支 xx 提交编译。
+        # 后面再接 ChangeLog（- 提交信息），%s 天然只取 subject 首行。
+        $branch = $env:GITHUB_REF_NAME
+        if ([string]::IsNullOrWhiteSpace($branch)) { $branch = (git rev-parse --abbrev-ref HEAD) }
+        $commit = (git rev-parse --short=8 HEAD).Trim()
+        $notes = "基于 $branch 分支 $commit 提交编译`n`nChangeLog：`n$changelog"
 
         Set-Content -Path './release-notes.md' -Value $notes -Encoding utf8
         Write-Host '----- release notes -----'
