@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -14,8 +13,6 @@ namespace PPTService
 		private static readonly int Offset = 5;
 
 		public static IntPtr LoadingWindowIntPtr;
-
-		private static readonly int MaxFindWindows = 1000;
 
 		private static readonly string RemoteShow = "remoteshow";
 
@@ -45,26 +42,40 @@ namespace PPTService
 			{
 				return true;
 			}
-			Sb.Clear();
-			List<IntPtr> childWindows = WindowsApi.GetChildWindows(PptOperator.Instance.SlideShowWindowIntPtr);
-			childWindows.Add(new WindowInteropHelper(window).Handle);
-			childWindows.Add(LoadingWindowIntPtr);
-			IntPtr intPtr = WindowsApi.WindowFromPoint(new MousePoint(window.Left, window.Top));
-			IntPtr intPtr2 = WindowsApi.WindowFromPoint(new MousePoint(window.Left + window.Width - (double)Offset, window.Top + (double)Offset));
-			IntPtr item = WindowsApi.WindowFromPoint(new MousePoint(window.Left + window.Width - (double)Offset, window.Height - (double)Offset));
-			IntPtr item2 = WindowsApi.WindowFromPoint(new MousePoint(window.Left + window.Width / 2.0 - (double)Offset, window.Top + window.Height / 2.0 - (double)Offset));
-			if (intPtr == intPtr2)
+			PptOperator op = PptOperator.Instance;
+			if (op == null || !op.IsShowing)
 			{
-				WindowsApi.GetWindowText(intPtr, Sb, Sb.Capacity);
-				if (Sb.ToString().ToLower() == RemoteShow)
+				return false;
+			}
+			IntPtr hwnd = op.SlideShowWindowIntPtr;
+			if (hwnd == IntPtr.Zero || !WindowsApi.IsWindow(hwnd) || !WindowsApi.IsWindowVisible(hwnd))
+			{
+				return false;
+			}
+
+			// 旧实现用 WindowFromPoint 在窗口四角/中心做命中测试判断「放映是否仍在前台」。
+			// 覆盖层改成附着放映窗口后不再全局置顶，PPT 一失去焦点（用户打开别的文件、
+			// 点到任务栏等）四个采样点就命中别的窗口，工具栏被置成 Opacity=0 看不见，
+			// 要等焦点回来才恢复——正是「启动时偶尔看不到」的根因。
+			// 现在 ShowBegin/ShowEnd + 放映 HWND 已是可靠真值源，不再按焦点隐藏工具栏。
+			// 仅保留原版对 remoteshow 特殊窗口的处理。
+			try
+			{
+				IntPtr intPtr = WindowsApi.WindowFromPoint(new MousePoint(window.Left, window.Top));
+				IntPtr intPtr2 = WindowsApi.WindowFromPoint(new MousePoint(window.Left + window.Width - (double)Offset, window.Top + (double)Offset));
+				if (intPtr == intPtr2)
 				{
-					WindowsApi.SetWindowPos(intPtr, 0, 0, 1, 0, 0, 69);
-					return true;
+					Sb.Clear();
+					WindowsApi.GetWindowText(intPtr, Sb, Sb.Capacity);
+					if (Sb.ToString().ToLower() == RemoteShow)
+					{
+						WindowsApi.SetWindowPos(intPtr, 0, 0, 1, 0, 0, 69);
+					}
 				}
 			}
-			if (!childWindows.Contains(item2) && !childWindows.Contains(intPtr) && !childWindows.Contains(intPtr2))
+			catch
 			{
-				return childWindows.Contains(item);
+				// 命中测试失败不影响放映状态判断。
 			}
 			return true;
 		}

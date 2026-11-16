@@ -104,6 +104,39 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 从工具栏当前视觉状态反推批注模式，写回 AnnotationController 的真值源。
+		/// Office 原生批注期间按钮只驱动 Office 指针，AnnotationController.CurrentMode
+		/// 仍停留在鼠标；若不同步，切到自实现批注时 SetEnabled(true) 会把 Board 复位成
+		/// 鼠标穿透，出现「工具栏显示笔、却画不出笔迹」。
+		/// 只在 SetEnabled(true) 之前调用，此时 IsEnabled=false，SetMode 只更新状态、
+		/// 不会提前创建 Board。
+		/// </summary>
+		public void SyncModeFromToolbar()
+		{
+			AnnotationController.Mode mode;
+			if (RubberCheckBox.IsChecked == true)
+			{
+				mode = AnnotationController.Mode.Eraser;
+			}
+			else if (SelectedPenImage.Visibility == Visibility.Visible)
+			{
+				mode = AnnotationController.Mode.Pen;
+			}
+			else
+			{
+				mode = AnnotationController.Mode.Mouse;
+			}
+			AnnotationController.SetMode(mode);
+		}
+
+		/// <summary>切回 Office 原生批注时把工具栏视觉复位到「鼠标」，避免残留笔选中态
+		/// 让下一次点笔只弹颜色盘而不真正启用 Office 画笔。</summary>
+		public void ResetToolbarToOfficePointer()
+		{
+			UpdateButtonState(PpSlideShowPointerType.ppSlideShowPointerNone);
+		}
+
 		public bool IsNeedStopMouseLineTrack
 		{
 			get

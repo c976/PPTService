@@ -29,7 +29,8 @@ namespace PPTService
 
 		private static readonly int MinPageTurningTimerSpan = 30;
 
-		private bool _isCheckPptStateFirstly = true;
+		// PPT 进程刚启动 / COM 忙时快速重试；进入放映后由 COM 事件接管。
+		private static readonly int CheckPptRetryInterval = 500;
 
 		private readonly DispatcherTimer _checkPowerPointTimer = new DispatcherTimer();
 
@@ -81,7 +82,7 @@ namespace PPTService
 			get
 			{
 				PpSlideShowPointerType type = PpSlideShowPointerType.ppSlideShowPointerNone;
-				SyntacticSugar.TryCatchAction(() =>
+				SyntacticSugar.TryComAction(() =>
 				{
 					type = _slideShowWindow?.View.PointerType ?? PpSlideShowPointerType.ppSlideShowPointerNone;
 				});
@@ -89,7 +90,7 @@ namespace PPTService
 			}
 			set
 			{
-				SyntacticSugar.TryCatchAction(() =>
+				SyntacticSugar.TryComAction(() =>
 				{
 					if (_slideShowWindow != null)
 					{
@@ -247,7 +248,13 @@ namespace PPTService
 
 		public void UpdatePointerColor()
 		{
-			SyntacticSugar.TryCatchAction(() =>
+			// 放映未开始 / 已结束时不碰 COM：放映窗口的 View 此时常处于销毁中，
+			// 读 PointerColor 会得到 0x80048010 / RPC_E_CALL_REJECTED。
+			if (!IsShowing || _slideShowWindow == null)
+			{
+				return;
+			}
+			SyntacticSugar.TryComAction(() =>
 			{
 				Color red = Colors.Red;
 				string text = (_slideShowWindow?.View.PointerColor.RGB ?? 0).ToString("X2").PadLeft(6, '0');
@@ -260,7 +267,7 @@ namespace PPTService
 
 		public void SetPointerColor(int color)
 		{
-			SyntacticSugar.TryCatchAction(() =>
+			SyntacticSugar.TryComAction(() =>
 			{
 				PointerType = PpSlideShowPointerType.ppSlideShowPointerPen;
 				_slideShowWindow.View.PointerColor.RGB = color;
@@ -275,7 +282,7 @@ namespace PPTService
 		public void ResetPointerColor()
 		{
 			PointerColor = PenSettings.DefaultColor;
-			SyntacticSugar.TryCatchAction(() =>
+			SyntacticSugar.TryComAction(() =>
 			{
 				if (_slideShowWindow != null)
 				{
@@ -338,7 +345,7 @@ namespace PPTService
 					new Action(OnShowBegin), DispatcherPriority.Background);
 				return;
 			}
-			_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(2500.0);
+			_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(CheckPptRetryInterval);
 			_checkPowerPointTimer.Tick += CheckPowerPointProcess;
 			_checkPowerPointTimer.Start();
 			_clearEmptyPowerPointTimer.Interval = TimeSpan.FromMilliseconds(2500.0);
@@ -364,21 +371,46 @@ namespace PPTService
 
 		private void CheckPowerPointProcess()
 		{
-			if (ProcessHelper.HasPowerPointProcess())
+			if (!ProcessHelper.HasPowerPointProcess())
 			{
-				try
+				return;
+			}
+			try
+			{
+				// 已挂上 COM 就不要每轮都反注册/重注册事件（GetActiveObject 在 PPT 忙时会
+				// 抛 RPC_E_CALL_REJECTED，旧逻辑此时把 _app 置空，下一次探测要再等 2.5s，
+				// 累积起来就是「启动后 6~14s 才看到工具栏」）。
+				if (_app == null)
 				{
 					CreatePowerPointApplication();
-					InitializeControl();
-					SetTimerEnable(true);
 				}
-				catch (Exception)
+				InitializeControl();
+				if (IsShowing)
 				{
-					_app = null;
-					ConfigHelper.Instance.IsInitApplicationSuccessful = false;
+					_checkPowerPointTimer.Stop();
+					_clearEmptyPowerPointTimer.Start();
+				}
+				else
+				{
+					// 放映尚未开始（或启动时已经在放映、ShowBegin 事件被错过）：
+					// 保持短间隔轮询，按当前 SlideShowWindows 补一次检测。
+					_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(CheckPptRetryInterval);
+					if (!_checkPowerPointTimer.IsEnabled)
+					{
+						_checkPowerPointTimer.Start();
+					}
+					_clearEmptyPowerPointTimer.Stop();
 				}
 			}
-			_isCheckPptStateFirstly = false;
+			catch (COMException ex) when (SyntacticSugar.IsTransientComException(ex))
+			{
+				// PPT 正忙（RPC_E_CALL_REJECTED 等）：保留已挂接的 _app，下轮快速重试。
+			}
+			catch (Exception)
+			{
+				_app = null;
+				ConfigHelper.Instance.IsInitApplicationSuccessful = false;
+			}
 		}
 
 		private void ClearEmptyPowerPointProcess()
@@ -421,7 +453,11 @@ namespace PPTService
 			else
 			{
 				_clearEmptyPowerPointTimer.Stop();
-				_checkPowerPointTimer.Start();
+				_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(CheckPptRetryInterval);
+				if (!_checkPowerPointTimer.IsEnabled)
+				{
+					_checkPowerPointTimer.Start();
+				}
 			}
 		}
 
@@ -432,26 +468,14 @@ namespace PPTService
 				return;
 			}
 			SlideShowWindows slideShowWindows = _app.SlideShowWindows;
-			if (slideShowWindows.Count <= 0)
+			if (slideShowWindows == null || slideShowWindows.Count <= 0)
 			{
 				return;
 			}
-			if (_isCheckPptStateFirstly)
-			{
-				try
-				{
-					if (_app.ActivePresentation.SlideShowSettings.ShowType != PpSlideShowType.ppShowTypeSpeaker)
-					{
-						AppSlideShowBegin(slideShowWindows[1]);
-					}
-					return;
-				}
-				catch (Exception arg)
-				{
-					Log.WriteError($"InitializeControl：{arg}");
-					return;
-				}
-			}
+			// 启动时放映可能已经开始，SlideShowBegin 事件已经错过。
+			// 旧逻辑首轮对演讲者放映直接 return，只能等用户再开一场；
+			// AppSlideShowBegin 内部已按放映类型判断，非演讲者放映不会触发 ShowBegin，
+			// 因此这里一律按当前放映窗口补一次初始化。
 			AppSlideShowBegin(slideShowWindows[1]);
 		}
 
@@ -524,6 +548,11 @@ namespace PPTService
 		{
 			try
 			{
+				// COM 事件与启动轮询可能同时命中同一场放映，避免重复触发 ShowBegin。
+				if (IsShowing)
+				{
+					return;
+				}
 				if (!ConfigHelper.Instance.IsNeedStart())
 				{
 					return;

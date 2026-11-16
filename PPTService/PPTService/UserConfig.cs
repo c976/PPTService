@@ -243,7 +243,18 @@ namespace PPTService
             // 走到这里，重复 SetEnabled 会重置当前页视图并造成闪烁。
             if (AnnotationController.IsEnabled != cfg.UseSelfAnnotation)
             {
+                if (cfg.UseSelfAnnotation)
+                {
+                    // 从 Office 原生批注切过来：工具栏可能已选中「笔/橡皮」，但
+                    // AnnotationController 的模式还停留在鼠标。先按工具栏真实状态同步，
+                    // 否则 SetEnabled(true) 会把 Board 切回鼠标穿透，界面是笔却画不了。
+                    ViewHelper.BottomArea?.SyncModeFromToolbar();
+                }
                 AnnotationController.SetEnabled(cfg.UseSelfAnnotation);
+                if (!cfg.UseSelfAnnotation)
+                {
+                    ViewHelper.BottomArea?.ResetToolbarToOfficePointer();
+                }
             }
             ViewHelper.MainWindow?.ApplyPageTurningLayout();
             // 翻页按钮可能已处于淡化态：开关一改就立刻应用，不能等下次点击或下一场放映。

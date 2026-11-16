@@ -500,10 +500,15 @@ namespace PPTService
 				// 若继续用它刷新，300ms 定时器会把笔/橡皮立刻重置回「鼠标」。
 				return;
 			}
-			PptOperator.Instance.UpdatePointerColor();
-			if (!ViewHelper.InnerBoardWindow.IsShowing)
+			// PPT 忙时 COM 会被拒绝（RPC_E_CALL_REJECTED）。退避期间跳过本轮探测，
+			// 既不刷日志也不让 300ms 定时器反复阻塞 UI 线程；按钮状态由用户操作直接更新。
+			if (!SyntacticSugar.IsComBusy)
 			{
-				ViewHelper.BottomArea.UpdateButtonState(PptOperator.Instance.PointerType);
+				PptOperator.Instance.UpdatePointerColor();
+				if (!ViewHelper.InnerBoardWindow.IsShowing)
+				{
+					ViewHelper.BottomArea.UpdateButtonState(PptOperator.Instance.PointerType);
+				}
 			}
 		}
 
