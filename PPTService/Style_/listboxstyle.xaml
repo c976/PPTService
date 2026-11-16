@@ -96,7 +96,7 @@
               <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 2 0 0" Width="15" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <TextBlock Name="SlideTextBlock" FontSize="6" HorizontalAlignment="Center" Text="{Binding Index}" />
+              <TextBlock Name="SlideTextBlock" FontSize="6" HorizontalAlignment="Center" Text="{Binding Index}" Foreground="{DynamicResource Theme.ThumbnailText}" />
             </Grid>
             <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}">
               <Grid Background="{DynamicResource Theme.SettingsControl}">
@@ -143,7 +143,7 @@
               <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 2 0 0" Width="30" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <TextBlock Name="SlideTextBlock" HorizontalAlignment="Center" Text="{Binding Index}" />
+              <TextBlock Name="SlideTextBlock" HorizontalAlignment="Center" Text="{Binding Index}" Foreground="{DynamicResource Theme.ThumbnailText}" />
             </Grid>
             <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}">
               <Grid Background="{DynamicResource Theme.SettingsControl}">
@@ -190,7 +190,7 @@
               <Path Name="SlideIndexBackgroundPath" Data="M0,0 L30,0 L40,30 L0,30 L0,0" Stroke="{DynamicResource Theme.BorderBrush}" Fill="{DynamicResource Theme.SettingsControl}" Stretch="Fill" />
             </Grid>
             <Grid Name="SlideIndexGrid" Row="0" RowSpan="2" Margin="3 1 0 0" Width="45" HorizontalAlignment="Left" VerticalAlignment="Top">
-              <TextBlock Name="SlideTextBlock" FontSize="21" HorizontalAlignment="Center" Text="{Binding Index}" />
+              <TextBlock Name="SlideTextBlock" FontSize="21" HorizontalAlignment="Center" Text="{Binding Index}" Foreground="{DynamicResource Theme.ThumbnailText}" />
             </Grid>
             <Border Name="SlideBorder" Grid.Row="1" BorderThickness="1" Margin="3" BorderBrush="{DynamicResource Theme.BorderBrush}" SnapsToDevicePixels="True">
               <Grid Background="{DynamicResource Theme.SettingsControl}">

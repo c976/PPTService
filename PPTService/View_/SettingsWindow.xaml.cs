@@ -95,6 +95,81 @@ namespace PPTService
             ThemeManager.Apply(cfg);
         }
 
+        // 当前正在拖滑条的触点：只响应这一个触点，避免多指同时命中导致数值跳动。
+        private TouchDevice _opacityTouchDevice;
+
+        /// <summary>
+        /// 滑条触控支持：原生 Slider 只有按在 Thumb 上才能拖，触控下很难命中。
+        /// 这里在整条轨道上捕获触摸，按触点 X 直接换算 Value，
+        /// 因此在条上任意位置按下并滑动都能调节；鼠标仍走原生 Thumb / 点击跳转。
+        /// </summary>
+        private void ToolbarOpacitySlider_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            Slider slider = sender as Slider;
+            if (slider == null)
+            {
+                return;
+            }
+            _opacityTouchDevice = e.TouchDevice;
+            try
+            {
+                slider.CaptureTouch(e.TouchDevice);
+            }
+            catch (ArgumentException)
+            {
+                // 触点已被其它元素捕获时不重复捕获；下面的按位置换算仍然有效。
+            }
+            SetOpacityFromTouch(slider, e);
+            e.Handled = true;
+        }
+
+        private void ToolbarOpacitySlider_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            if (_opacityTouchDevice != e.TouchDevice)
+            {
+                return;
+            }
+            SetOpacityFromTouch(sender as Slider, e);
+            e.Handled = true;
+        }
+
+        private void ToolbarOpacitySlider_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            if (_opacityTouchDevice != e.TouchDevice)
+            {
+                return;
+            }
+            Slider slider = sender as Slider;
+            if (slider != null)
+            {
+                try
+                {
+                    slider.ReleaseTouchCapture(e.TouchDevice);
+                }
+                catch (ArgumentException)
+                {
+                    // 捕获已由系统释放。
+                }
+            }
+            _opacityTouchDevice = null;
+            e.Handled = true;
+        }
+
+        private static void SetOpacityFromTouch(Slider slider, TouchEventArgs e)
+        {
+            if (slider == null || slider.ActualWidth <= 0.0)
+            {
+                return;
+            }
+            Point pos = e.GetTouchPoint(slider).Position;
+            // 扣除 Thumb 半宽，保证两端能取到 20% / 100% 两个端点。
+            const double thumbWidth = 16.0;
+            double usable = Math.Max(1.0, slider.ActualWidth - thumbWidth);
+            double ratio = (pos.X - thumbWidth / 2.0) / usable;
+            ratio = Math.Max(0.0, Math.Min(1.0, ratio));
+            slider.Value = slider.Minimum + ratio * (slider.Maximum - slider.Minimum);
+        }
+
         /// <summary>任何改动立即写入配置并应用到运行中的界面，无需「确定 / 应用」。</summary>
         private void SaveAndApply()
         {

@@ -8,18 +8,18 @@ namespace PPTService
 	/// <summary>
 	/// 界面主题：浅色 / 深色 / 跟随系统。
 	///
-	/// 通过 Application.Resources 里的一组 DynamicResource 画刷统一驱动工具栏面板、
-	/// 颜色盘 / 清屏滑杆弹窗、翻页按钮底板、图标、设置窗口底板与文字等配色。
-	/// 按用户定版要求：**WPF 原生按钮 / 下拉框 / 复选框等控件一律保持系统默认配色**，
-	/// 不覆盖 SystemColors，也不给它们套主题画刷；板中板白板画布恒为白色。
+	/// 【工具栏透明度定版规则】透明度只作用于「背景」画刷的 alpha：
+	///   - 背景字典（PanelBackground / PopupBackground / PageButtonBackground）
+	///     随滑条变化，RGB 由明暗主题决定；
+	///   - 内容字典（图标 / 文字 / 设置窗口 / 遮罩 / 滑杆轨道等）画刷 alpha
+	///     恒为 0xFF（100% 不透明），并且拖动透明度滑条时**完全不重建、不重挂**，
+	///     图标与文字的 DynamicResource 引用保持不变。
+	///   - 绝不使用 UIElement.Opacity 实现背景透明度（那是「翻页按钮自动淡化」
+	///     用的整块虚化，会把图标和文字一起变淡，与这里的需求不同）。
 	///
-	/// 工具栏相关的半透明底板（PanelBackground / PopupBackground / PageButtonBackground）
-	/// 统一使用用户设置的「工具栏透明度」（20–100%，默认 70%），只改变画刷 alpha，
-	/// RGB 仍由明暗主题决定；设置窗口底板、二维码遮罩、滑杆轨道、白板画布不参与。
-	///
-	/// 切换主题时替换画刷对象（ResourceDictionary 会冻结放进去的 Freezable，
-	/// 不能直接改已冻结画刷的 Color），并重新挂载资源字典以触发 ResourcesChanged，
-	/// 让所有 {DynamicResource Theme.*}（含 DrawingImage 里的图标画刷）即时刷新。
+	/// 画刷放进 ResourceDictionary 后会被冻结，不能直接改已冻结画刷的 Color，
+	/// 因此每次刷新都替换整支画刷对象，并重挂对应字典触发 ResourcesChanged，
+	/// 让 {DynamicResource Theme.*}（含 DrawingImage 里的图标画刷）即时刷新。
 	///
 	/// 「跟随系统」读取 HKCU\...\Themes\Personalize\AppsUseLightTheme，
 	/// 并订阅 SystemEvents.UserPreferenceChanged，在系统主题变化后自动重新应用。
@@ -30,11 +30,21 @@ namespace PPTService
 		public const string ThemeDark = "Dark";
 		public const string ThemeSystem = "System";
 
-		// 自定义画刷键：XAML 里统一用 {DynamicResource Theme.Xxx} 引用。
-		private static readonly string[] BrushKeys =
+		// 背景低于此不透明度时，幻灯片（多为白底）会大量透出，深色主题的浅灰图标
+		// 会失去对比度。仅跨越此阈值时切换工具栏内容的 RGB，alpha 仍恒 0xFF。
+		private const int LowOpacityThreshold = 55;
+
+		// 唯一受「工具栏透明度」影响的三个背景画刷。
+		private static readonly string[] BackgroundKeys =
 		{
 			"Theme.PanelBackground",        // 工具栏面板 / 退出按钮
 			"Theme.PopupBackground",        // 颜色盘 / 清屏滑杆弹窗 / 消息提示
+			"Theme.PageButtonBackground"    // 翻页按钮底板
+		};
+
+		// 内容画刷：alpha 恒 0xFF，不随透明度滑条变化。
+		private static readonly string[] ContentKeys =
+		{
 			"Theme.SliderBackground",       // 清屏滑杆轨道
 			"Theme.PrimaryText",            // 页码 / 主要文字
 			"Theme.HintText",               // 滑杆提示 / 次要文字
@@ -43,14 +53,17 @@ namespace PPTService
 			"Theme.SettingsForeground",     // 设置窗口文字
 			"Theme.SettingsControl",        // 缩略图底板 / 放大镜按钮条
 			"Theme.SettingsMutedText",      // 说明性文字
+			"Theme.ThumbnailText",          // 缩略图页码（压在不透明设置面板上，只随明暗主题）
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
-			"Theme.PageButtonBackground",   // 翻页按钮底板（跟随工具栏透明度）
 			"Theme.IconBrush"               // 工具栏矢量图标：浅色深灰 / 深色浅灰
 		};
 
-		private static ResourceDictionary _brushes;
+		private static ResourceDictionary _backgroundBrushes;
+		private static ResourceDictionary _contentBrushes;
 		private static string _theme = ThemeLight;
 		private static int _toolbarOpacity = UserConfig.DefaultToolbarOpacity;
+		private static bool _contentReady;
+		private static bool _lowContrastMode;
 		private static bool _systemEventsHooked;
 
 		public static string Normalize(string theme)
@@ -76,10 +89,18 @@ namespace PPTService
 
 		public static void Apply(string theme, int toolbarOpacity)
 		{
-			_theme = Normalize(theme);
-			_toolbarOpacity = UserConfig.NormalizeToolbarOpacity(toolbarOpacity);
+			string normalized = Normalize(theme);
+			int opacity = UserConfig.NormalizeToolbarOpacity(toolbarOpacity);
+			bool lowContrast = opacity < LowOpacityThreshold;
+			// 只在明暗主题 / 高对比模式真的变化（或首次）时重建内容字典；
+			// 同一区间内拖动透明度滑条走 backgroundOnly，图标 / 文字画刷连重查都不会发生。
+			bool themeChanged = !_contentReady || normalized != _theme || lowContrast != _lowContrastMode;
+			_theme = normalized;
+			_toolbarOpacity = opacity;
+			_lowContrastMode = lowContrast;
 			HookSystemEvents();
-			Refresh();
+			Refresh(!themeChanged);
+			_contentReady = true;
 		}
 
 		/// <summary>系统主题变化时的即时刷新（仅「跟随系统」模式生效）。</summary>
@@ -94,7 +115,7 @@ namespace PPTService
 			{
 				return;
 			}
-			app.Dispatcher.BeginInvoke(new Action(Refresh));
+			app.Dispatcher.BeginInvoke(new Action(() => Refresh(false)));
 		}
 
 		private static void HookSystemEvents()
@@ -114,73 +135,110 @@ namespace PPTService
 			}
 		}
 
-		private static void Refresh()
+		/// <param name="backgroundOnly">
+		/// true = 只重建背景字典（拖动透明度滑条）；内容画刷保持原对象不动。
+		/// false = 明暗主题变化，内容画刷也要按新配色重建并重挂。
+		/// </param>
+		private static void Refresh(bool backgroundOnly)
 		{
 			Application app = Application.Current;
 			if (app == null)
 			{
 				return;
 			}
-			EnsureDictionary();
+			EnsureDictionaries(app);
 			bool dark = IsDark(_theme);
-			// 工具栏相关底板统一使用同一个 alpha（RGB 仍随明暗主题变化）；
-			// 只有「背景」画刷读取工具栏透明度，文字 / 图标一律由 SetContent 固定 0xFF。
-			// 图标里以 <SolidColorBrush Color="#FF666666"> 形式写的深灰（带 Transform，
-			// 不便改成 Brush 属性）用 Color 级资源跟随主题。
-			app.Resources["Theme.IconColor"] = dark
-				? Color.FromRgb(0xD8, 0xD8, 0xD8)
-				: Color.FromRgb(0x66, 0x66, 0x66);
+
+			if (!backgroundOnly)
+			{
+				// 工具栏内容（图标 / 页码 / 提示文字）：alpha 恒 0xFF，只按「实际可见背景」
+				// 选高对比 RGB。深色主题下背景很透时幻灯片白底会透出来，浅灰图标会消失，
+				// 此时切回深灰；默认 70% 不透明时仍是用户定版的「深色浅灰图标」。
+				bool lightContent = dark && !_lowContrastMode;
+				_contentBrushes["Theme.IconColor"] = lightContent
+					? Color.FromRgb(0xD8, 0xD8, 0xD8)
+					: Color.FromRgb(0x66, 0x66, 0x66);
+				if (lightContent)
+				{
+					SetContent("Theme.PrimaryText", 0xEC, 0xEC, 0xEC);
+					SetContent("Theme.HintText", 0xB4, 0xB4, 0xB4);
+					SetContent("Theme.IconBrush", 0xD8, 0xD8, 0xD8);
+				}
+				else
+				{
+					SetContent("Theme.PrimaryText", 0x66, 0x66, 0x66);
+					SetContent("Theme.HintText", 0x98, 0x98, 0x98);
+					SetContent("Theme.IconBrush", 0x66, 0x66, 0x66);
+				}
+
+				// 以下只随明暗主题，绝不受背景透明度影响：设置窗口、缩略图、遮罩、滑杆轨道。
+				// 缩略图页码用独立的 ThumbnailText（它压在不透明的设置面板底板上，
+				// 不能跟翻页区页码一起按背景透明度换色）。
+				if (dark)
+				{
+					SetContent("Theme.SliderBackground", 0x4A, 0x4A, 0x52);
+					Set("Theme.BorderBrush", 0x80, 0xB0, 0xB0, 0xB0);
+					SetContent("Theme.SettingsBackground", 0x23, 0x23, 0x28);
+					SetContent("Theme.SettingsForeground", 0xF0, 0xF0, 0xF0);
+					SetContent("Theme.SettingsControl", 0x35, 0x35, 0x3C);
+					SetContent("Theme.SettingsMutedText", 0xA8, 0xA8, 0xA8);
+					SetContent("Theme.ThumbnailText", 0xEC, 0xEC, 0xEC);
+					Set("Theme.MaskBackground", 0xB3, 0x00, 0x00, 0x00);
+				}
+				else
+				{
+					SetContent("Theme.SliderBackground", 0xEB, 0xEB, 0xED);
+					Set("Theme.BorderBrush", 0x80, 0x66, 0x66, 0x66);
+					SetContent("Theme.SettingsBackground", 0xFF, 0xFF, 0xFF);
+					SetContent("Theme.SettingsForeground", 0x1A, 0x1A, 0x1A);
+					SetContent("Theme.SettingsControl", 0xF7, 0xF7, 0xF7);
+					SetContent("Theme.SettingsMutedText", 0x80, 0x80, 0x80);
+					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
+					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
+				}
+				// 替换画刷对象后重挂字典，触发 ResourcesChanged（仅主题 / 高对比模式切换时）。
+				app.Resources.MergedDictionaries.Remove(_contentBrushes);
+				app.Resources.MergedDictionaries.Add(_contentBrushes);
+			}
+
+			// 背景画刷：唯一读取工具栏透明度的地方，每次刷新都按当前 alpha 重建。
 			if (dark)
 			{
 				SetBackground("Theme.PanelBackground", 0x2B, 0x2B, 0x31);
 				SetBackground("Theme.PopupBackground", 0x2B, 0x2B, 0x31);
-				SetContent("Theme.SliderBackground", 0x4A, 0x4A, 0x52);
-				SetContent("Theme.PrimaryText", 0xEC, 0xEC, 0xEC);
-				SetContent("Theme.HintText", 0xB4, 0xB4, 0xB4);
-				Set("Theme.BorderBrush", 0x80, 0xB0, 0xB0, 0xB0);
-				SetContent("Theme.SettingsBackground", 0x23, 0x23, 0x28);
-				SetContent("Theme.SettingsForeground", 0xF0, 0xF0, 0xF0);
-				SetContent("Theme.SettingsControl", 0x35, 0x35, 0x3C);
-				SetContent("Theme.SettingsMutedText", 0xA8, 0xA8, 0xA8);
-				Set("Theme.MaskBackground", 0xB3, 0x00, 0x00, 0x00);
 				SetBackground("Theme.PageButtonBackground", 0x2B, 0x2B, 0x31);
-				SetContent("Theme.IconBrush", 0xD8, 0xD8, 0xD8);
 			}
 			else
 			{
 				SetBackground("Theme.PanelBackground", 0xFF, 0xFF, 0xFF);
 				SetBackground("Theme.PopupBackground", 0xFF, 0xFF, 0xFF);
-				SetContent("Theme.SliderBackground", 0xEB, 0xEB, 0xED);
-				SetContent("Theme.PrimaryText", 0x66, 0x66, 0x66);
-				SetContent("Theme.HintText", 0x98, 0x98, 0x98);
-				Set("Theme.BorderBrush", 0x80, 0x66, 0x66, 0x66);
-				SetContent("Theme.SettingsBackground", 0xFF, 0xFF, 0xFF);
-				SetContent("Theme.SettingsForeground", 0x1A, 0x1A, 0x1A);
-				SetContent("Theme.SettingsControl", 0xF7, 0xF7, 0xF7);
-				SetContent("Theme.SettingsMutedText", 0x80, 0x80, 0x80);
-				Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				SetBackground("Theme.PageButtonBackground", 0xFF, 0xFF, 0xFF);
-				SetContent("Theme.IconBrush", 0x66, 0x66, 0x66);
 			}
-			// 只替换字典里的画刷对象不会让「已解析」的 DynamicResource 重新查找。
-			// 移出再挂回同一个字典可触发 ResourcesChanged，让所有引用（含设置窗口
-			// 打开期间）立刻取到新画刷，无需关掉窗口重开。
-			app.Resources.MergedDictionaries.Remove(_brushes);
-			app.Resources.MergedDictionaries.Add(_brushes);
+			app.Resources.MergedDictionaries.Remove(_backgroundBrushes);
+			app.Resources.MergedDictionaries.Add(_backgroundBrushes);
 		}
 
-		private static void EnsureDictionary()
+		private static void EnsureDictionaries(Application app)
 		{
-			if (_brushes != null)
+			if (_backgroundBrushes == null)
 			{
-				return;
+				_backgroundBrushes = new ResourceDictionary();
+				foreach (string key in BackgroundKeys)
+				{
+					// 占位用不透明白色：万一后续配色刷新失败，界面仍是原版浅色外观。
+					_backgroundBrushes[key] = new SolidColorBrush(Colors.White);
+				}
+				app.Resources.MergedDictionaries.Add(_backgroundBrushes);
 			}
-			_brushes = new ResourceDictionary();
-			foreach (string key in BrushKeys)
+			if (_contentBrushes == null)
 			{
-				// 占位用不透明白色：万一后续配色刷新失败，界面仍是原版浅色外观，
-				// 不会因为 DynamicResource 取到透明画刷而「看不见」。
-				_brushes[key] = new SolidColorBrush(Colors.White);
+				_contentBrushes = new ResourceDictionary();
+				foreach (string key in ContentKeys)
+				{
+					_contentBrushes[key] = new SolidColorBrush(Colors.White);
+				}
+				_contentBrushes["Theme.IconColor"] = Color.FromRgb(0x66, 0x66, 0x66);
+				app.Resources.MergedDictionaries.Add(_contentBrushes);
 			}
 		}
 
@@ -196,7 +254,7 @@ namespace PPTService
 			Set(key, BackgroundAlpha(), r, g, b);
 		}
 
-		/// <summary>文字 / 图标画刷：alpha 恒为 0xFF，永远不随背景透明度变化。</summary>
+		/// <summary>文字 / 图标画刷：alpha 恒为 0xFF（100% 不透明），永远不随背景透明度变化。</summary>
 		private static void SetContent(string key, byte r, byte g, byte b)
 		{
 			Set(key, 0xFF, r, g, b);
@@ -206,8 +264,11 @@ namespace PPTService
 		{
 			// ResourceDictionary 会自动冻结（Freeze）放进去的 Freezable，
 			// 已冻结的画刷不能改 Color 属性（抛 InvalidOperationException）。
-			// 因此每次刷新都替换整支画刷对象，再由 Refresh() 重新挂载字典触发刷新。
-			_brushes[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+			// 因此每次刷新都替换整支画刷对象，再由 Refresh() 重挂对应字典触发刷新。
+			ResourceDictionary dict = Array.IndexOf(BackgroundKeys, key) >= 0
+				? _backgroundBrushes
+				: _contentBrushes;
+			dict[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
 		}
 
 		/// <summary>当前生效的明暗（跟随系统时读注册表，读取失败按浅色处理）。</summary>

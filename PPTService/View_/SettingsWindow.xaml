@@ -10,7 +10,8 @@
   <!-- 原生按钮 / 下拉框 / 复选框的背景与边框保持系统默认配色；
        只把文字前景接到主题，保证深色下可读。所有改动即时生效，无需确定 / 应用。 -->
   <Grid>
-    <Border Width="480" Height="612" Background="{DynamicResource Theme.SettingsBackground}" CornerRadius="10"
+    <!-- 高度按内容自适应：固定 612 时底部会留一大片空白；上限 740 保证不超过 768 屏。 -->
+    <Border Width="480" Height="Auto" MaxHeight="740" Background="{DynamicResource Theme.SettingsBackground}" CornerRadius="10"
             BorderBrush="{DynamicResource Theme.BorderBrush}" BorderThickness="1"
             HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="True">
       <Grid Margin="14">
@@ -125,10 +126,16 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
+              <!-- 触控：默认 Slider 必须精确按在 Thumb 上才能拖，手指很难命中；
+                   整条轨道捕获触摸后按触点位置直接换算 Value（见代码后置）。
+                   IsMoveToPointEnabled 让鼠标点击轨道任意位置也能直接跳转。 -->
               <Slider Name="ToolbarOpacitySlider" Grid.Column="0" Minimum="20" Maximum="100"
                       SmallChange="1" LargeChange="5" TickFrequency="1" IsSnapToTickEnabled="True"
-                      Value="70" VerticalAlignment="Center" Margin="0,0,8,0"
-                      ValueChanged="ToolbarOpacitySlider_ValueChanged" />
+                      IsMoveToPointEnabled="True" Value="70" VerticalAlignment="Center" Margin="0,0,8,0"
+                      ValueChanged="ToolbarOpacitySlider_ValueChanged"
+                      PreviewTouchDown="ToolbarOpacitySlider_PreviewTouchDown"
+                      PreviewTouchMove="ToolbarOpacitySlider_PreviewTouchMove"
+                      PreviewTouchUp="ToolbarOpacitySlider_PreviewTouchUp" />
               <TextBlock Name="ToolbarOpacityValueTextBlock" Grid.Column="1" Width="38" Text="70%"
                          VerticalAlignment="Center" HorizontalAlignment="Right"
                          Foreground="{DynamicResource Theme.SettingsForeground}" />
