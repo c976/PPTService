@@ -5,8 +5,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -294,7 +292,6 @@ namespace PPTService
 				{
 					_releaseTimer?.Stop();
 					Show();
-					Log.WriteDebug($"[SHOW] Show() done, IsShowing={PptOperator.Instance?.IsShowing} hwnd={PptOperator.Instance?.SlideShowWindowIntPtr} this={new WindowInteropHelper(this).Handle}");
 					// 显示态先行：XAML 初始 Opacity="0"，必须尽早置 1。
 					// 下面 SetPageIndex / ShowRangeType 等会访问 COM，放映刚启动时
 					// 可能被 RPC_E_CALL_REJECTED 拒绝而抛异常；整个回调只在更外层的
@@ -521,19 +518,11 @@ namespace PPTService
 			}
 		}
 
-		// 显隐诊断：仅在判定结果相对上一次变化时才写，避免每 300ms 刷屏。
-		private bool? _lastDiagOpacityVisible;
-
 		private void UpdateWindowOpacity()
 		{
 			if (!_isAnalyzing)
 			{
 				bool pptShowingState = WindowStateHelper.GetPptShowingState(this);
-				if (_lastDiagOpacityVisible != pptShowingState)
-				{
-					_lastDiagOpacityVisible = pptShowingState;
-					Log.WriteDebug($"[VIS] pptShowing={pptShowingState} IsShowing={PptOperator.Instance?.IsShowing} hwnd={PptOperator.Instance?.SlideShowWindowIntPtr} Opacity(before)={Opacity}");
-				}
 				if (IsTransparent & pptShowingState)
 				{
 					UpdatePageIndex();
@@ -662,7 +651,6 @@ namespace PPTService
 			{
 				SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 				{
-					Log.WriteDebug($"[ENDBEGIN] IsNeedStart={ConfigHelper.Instance.IsNeedStart()} IsTransparent={IsTransparent} Opacity={Opacity} foreground={WindowsApi.GetForegroundWindow()}");
 					// 放映窗口即将销毁：先解除 Owner，避免系统连带销毁本窗口（下次放映还要复用）。
 					WindowStateHelper.DetachFromPpt(this);
 					if (ConfigHelper.Instance.IsNeedStart() || !IsTransparent)
@@ -861,36 +849,6 @@ namespace PPTService
 			SlideItems.Add(item);
 		}
 
-		// z 序诊断：放映态下每 ~2s 写一次，记录覆盖层上方紧邻窗口与自身尺寸。
-		// 上方若是 PPT 放映窗口 = 被盖住（z 序问题）；若是桌面/其它 = 尺寸位置问题。
-		private DateTime _lastZOrderDiag = DateTime.MinValue;
-
-		private void LogOverlayZOrderDiag()
-		{
-			if ((DateTime.Now - _lastZOrderDiag).TotalSeconds < 2.0)
-			{
-				return;
-			}
-			_lastZOrderDiag = DateTime.Now;
-			try
-			{
-				IntPtr hwnd = new WindowInteropHelper(this).Handle;
-				IntPtr above = WindowsApi.GetWindow(hwnd, GetWindowCmd.GwHwndprev);
-				StringBuilder sb = new StringBuilder(256);
-				if (above != IntPtr.Zero)
-				{
-					WindowsApi.GetWindowText(above, sb, sb.Capacity);
-				}
-				WindowRect rect;
-				WindowsApi.GetWindowRect(new HandleRef(this, hwnd), out rect);
-				Log.WriteDebug($"[LAYER] overlay={hwnd} size={rect.Right - rect.Left}x{rect.Bottom - rect.Top} above={above}('{sb}') pptHwnd={PptOperator.Instance?.SlideShowWindowIntPtr}");
-			}
-			catch (Exception ex)
-			{
-				Log.WriteDebug("[LAYER] failed: " + ex.Message);
-			}
-		}
-
 		private void UpdateTimerTick(object sender, EventArgs e)
 		{
 			if (IsExiting || !IsNeedUpdateTimer || !PptOperator.Instance.IsShowing)
@@ -914,7 +872,6 @@ namespace PPTService
 						if (Opacity > 0.0)
 						{
 							WindowStateHelper.MakeAppAbovePpt(this);
-							LogOverlayZOrderDiag();
 						}
 					}
 				}
