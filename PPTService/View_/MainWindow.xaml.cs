@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -859,6 +861,36 @@ namespace PPTService
 			SlideItems.Add(item);
 		}
 
+		// z 序诊断：放映态下每 ~2s 写一次，记录覆盖层上方紧邻窗口与自身尺寸。
+		// 上方若是 PPT 放映窗口 = 被盖住（z 序问题）；若是桌面/其它 = 尺寸位置问题。
+		private DateTime _lastZOrderDiag = DateTime.MinValue;
+
+		private void LogOverlayZOrderDiag()
+		{
+			if ((DateTime.Now - _lastZOrderDiag).TotalSeconds < 2.0)
+			{
+				return;
+			}
+			_lastZOrderDiag = DateTime.Now;
+			try
+			{
+				IntPtr hwnd = new WindowInteropHelper(this).Handle;
+				IntPtr above = WindowsApi.GetWindow(hwnd, GetWindowCmd.GwHwndprev);
+				StringBuilder sb = new StringBuilder(256);
+				if (above != IntPtr.Zero)
+				{
+					WindowsApi.GetWindowText(above, sb, sb.Capacity);
+				}
+				WindowRect rect;
+				WindowsApi.GetWindowRect(new HandleRef(this, hwnd), out rect);
+				Log.WriteDebug($"[LAYER] overlay={hwnd} size={rect.Right - rect.Left}x{rect.Bottom - rect.Top} above={above}('{sb}') pptHwnd={PptOperator.Instance?.SlideShowWindowIntPtr}");
+			}
+			catch (Exception ex)
+			{
+				Log.WriteDebug("[LAYER] failed: " + ex.Message);
+			}
+		}
+
 		private void UpdateTimerTick(object sender, EventArgs e)
 		{
 			if (IsExiting || !IsNeedUpdateTimer || !PptOperator.Instance.IsShowing)
@@ -882,6 +914,7 @@ namespace PPTService
 						if (Opacity > 0.0)
 						{
 							WindowStateHelper.MakeAppAbovePpt(this);
+							LogOverlayZOrderDiag();
 						}
 					}
 				}

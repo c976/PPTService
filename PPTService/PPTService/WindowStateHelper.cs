@@ -261,7 +261,11 @@ namespace PPTService
 			}
 			else
 			{
-				WindowsApi.SetWindowPos(hwnd, owner, 0, 0, 0, 0, flags);
+				// owner 非 topmost：用 HWND_TOP(0) 把覆盖层提到「非置顶 z 序组」的最前，
+				// 稳定压在放映窗口之上，又不进 HWND_TOPMOST 组——第三方窗口仍可盖住它。
+				// 不要用 owner 句柄作插入点：owned window 与 owner 的 z 序绑定，实测
+				// 放映窗口仍会压在覆盖层之上（右键激活才临时恢复）。
+				WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, flags);
 			}
 		}
 
