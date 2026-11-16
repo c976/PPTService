@@ -292,6 +292,13 @@ namespace PPTService
 				{
 					_releaseTimer?.Stop();
 					Show();
+					// 显示态先行：XAML 初始 Opacity="0"，必须尽早置 1。
+					// 下面 SetPageIndex / ShowRangeType 等会访问 COM，放映刚启动时
+					// 可能被 RPC_E_CALL_REJECTED 拒绝而抛异常；整个回调只在更外层的
+					// TryCatchAction 里兜底，若 Opacity 排在后面，异常会让它停在 0
+					// ——表现为「放 PPT 后工具栏不显示，右键一下（COM 通了）才出现」。
+					IsExiting = false;
+					Opacity = 1.0;
 					// 不再 Activate() 抢前台：把焦点留给 PPT 放映窗口，翻页笔 / 方向键
 					// 由 PowerPoint 原生处理（debug 由模拟放映窗口处理），也不会把用户
 					// 刚打开的第三方窗口焦点顶掉。z 序改由 Owner 关系保证「只在 PPT 之上」。
@@ -302,8 +309,6 @@ namespace PPTService
 					_currentPageIndex = PptOperator.Instance.CurrentShowPosition;
 					SetPageIndex(_currentPageIndex);
 					SetLeftRightOpacity();
-					IsExiting = false;
-					Opacity = 1.0;
 					AnnotationController.SetEnabled(UserConfigManager.Load().UseSelfAnnotation);
 					// 重新放映 / 切换 PPT：清掉上一场残留笔迹，再切到当前页
 					AnnotationController.Reset();

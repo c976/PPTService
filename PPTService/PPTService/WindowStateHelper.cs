@@ -43,15 +43,20 @@ namespace PPTService
 				return true;
 			}
 			PptOperator op = PptOperator.Instance;
+			// 工具栏显隐只认 ShowBegin/ShowEnd 维护的放映状态这一权威真值源。
+			//
+			// 曾经额外用 IsWindow/IsWindowVisible 检查放映窗口 HWND：放映刚启动、
+			// 切显示器或 COM 忙时该 HWND 会短暂失效/不可见，这里就返回 false，
+			// 把工具栏置成 Opacity=0 看不见；用户在 PPT 页面右键一下会激活放映
+			// 窗口、泵通 COM 消息，HWND 恢复可见，下一 tick 工具栏又冒出来——
+			// 这正是「放 PPT 后批注栏不显示、右键一下才出现」，且全程无异常、
+			// log 干净。放映窗口 HWND 的生命周期已由 MakeAppAbovePpt/DetachFromPpt
+			// 负责，这里不再重复按瞬时窗口状态隐藏工具栏。
 			if (op == null || !op.IsShowing)
 			{
 				return false;
 			}
 			IntPtr hwnd = op.SlideShowWindowIntPtr;
-			if (hwnd == IntPtr.Zero || !WindowsApi.IsWindow(hwnd) || !WindowsApi.IsWindowVisible(hwnd))
-			{
-				return false;
-			}
 
 			// 旧实现用 WindowFromPoint 在窗口四角/中心做命中测试判断「放映是否仍在前台」。
 			// 覆盖层改成附着放映窗口后不再全局置顶，PPT 一失去焦点（用户打开别的文件、
