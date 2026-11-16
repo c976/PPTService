@@ -226,10 +226,19 @@ namespace PPTService
 			}
 		}
 
+		// owner topmost 状态诊断：只在变化时写，避免每 tick 刷屏。
+		private static bool? _lastOwnerTopmost;
+
 		/// <summary>
-		/// 把覆盖层插到放映窗口 owner 之上（紧邻其上），但不用 HWND_TOPMOST ——
-		/// 这样它只压在 PPT 放映窗口之上，不进入全局置顶组，第三方置顶窗口仍可盖住它。
-		/// SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE：只调 z 序，不改尺寸/位置/焦点。
+		/// 把覆盖层维持在放映窗口之上。
+		/// 关键：PowerPoint 放映窗口自身是 HWND_TOPMOST。Windows 的 z 序规则是
+		/// 「所有 topmost 窗口恒定压在所有非 topmost 窗口之上」，所以用 owner 作为
+		/// SetWindowPos 的插入点是没用的——覆盖层仍属于非 topmost 组，会被放映窗口
+		/// 压在下面；只有右键激活 owner 时 Windows 才临时把 owned window 带上来，
+		/// 随即又被盖回去（右键后显示、一闪而过）。
+		/// 因此当 owner 带 WS_EX_TOPMOST 时，覆盖层必须也用 HWND_TOPMOST 才能真正
+		/// 待在它上面；owner 非 topmost 时才退回「插到 owner 之上」的普通层级。
+		/// 这不会抢焦点：始终带 SWP_NOACTIVATE，只调 z 序，不改尺寸/位置。
 		/// </summary>
 		private static void KeepAboveOwner(IntPtr hwnd, IntPtr owner)
 		{
@@ -237,7 +246,23 @@ namespace PPTService
 			{
 				return;
 			}
-			WindowsApi.SetWindowPos(hwnd, owner, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
+			uint ownerExStyle = WindowsApi.GetWindowLong(owner, WindowsApi.WindowFlags.GwlExstyle);
+			bool ownerTopmost = (ownerExStyle & WindowsApi.WindowFlags.WsExTopmost) != 0u;
+			if (_lastOwnerTopmost != ownerTopmost)
+			{
+				_lastOwnerTopmost = ownerTopmost;
+				Log.WriteDebug($"[ZORDER] ownerTopmost={ownerTopmost} ownerEx={ownerExStyle:X} hwnd={hwnd}");
+			}
+			// 0x0003 = SWP_NOSIZE|SWP_NOMOVE，0x0010 = SWP_NOACTIVATE。
+			int flags = 0x0001 | 0x0002 | 0x0010;
+			if (ownerTopmost)
+			{
+				WindowsApi.SetWindowPos(hwnd, -1, 0, 0, 0, 0, flags);
+			}
+			else
+			{
+				WindowsApi.SetWindowPos(hwnd, owner, 0, 0, 0, 0, flags);
+			}
 		}
 
 		/// <summary>放映结束 / 放映窗口销毁前解除 Owner，避免本窗口被连带销毁。</summary>

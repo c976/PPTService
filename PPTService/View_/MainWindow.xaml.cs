@@ -660,6 +660,7 @@ namespace PPTService
 			{
 				SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 				{
+					Log.WriteDebug($"[ENDBEGIN] IsNeedStart={ConfigHelper.Instance.IsNeedStart()} IsTransparent={IsTransparent} Opacity={Opacity} foreground={WindowsApi.GetForegroundWindow()}");
 					// 放映窗口即将销毁：先解除 Owner，避免系统连带销毁本窗口（下次放映还要复用）。
 					WindowStateHelper.DetachFromPpt(this);
 					if (ConfigHelper.Instance.IsNeedStart() || !IsTransparent)
