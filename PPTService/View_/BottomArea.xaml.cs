@@ -171,6 +171,37 @@ namespace PPTService
 			// 滑动清屏滑杆任意方式关闭（失焦自动 / 手动 / 清屏完成）都收起真值标记，
 			// 让「再点橡皮」的 toggle 判断始终基于真实状态，不受 StaysOpen 时序影响。
 			EraserSliderPopup.Closed += (object s, EventArgs e) => { _eraserSliderOpen = false; };
+			// 列宽自适应由代码设置，不再走 XAML 的 ObjectAnimationUsingKeyFrames：
+			// VS2015/MSBuild 14 会把 <GridLength>30</GridLength> 动画值编译成字符串 "30"，
+			// 运行时抛 AnimationException（Width 属性动画计算值无效），导致主界面渲染中断。
+			// 纯代码 new GridLength(...) 在任何 MSBuild 版本下行为一致。
+			Loaded += (object s, RoutedEventArgs e) =>
+			{
+				Window window = Window.GetWindow(this);
+				if (window != null)
+				{
+					ApplyAdaptiveColumnWidths(window.ActualWidth);
+					window.SizeChanged += (s2, e2) => ApplyAdaptiveColumnWidths(e2.NewSize.Width);
+				}
+			};
+		}
+
+		/// <summary>
+		/// 按窗口宽度（DIP）设置工具栏各列宽，阈值与 XAML 的 AdaptiveTrigger 一致：
+		/// &lt;1440 → 30，1440~3799 → 50（XAML 默认值），≥3800 → 100。
+		/// 只写列宽，不碰行高/ExitGrid 等仍由 XAML VisualState 动画管理的属性。
+		/// </summary>
+		private void ApplyAdaptiveColumnWidths(double windowWidth)
+		{
+			double value = windowWidth >= 3800.0 ? 100.0 : (windowWidth > 0.0 && windowWidth < 1440.0 ? 30.0 : 50.0);
+			GridLength width = new GridLength(value);
+			ShareCol0.Width = width;
+			ShareCol1.Width = width;
+			ToolCol0.Width = width;
+			ToolCol1.Width = width;
+			ToolCol2.Width = width;
+			ToolCol3.Width = width;
+			ToolCol4.Width = width;
 		}
 
 		public void InitializeBottomArea()

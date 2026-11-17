@@ -76,55 +76,6 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol0" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol1" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol0" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol1" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol2" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol3" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol4" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>30</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="2" />
             </DoubleAnimationUsingKeyFrames>
@@ -159,55 +110,6 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol0" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShareCol1" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol0" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol1" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol2" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol3" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ToolCol4" Storyboard.TargetProperty="Width">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <DiscreteObjectKeyFrame.Value>
-                  <GridLength>100</GridLength>
-                </DiscreteObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="8" />
             </DoubleAnimationUsingKeyFrames>
