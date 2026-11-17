@@ -141,23 +141,7 @@ namespace PPTService
 		{
 			get
 			{
-				// 板中板打开：主批注层让位给板中板白板，划屏翻页一律停掉（同原逻辑）。
-				if (InnerBoardCheckBox.IsChecked == true || IsInnerBoardWindowShowing)
-				{
-					return true;
-				}
-				// 自实现批注：以 AnnotationController.CurrentMode 真值源为准——
-				// 笔 / 橡皮模式下用户正在幻灯片上手写 / 擦除，必须停掉划屏翻页手势，
-				// 否则写一横（横向位移 >30px、100~600ms）会被 Gesture 误判成翻页。
-				// 不再只看 SelectCheckBox.IsChecked（UI 状态可能与真值源不同步，
-				// 且 MouseHelper 每 300ms 才启停一次，存在时序窗口 → 概率性误翻页）。
-				if (UserConfigManager.Load().UseSelfAnnotation &&
-					AnnotationController.CurrentMode != AnnotationController.Mode.Mouse)
-				{
-					return true;
-				}
-				// Office 原生批注 / 鼠标态：沿用原判定（橡皮或非鼠标选中时停掉）。
-				if (RubberCheckBox.IsChecked != true)
+				if (RubberCheckBox.IsChecked != true && InnerBoardCheckBox.IsChecked != true)
 				{
 					return SelectCheckBox.IsChecked == false;
 				}
