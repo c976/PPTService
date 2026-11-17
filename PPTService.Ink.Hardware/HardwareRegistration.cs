@@ -1,4 +1,4 @@
-﻿using PPTService.Ink.Core.Hardware;
+﻿using PPTService.Ink.Hardware.Core;
 using PPTService.Paint.Inks.Hardware.SmartPen;
 using SmartPenDevice = PPTService.Paint.Inks.Hardware.SmartPen.SmartPen;
 

@@ -4,7 +4,7 @@ using System.Windows.Interop;
 using PPTService.Paint.Framework;
 using PPTService.Paint.Framework.Settings;
 using PPTService.Paint.Inks;
-using PPTService.Ink.Core.Hardware;
+using PPTService.Ink.Hardware.Core;
 using PPTService.Paint.Settings;
 using PPTService.Ink.Core.Windows.Input;
 using PPTService.Ink.Core.Windows.Threading;

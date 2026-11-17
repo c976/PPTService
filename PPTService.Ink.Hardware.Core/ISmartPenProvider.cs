@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>
 	/// 希沃智能笔 / 电磁笔硬件状态的抽象。

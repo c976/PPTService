@@ -9,7 +9,7 @@ using PPTService.Ink.Core.Cache;
 using PPTService.Ink.Core.Diagnostics.Annotations;
 using PPTService.Paint.Framework;
 using PPTService.Paint.Framework.Settings;
-using PPTService.Ink.Core.Hardware;
+using PPTService.Ink.Hardware.Core;
 using PPTService.Paint.Settings;
 using PPTService.Ink.Core.Reflection;
 using PPTService.Ink.Core.Windows.Input;

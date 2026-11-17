@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>
 	/// ITouchArea 的通用实现，供普通 WPF TouchPoint / RawStylusInput 路径构造触摸区域。

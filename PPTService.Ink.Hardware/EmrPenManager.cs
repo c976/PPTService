@@ -4,8 +4,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using InputDevice = PPTService.Ink.Core.Hardware.InputDevice;
-using InputDeviceInfo = PPTService.Ink.Core.Hardware.InputDeviceInfo;
+using InputDevice = PPTService.Ink.Hardware.Core.InputDevice;
+using InputDeviceInfo = PPTService.Ink.Hardware.Core.InputDeviceInfo;
 using PPTService.Ink.Core.Windows.Mathematics;
 
 namespace PPTService.Paint.Inks.Hardware

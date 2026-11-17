@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>输入设备信息（WPF TabletDevice 数据封装，通用）。</summary>
 	public class InputDeviceInfo

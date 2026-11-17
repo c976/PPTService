@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>
 	/// 硬件能力服务定位器：Ink 本体的智能笔 / CV 触控能力全部通过这里读取接口，

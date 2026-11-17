@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>
 	/// 触摸区域的通用抽象（Position/Size）。

@@ -1,4 +1,4 @@
-﻿namespace PPTService.Ink.Core.Hardware
+﻿namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>输入设备类别（通用抽象，无硬件访问）。</summary>
 	public enum InputDevice

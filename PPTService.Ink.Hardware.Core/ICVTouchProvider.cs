@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PPTService.Ink.Core.Hardware
+namespace PPTService.Ink.Hardware.Core
 {
 	/// <summary>
 	/// 希沃 CV 原始触控（TouchSDKDll）的抽象。
