@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 // 保留在各自项目的 AssemblyInfo.cs 中。
 [assembly: AssemblyTitle("PPTServiceUltra")]
 [assembly: AssemblyDescription("PPT小工具增强版")]
-[assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The PPTServiceUltra Project")]
 [assembly: AssemblyProduct("PPTServiceUltra")]
 [assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
