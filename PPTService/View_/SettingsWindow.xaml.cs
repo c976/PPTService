@@ -192,7 +192,9 @@ namespace PPTService
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
             HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
             AutoFadePageButtonsCheckBox.IsChecked = cfg.AutoFadePageButtons;
-            LegacyTopmostWindowCheckBox.IsChecked = cfg.LegacyTopmostWindow;
+            // 开关文案是「批注窗口附着PPT放映窗口」：勾选=附着(LegacyTopmostWindow=false)，
+            // 取消勾选=全局置顶(true)。配置字段语义不变，仅在 UI 层反转。
+            LegacyTopmostWindowCheckBox.IsChecked = !cfg.LegacyTopmostWindow;
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
             ToolbarOpacitySlider.Value = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
@@ -401,7 +403,8 @@ namespace PPTService
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
             cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
             cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
-            cfg.LegacyTopmostWindow = LegacyTopmostWindowCheckBox.IsChecked == true;
+            // 勾选「附着PPT放映窗口」= 旧置顶开关关闭；取消勾选才启用全局置顶。
+            cfg.LegacyTopmostWindow = LegacyTopmostWindowCheckBox.IsChecked != true;
             cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
             cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
             cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(
@@ -425,7 +428,7 @@ namespace PPTService
                 EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
                 HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
                 AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
-                LegacyTopmostWindowCheckBox.IsChecked = def.LegacyTopmostWindow;
+                LegacyTopmostWindowCheckBox.IsChecked = !def.LegacyTopmostWindow;
                 ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
                 PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
                 ToolbarOpacitySlider.Value = def.ToolbarOpacity;

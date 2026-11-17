@@ -77,9 +77,9 @@
             <TextBlock Text="不勾选时使用 Office / WPS 原生批注"
                        Margin="20,2,2,2" FontSize="11" Foreground="{DynamicResource Theme.SettingsMutedText}" TextWrapping="Wrap" />
             <CheckBox Name="LegacyTopmostWindowCheckBox"
-                      Content="批注窗口始终置顶（兼容旧版）" Margin="2,8,2,2"
+                      Content="批注窗口附着PPT放映窗口" Margin="2,8,2,2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
-            <TextBlock Text="默认关闭：批注窗口附着在 PPT 放映窗口上，不遮挡其它程序。开启后回到旧版全局置顶。"
+            <TextBlock Text="关闭后批注窗口将处于全局置顶模式，可能遮挡其它程序，无法在PPT放映时打开其他程序。仅当PPT放映无法正常出现工具栏时才建议关闭。"
                        Margin="20,2,2,2" FontSize="11" Foreground="{DynamicResource Theme.SettingsMutedText}" TextWrapping="Wrap" />
           </StackPanel>
         </GroupBox>
