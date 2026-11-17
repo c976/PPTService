@@ -9,7 +9,7 @@ using PPTService.Ink.Core.Cache;
 using PPTService.Ink.Core.Diagnostics.Annotations;
 using PPTService.Paint.Framework;
 using PPTService.Paint.Framework.Settings;
-using PPTService.Paint.Inks.Hardware.RawTouchEngine;
+using PPTService.Ink.Core.Hardware;
 using PPTService.Paint.Settings;
 using PPTService.Ink.Core.Reflection;
 using PPTService.Ink.Core.Windows.Input;
@@ -55,8 +55,8 @@ namespace PPTService.Paint.Inks
 			{
 				return false;
 			}
-			ValueTuple<TouchArea, EraserGestureTouchInfoSource> touchArea = GetTouchArea(e, slide);
-			TouchArea item = touchArea.Item1;
+			ValueTuple<ITouchArea, EraserGestureTouchInfoSource> touchArea = GetTouchArea(e, slide);
+			ITouchArea item = touchArea.Item1;
 			EraserGestureTouchInfoSource item2 = touchArea.Item2;
 			if (item == null)
 			{
@@ -72,54 +72,54 @@ namespace PPTService.Paint.Inks
 
 		public static Size? GetEraserSize(DeviceInputEventArgs args, Slide slide)
 		{
-			ValueTuple<TouchArea, EraserGestureTouchInfoSource> touchArea = GetTouchArea(args, slide);
-			TouchArea item = touchArea.Item1;
+			ValueTuple<ITouchArea, EraserGestureTouchInfoSource> touchArea = GetTouchArea(args, slide);
+			ITouchArea item = touchArea.Item1;
 			EraserGestureTouchInfoSource item2 = touchArea.Item2;
 			return NormalizeSize(item?.Size, slide, item2);
 		}
 
-		private static ValueTuple<TouchArea, EraserGestureTouchInfoSource> GetTouchArea(DeviceInputEventArgs args, Slide slide)
+		private static ValueTuple<ITouchArea, EraserGestureTouchInfoSource> GetTouchArea(DeviceInputEventArgs args, Slide slide)
 		{
 			EraserGestureSettings eraserGestureSettings = GetEraserGestureSettings(slide);
 			if (eraserGestureSettings == null || eraserGestureSettings.EraserGestureTouchInfoSource == EraserGestureTouchInfoSource.None)
 			{
-				return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.None);
+				return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.None);
 			}
 			if (eraserGestureSettings.EraserGestureTouchInfoSource == EraserGestureTouchInfoSource.TouchSdkFirst)
 			{
-				if (eraserGestureSettings.CanUseCVTouch && CVTouchInfoProvider.HasInitialized && CVTouchInfoProvider.IsCVTouchFrame == true)
+				if (eraserGestureSettings.CanUseCVTouch && HardwareServices.CVTouch.HasInitialized && HardwareServices.CVTouch.IsCVTouchFrame == true)
 				{
-					return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(GetTouchAreaByTouchSdk(args, slide), EraserGestureTouchInfoSource.TouchSdkFirst);
+					return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(GetTouchAreaByTouchSdk(args, slide), EraserGestureTouchInfoSource.TouchSdkFirst);
 				}
-				TouchArea touchAreaByWpfTouchPoint = GetTouchAreaByWpfTouchPoint(args, slide);
+				ITouchArea touchAreaByWpfTouchPoint = GetTouchAreaByWpfTouchPoint(args, slide);
 				if (touchAreaByWpfTouchPoint != null)
 				{
-					return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(touchAreaByWpfTouchPoint, EraserGestureTouchInfoSource.WpfTouchPointFirst);
+					return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(touchAreaByWpfTouchPoint, EraserGestureTouchInfoSource.WpfTouchPointFirst);
 				}
-				return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.TouchSdkFirst);
+				return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.TouchSdkFirst);
 			}
 			if (eraserGestureSettings.EraserGestureTouchInfoSource == EraserGestureTouchInfoSource.WpfTouchPointFirst)
 			{
-				TouchArea touchAreaByWpfTouchPoint2 = GetTouchAreaByWpfTouchPoint(args, slide);
+				ITouchArea touchAreaByWpfTouchPoint2 = GetTouchAreaByWpfTouchPoint(args, slide);
 				if (touchAreaByWpfTouchPoint2 != null)
 				{
-					return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(touchAreaByWpfTouchPoint2, EraserGestureTouchInfoSource.WpfTouchPointFirst);
+					return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(touchAreaByWpfTouchPoint2, EraserGestureTouchInfoSource.WpfTouchPointFirst);
 				}
-				if (!eraserGestureSettings.CanUseCVTouch || !CVTouchInfoProvider.HasInitialized || CVTouchInfoProvider.IsCVTouchFrame != true)
+				if (!eraserGestureSettings.CanUseCVTouch || !HardwareServices.CVTouch.HasInitialized || HardwareServices.CVTouch.IsCVTouchFrame != true)
 				{
-					return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.WpfTouchPointFirst);
+					return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(null, EraserGestureTouchInfoSource.WpfTouchPointFirst);
 				}
-				return new ValueTuple<TouchArea, EraserGestureTouchInfoSource>(GetTouchAreaByTouchSdk(args, slide), EraserGestureTouchInfoSource.TouchSdkFirst);
+				return new ValueTuple<ITouchArea, EraserGestureTouchInfoSource>(GetTouchAreaByTouchSdk(args, slide), EraserGestureTouchInfoSource.TouchSdkFirst);
 			}
 			throw new NotSupportedException($"{eraserGestureSettings.EraserGestureTouchInfoSource} is not supported.");
 		}
 
-		private static TouchArea GetTouchAreaByTouchSdk(DeviceInputEventArgs args, Slide slide)
+		private static ITouchArea GetTouchAreaByTouchSdk(DeviceInputEventArgs args, Slide slide)
 		{
-			return RawTouch.GetTouchArea(slide.PointToScreen(args.Position));
+			return HardwareServices.CVTouch.GetTouchArea(slide.PointToScreen(args.Position));
 		}
 
-		private static TouchArea GetTouchAreaByWpfTouchPoint(DeviceInputEventArgs args, Slide slide)
+		private static ITouchArea GetTouchAreaByWpfTouchPoint(DeviceInputEventArgs args, Slide slide)
 		{
 			if (!_useRawInputMethod)
 			{
@@ -128,7 +128,7 @@ namespace PPTService.Paint.Inks
 			return GetTouchAreaByWpfWithRawInput(args);
 		}
 
-		private static TouchArea GetTouchAreaByWpfWithDevice(DeviceInputEventArgs args, Slide slide)
+		private static ITouchArea GetTouchAreaByWpfWithDevice(DeviceInputEventArgs args, Slide slide)
 		{
 			Window window = Window.GetWindow(slide);
 			TouchPoint touchPoint = GetTouchDevice(args.OriginEventArgs)?.GetTouchPoint(window);
@@ -140,14 +140,14 @@ namespace PPTService.Paint.Inks
 			{
 				return null;
 			}
-			return new TouchArea
+			return new TouchAreaData
 			{
 				Position = touchPoint.Position,
 				Size = touchPoint.Size
 			};
 		}
 
-		private static TouchArea GetTouchAreaByWpfWithRawInput(DeviceInputEventArgs args)
+		private static ITouchArea GetTouchAreaByWpfWithRawInput(DeviceInputEventArgs args)
 		{
 			if (args.Type == DeviceType.Mouse)
 			{
@@ -163,7 +163,7 @@ namespace PPTService.Paint.Inks
 				StylusPoint stylusPoint = rawStylusInput.GetStylusPoints().LastOrDefault();
 				double stylusPointWidthOrHeight = TouchAreaHelper.GetStylusPointWidthOrHeight(stylusPoint, true);
 				double stylusPointWidthOrHeight2 = TouchAreaHelper.GetStylusPointWidthOrHeight(stylusPoint, false);
-				return new TouchArea
+				return new TouchAreaData
 				{
 					Position = stylusPoint.ToPoint(),
 					Size = new Size(stylusPointWidthOrHeight, stylusPointWidthOrHeight2)

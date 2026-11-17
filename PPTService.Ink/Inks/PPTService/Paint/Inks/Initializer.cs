@@ -1,5 +1,4 @@
 ﻿using PPTService.Paint.Framework;
-using PPTService.Paint.Inks.Hardware.SmartPen;
 
 namespace PPTService.Paint.Inks
 {

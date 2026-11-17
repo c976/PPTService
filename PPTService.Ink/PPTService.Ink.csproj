@@ -784,12 +784,6 @@
       <Name>PPTService.Ink.Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PPTService.Ink.Hardware\PPTService.Ink.Hardware.csproj">
-      <Project>{DDCC661F-DAB5-4184-BE27-C94FB4F9781C}</Project>
-      <Name>PPTService.Ink.Hardware</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- 与主程序同源的 git 动态版本号 / 短 hash -->
   <Import Project="..\Version.targets" />

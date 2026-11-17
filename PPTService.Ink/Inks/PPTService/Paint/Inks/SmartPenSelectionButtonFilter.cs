@@ -1,9 +1,10 @@
 ﻿using PPTService.Paint.Framework;
+using PPTService.Ink.Core.Hardware;
 using PPTService.Paint.Framework.Settings;
 using PPTService.Paint.Settings;
 using PPTService.Ink.Core.Windows.Threading;
 
-namespace PPTService.Paint.Inks.Hardware.SmartPen
+namespace PPTService.Paint.Inks
 {
 	public class SmartPenSelectionButtonFilter : ActiveModeFilter, IAttachedSetting<SmartPenSelectionButtonSettings>
 	{
@@ -56,7 +57,7 @@ namespace PPTService.Paint.Inks.Hardware.SmartPen
 
 		private bool IsSquareButtonPressed()
 		{
-			if (SmartPen.IsSquareButtonPressed)
+			if (HardwareServices.SmartPen.IsSquareButtonPressed)
 			{
 				return true;
 			}

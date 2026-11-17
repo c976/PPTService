@@ -48,10 +48,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
+    <Compile Include="HardwareRegistration.cs" />
     <Compile Include="EMRMode.cs" />
     <Compile Include="EmrPenManager.cs" />
-    <Compile Include="InputDevice.cs" />
-    <Compile Include="InputDeviceInfo.cs" />
     <Compile Include="RawTouchEngine\CVTouchInfoProvider.cs" />
     <Compile Include="RawTouchEngine\RawTouch.cs" />
     <Compile Include="RawTouchEngine\RawTouchEventArgs.cs" />

@@ -4,8 +4,7 @@ using System.Windows.Interop;
 using PPTService.Paint.Framework;
 using PPTService.Paint.Framework.Settings;
 using PPTService.Paint.Inks;
-using PPTService.Paint.Inks.Hardware;
-using PPTService.Paint.Inks.Hardware.SmartPen;
+using PPTService.Ink.Core.Hardware;
 using PPTService.Paint.Settings;
 using PPTService.Ink.Core.Windows.Input;
 using PPTService.Ink.Core.Windows.Threading;
@@ -43,16 +42,16 @@ namespace PPTService.Paint
 		protected override void OnSwitchOn()
 		{
 			Board board = GetBoard();
-			SmartPen.Enable(() => (HwndSource)PresentationSource.FromVisual(board));
+			HardwareServices.SmartPen.Enable(() => (HwndSource)PresentationSource.FromVisual(board));
 			OnCanBeActivated = ActiveModeFilter.ModetoFilterCanBeActivated(() => Settings.OnCanWrite);
 			base.OnSwitchOn();
 		}
 
 		protected override void OnDeviceDown(ModeInputEventArgs e)
 		{
-			if (SmartPen.IsEmrEnabled && !SmartPen.IsEmrPenConnected && EmrPenManager.IsPen(e.OriginEventArgs))
+			if (HardwareServices.SmartPen.IsEmrEnabled && !HardwareServices.SmartPen.IsEmrPenConnected && HardwareServices.SmartPen.IsPen(e.OriginEventArgs))
 			{
-				SmartPen.OnEmrPenConnected();
+				HardwareServices.SmartPen.OnEmrPenConnected();
 			}
 			if (e.Type != DeviceType.Mouse && CanBeActivated() && IsPenPressed(e))
 			{
@@ -125,14 +124,14 @@ namespace PPTService.Paint
 			StylusEventArgs e2 = e.OriginEventArgs as StylusEventArgs;
 			if (e2 != null)
 			{
-				return EmrPenManager.IsSelectedButtonPressed(e2);
+				return HardwareServices.SmartPen.IsSelectedButtonPressed(e2);
 			}
 			return false;
 		}
 
 		private bool IsEmrPenTipPressed(DeviceInputEventArgs e)
 		{
-			if (SmartPen.IsEmrPenWritable && EmrPenManager.IsPen(e.OriginEventArgs))
+			if (HardwareServices.SmartPen.IsEmrPenWritable && HardwareServices.SmartPen.IsPen(e.OriginEventArgs))
 			{
 				return !IsEmrSeletionPressed(e);
 			}
@@ -141,7 +140,7 @@ namespace PPTService.Paint
 
 		private bool IsNormalPenTipPressed()
 		{
-			return SmartPen.Pressure.HasValue;
+			return HardwareServices.SmartPen.Pressure.HasValue;
 		}
 	}
 }
