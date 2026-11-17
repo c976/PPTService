@@ -54,8 +54,18 @@ namespace PPTService
 
 		private void Instance_ShowBegin(object sender, EventArgs e)
 		{
+			// ShowBegin 可能在同一场放映里被 COM 事件与进程轮询重复触发（机器上有多个
+			// powerpnt.exe 时更容易遇到）。必须在创建窗口之前退订：否则重入的第二次回调
+			// 仍拿着旧的事件快照，会再 new 一个 MainWindow，出现两个工具栏互相抢状态。
+			PptOperator.Instance.ShowBegin -= Instance_ShowBegin;
 			SyntacticSugar.CurrentDispatcherInvoke(() =>
 			{
+				// 防御性兜底：窗口已存在时只刷新它，绝不创建第二份工具栏实例。
+				if (MainWindow != null)
+				{
+					MainWindow._pptOperatorShowBegin(null, null);
+					return;
+				}
 				LoadingScreen<LoadingView>.Current = new LoadingScreen<LoadingView>();
 				LeftArea = new LeftArea();
 				RightArea = new RightArea();
@@ -64,9 +74,8 @@ namespace PPTService
 				BottomArea = new BottomArea();
 				MainWindow = new MainWindow();
 				ControlHelper.SetAltF4Enabled(MainWindow, false);
+				MainWindow._pptOperatorShowBegin(null, null);
 			});
-			MainWindow._pptOperatorShowBegin(null, null);
-			PptOperator.Instance.ShowBegin -= Instance_ShowBegin;
 		}
 
 		public static void StopMainWindowUpdateTimerAndMouseGesture()

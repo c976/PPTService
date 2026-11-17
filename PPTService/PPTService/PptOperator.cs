@@ -23,6 +23,11 @@ namespace PPTService
 
 		private bool _isShowTypeSpeaker;
 
+		// COM 事件与启动轮询可能在极短时间内同时命中同一场放映。IsShowing 要到
+		// 一堆 COM 准备工作之后才置位，这段窗口期用进入标志挡住重复进入，
+		// 否则会重复触发 ShowBegin，进而建出两个工具栏。
+		private bool _isHandlingShowBegin;
+
 		private SlideShowWindow _slideShowWindow;
 
 		private const int PptProcessCheckInterval = 2500;
@@ -486,6 +491,7 @@ namespace PPTService
 				new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").RemoveEventHandler(_app, new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
 				new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").RemoveEventHandler(_app, new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
 				new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").RemoveEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
+				new ComAwareEventInfo(typeof(EApplication_Event), "PresentationCloseFinal").RemoveEventHandler(_app, new EApplication_PresentationCloseFinalEventHandler(AppOnPresentationCloseFinal));
 			}
 			_app = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
 			PptVersionManager.UpdatePptApplicationInfo(_app.Path, _app.Version);
@@ -546,14 +552,16 @@ namespace PPTService
 
 		private void AppSlideShowBegin(SlideShowWindow wn)
 		{
+			// COM 事件与启动轮询可能并发/重入；IsShowing 之前的准备工作也要挡住。
+			if (IsShowing || _isHandlingShowBegin)
+			{
+				return;
+			}
+			_isHandlingShowBegin = true;
 			try
 			{
 				// COM 事件与启动轮询可能同时命中同一场放映，避免重复触发 ShowBegin。
-				if (IsShowing)
-				{
-					return;
-				}
-				if (!ConfigHelper.Instance.IsNeedStart())
+				if (wn == null || !ConfigHelper.Instance.IsNeedStart())
 				{
 					return;
 				}
@@ -586,7 +594,13 @@ namespace PPTService
 			catch (Exception arg)
 			{
 				ConfigHelper.Instance.IsComOk = false;
+				// 初始化失败必须把放映态收回，否则下一场放映会被误判为「已放映」。
+				IsShowing = false;
 				Log.WriteError($"ShowBeginError：{arg}");
+			}
+			finally
+			{
+				_isHandlingShowBegin = false;
 			}
 		}
 
