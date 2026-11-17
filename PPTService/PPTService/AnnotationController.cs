@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace PPTService
@@ -126,6 +127,7 @@ namespace PPTService
 			{
 				_board.InkBoard.Visibility = Visibility.Visible;
 				_board.GoToSlide(_currentPageIndex - 1);
+				_lastFocusMode = null;
 				SetMode(_currentMode);
 			}
 		}
@@ -149,6 +151,7 @@ namespace PPTService
 			// 只复位状态与已有 Board，不走 SetMode → EnsureBoard，
 			// 避免在放映结束时反而重新创建/挂上批注层。
 			_currentMode = Mode.Mouse;
+			_lastFocusMode = null;
 			if (_board != null)
 			{
 				_board.GotoSelect();
@@ -167,6 +170,8 @@ namespace PPTService
 				_board = null;
 			}
 		}
+
+		private static Mode? _lastFocusMode;
 
 		public static void SetMode(Mode mode)
 		{
@@ -191,6 +196,50 @@ namespace PPTService
 			else
 			{
 				_board.GotoEraser();
+			}
+			ApplyFocusForMode(mode);
+		}
+
+		/// <summary>
+		/// 让前台焦点跟随批注模式，解决「附着模式下手写横滑误触发 PowerPoint 翻页」：
+		/// PowerPoint 只在自己是前台活动窗口时才响应左右滑动翻页手势。
+		/// 笔 / 橡皮模式必须让批注窗口持有焦点，PPT 失焦后手写横滑就不会被它当成翻页；
+		/// 鼠标模式把焦点还给 PPT，保留 PowerPoint 原生翻页（方向键 / 翻页笔 / 触屏滑动），
+		/// 与全局置顶模式的表现一致。仅在模式真正变化时设一次，不每 tick 抢焦点。
+		/// debug 模拟放映没有真实 PPT 窗口，跳过。
+		/// </summary>
+		private static void ApplyFocusForMode(Mode mode)
+		{
+			if (DebugMode.IsEnabled || _toolbarWindow == null)
+			{
+				return;
+			}
+			if (_lastFocusMode == mode)
+			{
+				return;
+			}
+			_lastFocusMode = mode;
+			try
+			{
+				IntPtr hwnd = new WindowInteropHelper(_toolbarWindow).Handle;
+				if (mode == Mode.Mouse)
+				{
+					// 鼠标模式：焦点还给 PPT，PowerPoint 原生翻页照常。
+					IntPtr ppt = PptOperator.Instance.SlideShowWindowIntPtr;
+					if (ppt != IntPtr.Zero)
+					{
+						WindowsApi.SetForegroundWindow(ppt);
+					}
+				}
+				else if (hwnd != IntPtr.Zero)
+				{
+					// 笔 / 橡皮：批注窗口持有焦点，PPT 失焦 → 手写横滑不被识别成翻页手势。
+					WindowsApi.SetForegroundWindow(hwnd);
+				}
+			}
+			catch (Exception)
+			{
+				// 焦点设置失败不影响批注本身。
 			}
 		}
 
