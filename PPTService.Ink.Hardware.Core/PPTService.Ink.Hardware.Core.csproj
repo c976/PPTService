@@ -36,7 +36,7 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\AssemblyInfo.Shared.cs" />
     <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="HardwareServices.cs" />

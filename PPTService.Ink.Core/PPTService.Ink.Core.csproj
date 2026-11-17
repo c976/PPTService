@@ -177,6 +177,8 @@
     <Compile Include="Contracts\ReturnNullException.cs" />
     <Compile Include="Contracts\ReturnValueException.cs" />
     <Compile Include="Core\AppInfo.cs" />
+    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <!-- 本 AssemblyInfo 仅保留本项目专有属性 -->
     <Compile Include="Core\AssemblyInfo.cs" />
     <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />

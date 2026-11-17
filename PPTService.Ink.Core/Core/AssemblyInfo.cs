@@ -1,22 +1,7 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Markup;
 
+// 公共程序集元数据（Title / Company / 版本等）统一见仓库根 AssemblyInfo.Shared.cs。
+// 以下两项是 Ink.Core 作为 WPF/XAML 类库的专有属性，反编译源码所需，保留。
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/winfx/2006/xaml/presentation", "PPTService.Ink.Core.Windows.Localization.Markup")]
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
-[assembly: AssemblyCompany("广州视睿电子科技有限公司 (Guangzhou Shirui Electronics Co.,Ltd)")]
-[assembly: AssemblyConfiguration("Release")]
-[assembly: AssemblyCopyright("Copyright © 2014-2020 Guangzhou Shirui Electronics Co.,Ltd, All Rights Reserved.")]
-[assembly: AssemblyDescription("Integrated CoreLib sources required by PPTService.Ink")]
-// 版本号 / git 短 hash 由仓库根 Version.targets 生成，与主程序完全同源。
-[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
-[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]
-[assembly: AssemblyProduct("PPTService.Ink.Core")]
-[assembly: AssemblyTitle("PPTService.Ink.Core")]
-[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]

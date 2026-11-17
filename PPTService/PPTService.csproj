@@ -223,6 +223,8 @@
     <Compile Include="PPTService\WindowRect.cs" />
     <Compile Include="PPTService\WindowStateHelper.cs" />
     <Compile Include="PPTService\WindowsApi.cs" />
+    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <!-- 本 AssemblyInfo 仅保留本项目专有属性 -->
     <Compile Include="Properties\AssemblyInfo.cs" />
     <!-- 由 Version.targets 的 GenerateVersionInfo 目标在构建时生成；仓库内保留默认（unknown）副本，供非 git 环境直接编译 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />

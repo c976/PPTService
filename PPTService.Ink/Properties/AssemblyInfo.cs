@@ -1,19 +1,5 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Windows;
+﻿using System.Windows;
 
-[assembly: AssemblyTitle("PPTServiceUltra Ink")]
-[assembly: AssemblyDescription("PPT小工具增强版")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The PPTServiceUltra Project")]
-[assembly: AssemblyProduct("PPTServiceUltra")]
-[assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
-[assembly: AssemblyTrademark("")]
-
-// 版本号 / git 短 hash 由仓库根 Version.targets 生成，与主程序完全同源。
-[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
-[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]
-[assembly: ComVisible(false)]
+// 公共程序集元数据（Title / Company / 版本等）统一见仓库根 AssemblyInfo.Shared.cs。
+// Ink 为 WPF 类库，需保留默认主题资源查找方式。
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]

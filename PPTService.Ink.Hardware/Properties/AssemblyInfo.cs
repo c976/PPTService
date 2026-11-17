@@ -1,21 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Windows;
 
+// 公共程序集元数据（Title / Company / 版本等）统一见仓库根 AssemblyInfo.Shared.cs。
+// 硬件程序集的内部类型需对 Ink 本体可见（HardwareRegistration 适配层使用）。
 [assembly: InternalsVisibleTo("PPTService.Ink")]
-
-[assembly: AssemblyTitle("PPTServiceUltra Ink Hardware")]
-[assembly: AssemblyDescription("PPT小工具增强版")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The PPTServiceUltra Project")]
-[assembly: AssemblyProduct("PPTServiceUltra")]
-[assembly: AssemblyCopyright("Copyright © The PPTServiceUltra Project")]
-[assembly: AssemblyTrademark("")]
-[assembly: ComVisible(false)]
-
-// 版本号 / git 短 hash 由仓库根 Version.targets 生成，与主程序完全同源。
-[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
-[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]

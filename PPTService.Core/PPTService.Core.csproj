@@ -178,6 +178,8 @@
     <Compile Include="Pipe.Http\BasicHttpPipe.cs" />
     <Compile Include="Pipe.Http\HttpPipe.cs" />
     <Compile Include="Pipe.Http\IHttpPipe.cs" />
+    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <!-- 本 AssemblyInfo 仅保留本项目专有属性 -->
     <Compile Include="Properties\AssemblyInfo.cs" />
     <!-- 由 Version.targets 在构建时生成；仓库内保留 unknown 默认副本，脱离 git 也能直接编译 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
