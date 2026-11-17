@@ -345,7 +345,9 @@ namespace PPTService
 				{
 					Directory.CreateDirectory(ThumbnailFilePath);
 				}
-				ThumbnailFilePathDictionary.Add(_md5, ThumbnailFilePath);
+				// 用索引器赋值代替 Add：快速连续放映（ShowBegin 重入）时两个线程可能
+				// 同时通过 ContainsKey 检查，Add 会抛「已添加了具有相同键的项」。
+				ThumbnailFilePathDictionary[_md5] = ThumbnailFilePath;
 			}
 			else
 			{
