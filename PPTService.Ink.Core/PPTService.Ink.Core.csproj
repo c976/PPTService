@@ -1171,6 +1171,14 @@
     <Compile Include="ing\ExecuteOnceAwaiter.cs" />
     <Compile Include="ing\IAsyncDisposable.cs" />
     <Compile Include="ing\LimitedRunningCountTask.cs" />
+    <!-- 硬件契约与空实现合并到必装程序集：两个 PPTService.Ink.Hardware*.dll 均可作为可选插件删除 -->
+    <Compile Include="Hardware\HardwareServices.cs" />
+    <Compile Include="Hardware\ICVTouchProvider.cs" />
+    <Compile Include="Hardware\ISmartPenProvider.cs" />
+    <Compile Include="Hardware\ITouchArea.cs" />
+    <Compile Include="Hardware\InputDevice.cs" />
+    <Compile Include="Hardware\InputDeviceInfo.cs" />
+    <Compile Include="Hardware\TouchAreaData.cs" />
     <Page Include="themes\generic.xaml"><LogicalName>themes/generic.xaml</LogicalName></Page>
     <Page Include="themes\style.contentdialog.xaml"><LogicalName>themes/style.contentdialog.xaml</LogicalName></Page>
     <Page Include="themes\style.loadingview.xaml"><LogicalName>themes/style.loadingview.xaml</LogicalName></Page>

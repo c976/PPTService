@@ -43,10 +43,6 @@
       <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
       <Name>PPTService.Ink.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PPTService.Ink.Hardware.Core\PPTService.Ink.Hardware.Core.csproj">
-      <Project>{2E5A9C41-8D73-4F16-B0A2-6C9E5D8F1A34}</Project>
-      <Name>PPTService.Ink.Hardware.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\AssemblyInfo.Shared.cs" />
