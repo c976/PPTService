@@ -340,22 +340,25 @@ namespace PPTService
 			AdjustButtonPosition(left, top);
 		}
 
+		/// <summary>按钮条与放大镜可见矩形下边缘的间距。</summary>
+		private const double ButtonRectGap = 2.0;
+
 		/// <summary>
-		/// 工具条贴在放大镜矩形下边缘外面、水平居中，两个按钮平分。
-		/// left/top 为 RootGrid 在 RootCanvas 中的位置；可见放大镜矩形是 MagnifierBorder
-		/// （位于 RootGrid 内、Margin=-30），其在 RootCanvas 中的左上角 = left + Margin.Left、
-		/// 尺寸 = MagnifierBorder.Width/Height。用 Canvas.Left/Top 定位，随放大镜移动 / 缩放。
+		/// 工具条贴在放大镜可见矩形下边缘外面、水平居中，两个按钮平分。
+		/// 可见放大镜矩形就是 RootGrid（InnerMagnifierBorder / MagnifierRectangle 撑满它）；
+		/// MagnifierBorder 带 Margin=-30，是缩放手柄层、比可见矩形大一圈，不能作定位基准
+		/// ——否则它的 -30 会把间距抵消掉，改间距看不出效果。
+		/// left/top 为 RootGrid 在 RootCanvas 中的位置，尺寸取 RootGrid 实际宽高。
 		/// 工具条尺寸沿用原版固定值（不随矩形宽度拉伸），仅按分辨率分档。
 		/// </summary>
 		private void AdjustButtonPosition(double left, double top)
 		{
-			double margin = MagnifierBorder.Margin.Left;
-			double rectWidth = MagnifierBorder.Width;
-			double rectHeight = MagnifierBorder.Height;
+			double rectWidth = RootGrid.ActualWidth > 0.0 ? RootGrid.ActualWidth : RootGrid.Width;
+			double rectHeight = RootGrid.ActualHeight > 0.0 ? RootGrid.ActualHeight : RootGrid.Height;
 			double buttonWidth = ButtonBorder.Width;
-			// 水平居中于矩形；垂直贴在矩形下边缘外面（留一点点间距）。
-			Canvas.SetLeft(ButtonBorder, left + margin + (rectWidth - buttonWidth) / 2.0);
-			Canvas.SetTop(ButtonBorder, top + margin + rectHeight + 1.0);
+			// 水平居中于可见矩形；垂直贴在矩形下边缘外面（间距可控）。
+			Canvas.SetLeft(ButtonBorder, left + (rectWidth - buttonWidth) / 2.0);
+			Canvas.SetTop(ButtonBorder, top + rectHeight + ButtonRectGap);
 		}
 
 		private void AdjustButtonBorderMargin()
