@@ -117,13 +117,6 @@
               <Setter TargetName="NormalImage" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="CheckedImage" Property="Visibility" Value="Visible" />
             </Trigger>
-            <!-- 鼠标悬停 / 触控按下时给出不同的背景反馈（放大镜关灯按钮）。 -->
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="RootGrid" Property="Background" Value="#26FFFFFF" />
-            </Trigger>
-            <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="RootGrid" Property="Background" Value="#4DFFFFFF" />
-            </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>

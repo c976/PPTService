@@ -341,39 +341,36 @@ namespace PPTService
 		}
 
 		/// <summary>
-		/// 按钮组贴在放大镜矩形下边缘外面、水平居中。left/top 为 RootGrid 在 RootCanvas
-		/// 中的位置；可见放大镜矩形是 MagnifierBorder（位于 RootGrid 内、Margin=-30），
-		/// 其在 RootCanvas 中的左上角 = left + Margin.Left、尺寸 = MagnifierBorder.Width/Height。
-		/// 用 Canvas.Left/Top 定位，按钮随放大镜一起移动 / 缩放。
+		/// 工具条贴在放大镜矩形下边缘外面、与矩形同宽，两个按钮平分。
+		/// left/top 为 RootGrid 在 RootCanvas 中的位置；可见放大镜矩形是 MagnifierBorder
+		/// （位于 RootGrid 内、Margin=-30），其在 RootCanvas 中的左上角 = left + Margin.Left、
+		/// 尺寸 = MagnifierBorder.Width/Height。用 Canvas.Left/Top 定位，随放大镜移动 / 缩放。
 		/// </summary>
 		private void AdjustButtonPosition(double left, double top)
 		{
 			double margin = MagnifierBorder.Margin.Left;
 			double rectWidth = MagnifierBorder.Width;
 			double rectHeight = MagnifierBorder.Height;
-			double buttonWidth = ButtonBorder.Width;
-			// 水平居中于矩形；垂直贴在矩形下边缘外面（留一点点间距）。
-			Canvas.SetLeft(ButtonBorder, left + margin + (rectWidth - buttonWidth) / 2.0);
+			// 与放大镜矩形同宽；垂直贴在矩形下边缘外面（留一点点间距）。
+			ButtonBorder.Width = rectWidth;
+			Canvas.SetLeft(ButtonBorder, left + margin);
 			Canvas.SetTop(ButtonBorder, top + margin + rectHeight + 2.0);
 		}
 
 		private void AdjustButtonBorderMargin()
 		{
-			// 按钮尺寸按分辨率分档（与 XAML 默认 100x52 对应）。
+			// 工具条高度按分辨率分档（宽度由 AdjustButtonPosition 设为放大镜矩形宽度）。
 			if (Height > 2100.0)
 			{
-				ButtonBorder.Width = 200;
-				ButtonBorder.Height = 104;
+				ButtonBorder.Height = 128;
 			}
 			if (Height > 770.0 && Height <= 2100.0)
 			{
-				ButtonBorder.Width = 100;
-				ButtonBorder.Height = 52;
+				ButtonBorder.Height = 72;
 			}
 			if (Height > 0.0 && Height <= 770.0)
 			{
-				ButtonBorder.Width = 80;
-				ButtonBorder.Height = 44;
+				ButtonBorder.Height = 56;
 			}
 			AdjustButtonPosition(Canvas.GetLeft(RootGrid), Canvas.GetTop(RootGrid));
 		}
