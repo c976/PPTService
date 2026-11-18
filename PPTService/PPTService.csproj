@@ -422,5 +422,18 @@
   <PropertyGroup>
     <IsVersionOwner>true</IsVersionOwner>
   </PropertyGroup>
+  <!-- Optional plugins are built via ProjectReference but not assembly-referenced;
+       copy them explicitly so NSIS payload (bin\Release\*.*) includes them. -->
+  <Target Name="CopyOptionalPlugins" AfterTargets="Build">
+    <Copy SourceFiles="..\PPTService.Ink.Hardware\bin\$(Configuration)\PPTService.Ink.Hardware.dll"
+          DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true"
+          Condition="Exists('..\PPTService.Ink.Hardware\bin\$(Configuration)\PPTService.Ink.Hardware.dll')" />
+    <Copy SourceFiles="..\PPTService.Ink.Hardware.Core\bin\$(Configuration)\PPTService.Ink.Hardware.Core.dll"
+          DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true"
+          Condition="Exists('..\PPTService.Ink.Hardware.Core\bin\$(Configuration)\PPTService.Ink.Hardware.Core.dll')" />
+    <Copy SourceFiles="..\PPTService.NetShared\bin\$(Configuration)\PPTService.NetShared.dll"
+          DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true"
+          Condition="Exists('..\PPTService.NetShared\bin\$(Configuration)\PPTService.NetShared.dll')" />
+  </Target>
   <Import Project="..\Version\Version.targets" />
 </Project>

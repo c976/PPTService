@@ -1176,8 +1176,6 @@
     <Compile Include="Hardware\ICVTouchProvider.cs" />
     <Compile Include="Hardware\ISmartPenProvider.cs" />
     <Compile Include="Hardware\ITouchArea.cs" />
-    <Compile Include="Hardware\InputDevice.cs" />
-    <Compile Include="Hardware\InputDeviceInfo.cs" />
     <Compile Include="Hardware\TouchAreaData.cs" />
     <Page Include="themes\generic.xaml"><LogicalName>themes/generic.xaml</LogicalName></Page>
     <Page Include="themes\style.contentdialog.xaml"><LogicalName>themes/style.contentdialog.xaml</LogicalName></Page>
