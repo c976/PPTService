@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
-using PPTService.Core.WebService.Lychee;
 using PPTService.Core.Windows;
 using PPTService.Collection;
 
@@ -20,6 +20,38 @@ namespace PPTService
 		public static CancellationTokenSource CancellationTokenSource;
 
 		private static readonly Dictionary<string, string> PptMd5AndQrFilePathDictionary = new Dictionary<string, string>();
+
+		// 二维码上传实现位于可选插件 PPTService.NetShared.dll。这里只用反射调用，
+		// 主程序对它没有编译期引用；DLL 不存在时仅二维码功能不可用。
+		private const string QrServiceTypeName = "PPTService.NetShared.QrShareService, PPTService.NetShared";
+
+		private static bool TryPublishQr(IList<string> imageFiles, string title, double scale,
+			CancellationToken cancellationToken, Action<double> progressChanged, out string url)
+		{
+			url = string.Empty;
+			try
+			{
+				Type serviceType = Type.GetType(QrServiceTypeName, false);
+				if (serviceType == null)
+				{
+					return false;
+				}
+				MethodInfo publish = serviceType.GetMethod("Publish", BindingFlags.Public | BindingFlags.Static);
+				if (publish == null)
+				{
+					return false;
+				}
+				object[] args = { imageFiles, title, scale, cancellationToken, progressChanged, url };
+				bool result = (bool)publish.Invoke(null, args);
+				url = args[5] as string ?? string.Empty;
+				return result;
+			}
+			catch (Exception)
+			{
+				// 插件版本不匹配 / 加载失败都退化为「二维码不可用」，绝不影响放映。
+				return false;
+			}
+		}
 
 		public static void Share(string pptFilePath)
 		{
@@ -108,27 +140,25 @@ namespace PPTService
 			try
 			{
 				string url;
-				if (new LycheeService("http://lizhi.seewo.com", "pptservice", "0f6bb4dc70e901e21eba5dfdec6c68f6").Publish(imageFiles, new PublicInfo
-				{
-					Author = "",
-					Title = Path.GetFileName(pptFilePath),
-					Scale = PptAnalyzer.ThumbnailRate
-				}, CancellationTokenSource.Token, (double progress) =>
+				string title = Path.GetFileName(pptFilePath);
+				double scale = PptAnalyzer.ThumbnailRate;
+				CancellationToken token = CancellationTokenSource.Token;
+				Action<double> progressChanged = (double progress) =>
 				{
 					LoadingScreen<LoadingView>.Current.UsingLoadingThread((LoadingView loadingView) =>
 					{
 						loadingView.Progress = Convert.ToInt32(_isAddExportTime ? (30.0 + progress * 70.0) : (progress * 100.0));
 					});
-				}, out url))
+				};
+				if (!TryPublishQr(imageFiles, title, scale, token, progressChanged, out url))
 				{
-					AfterShareSuccessfullyDo(pptFilePath, url);
+					string message = Type.GetType(QrServiceTypeName, false) == null
+						? "二维码组件缺失，无法创建二维码"
+						: "网络开小差，无法创建二维码";
+					AfterShareFailedDo(message);
 					return;
 				}
-				LoadingScreen<LoadingView>.Current.UsingLoadingThread((LoadingView loadingView) =>
-				{
-					loadingView.Cancel();
-				});
-				AfterShareFailedDo();
+				AfterShareSuccessfullyDo(pptFilePath, url);
 			}
 			catch (Exception)
 			{
@@ -171,7 +201,7 @@ namespace PPTService
 			});
 		}
 
-		private static void AfterShareFailedDo()
+		private static void AfterShareFailedDo(string message = "网络开小差，无法创建二维码")
 		{
 			WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 			if (IsCancelShare)
@@ -185,7 +215,7 @@ namespace PPTService
 				LoadingScreen<LoadingView>.Current.Hide();
 				SyntacticSugar.CurrentDispatcherInvoke(() =>
 				{
-					MessageWindow messageWindow = new MessageWindow("网络开小差，无法创建二维码");
+					MessageWindow messageWindow = new MessageWindow(message);
 					messageWindow.Owner = ViewHelper.MainWindow;
 					messageWindow.ShowDialog();
 				});

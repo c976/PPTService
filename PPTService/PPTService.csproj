@@ -97,6 +97,12 @@
       <Project>{B6E1C4D2-7A35-4F89-9C10-3D5E8A2F1B74}</Project>
       <Name>PPTService.Core</Name>
     </ProjectReference>
+    <!-- Optional QR plugin: build/deploy only, no compile-time reference. -->
+    <ProjectReference Include="..\PPTService.NetShared\PPTService.NetShared.csproj">
+      <Project>{8A6F1C33-4D62-4E1B-9A7C-51D4E9A2B7F0}</Project>
+      <Name>PPTService.NetShared</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\PPTService.Collection\PPTService.Collection.csproj">
       <Project>{38F2D216-F5C7-5F20-ABD8-36A62CDEE9BA}</Project>
       <Name>PPTService.Collection</Name>
