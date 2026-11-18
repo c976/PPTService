@@ -9,7 +9,7 @@ namespace PPTService
 	public class AppPath
 	{
 		/// <summary>本程序所有运行时数据（配置 / 日志 / 临时缩略图 / 二维码 / 事件缓存）的统一根目录名，
-		/// 位于 %LOCALAPPDATA%（Local）下，不再散落在 Roaming\Seewo\PPTService 或安装目录。</summary>
+		/// 位于 %APPDATA%（Roaming）下，不再散落在安装目录。</summary>
 		public static readonly string AppFolderName = "PPTServiceUltra";
 
 		private static readonly string Log = "Log";
@@ -18,10 +18,10 @@ namespace PPTService
 
 		private static readonly string Document = "Document";
 
-		/// <summary>%LOCALAPPDATA%\PPTServiceUltra，不存在时自动创建。</summary>
+		/// <summary>%APPDATA%\PPTServiceUltra（Roaming），不存在时自动创建。</summary>
 		public static string LocalRoot()
 		{
-			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppFolderName);
+			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppFolderName);
 			if (!Directory.Exists(text))
 			{
 				Directory.CreateDirectory(text);

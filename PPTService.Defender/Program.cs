@@ -50,9 +50,9 @@ namespace PPTService.Defender
 		/// </summary>
 		private const int HealthyAfterRestartSec = 3;
 
-		// 与主程序 AppPath.LocalRoot() 保持一致：%LOCALAPPDATA%\PPTServiceUltra\Defender
+		// 与主程序 AppPath.LocalRoot() 保持一致：%APPDATA%\PPTServiceUltra\Defender（Roaming）
 		private static readonly string DataDir = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 			"PPTServiceUltra", "Defender");
 
 		private static string BaseDirectory

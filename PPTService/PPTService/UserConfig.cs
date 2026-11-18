@@ -17,7 +17,7 @@ namespace PPTService
     }
 
     /// <summary>
-    /// 用户配置根对象，序列化到 %LOCALAPPDATA%\PPTServiceUltra\UserConfig.json。
+    /// 用户配置根对象，序列化到 %APPDATA%\PPTServiceUltra\UserConfig.json。
     /// </summary>
     public class UserConfig
     {
@@ -126,7 +126,7 @@ namespace PPTService
     }
 
     /// <summary>
-    /// 用户配置读写与下发。文件位于 %LOCALAPPDATA%\PPTServiceUltra\UserConfig.json。
+    /// 用户配置读写与下发。文件位于 %APPDATA%\PPTServiceUltra\UserConfig.json。
     /// </summary>
     public static class UserConfigManager
     {

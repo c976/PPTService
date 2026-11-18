@@ -1974,7 +1974,7 @@
       <DrawingGroup>
         <GeometryDrawing Brush="Transparent">
           <GeometryDrawing.Pen>
-            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="3" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
           </GeometryDrawing.Pen>
           <GeometryDrawing.Geometry>
             <PathGeometry Figures="M7,12 L16,21 L25,12" />
@@ -1988,7 +1988,7 @@
       <DrawingGroup Opacity="0.6">
         <GeometryDrawing Brush="Transparent">
           <GeometryDrawing.Pen>
-            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="3" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
           </GeometryDrawing.Pen>
           <GeometryDrawing.Geometry>
             <PathGeometry Figures="M7,12 L16,21 L25,12" />

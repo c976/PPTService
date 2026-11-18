@@ -16,8 +16,8 @@ namespace PPTService.Core.Net.WebServices.EventReport
 	
 	internal class PostEventDataCache
 	{
-		// 事件上报缓存也归到统一数据目录：%LOCALAPPDATA%\PPTServiceUltra\EventCache
-		private string _cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PPTServiceUltra", "EventCache");
+		// 事件上报缓存也归到统一数据目录：%APPDATA%\PPTServiceUltra\EventCache
+		private string _cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PPTServiceUltra", "EventCache");
 
 		public static int MaxCacheCount { get; set; } = 100;
 
