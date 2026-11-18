@@ -1187,5 +1187,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- 与主程序同源的 git 动态版本号 / 短 hash -->
-  <Import Project="..\Version.targets" />
+  <Import Project="..\Version\Version.targets" />
 </Project>

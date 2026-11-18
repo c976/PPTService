@@ -5,24 +5,24 @@
     每个项目在编译前生成自己的 Properties\GitVersionInfo.g.cs（namespace PPTService，internal），
     因此 exe 与两个 dll 拥有完全相同的 ProductVersion / Hash / InformationalVersion。
 
-    version.prefix 保存版本前缀（如 1.0.0）；build.number 保存「本次构建使用的 build 号」。
+    Version/version.prefix 保存版本前缀（如 1.0.0）；Version/build.number 保存「本次构建使用的 build 号」。
     完整版本 = 前缀 + build 号，构建成功后由主程序项目（IsVersionOwner=true）
     统一 +1 写回，供下一次构建使用。递增放在构建之后，保证同一次构建中三个项目读到同一个值，
     也避免 /m 并行构建或项目依赖顺序导致版本不一致 / 重复递增。
 
     -p:SkipVersionIncrement=true    本次不递增（重复构建 / CI 验证）
-    -p:BuildNumberOverride=900      强制本次版本，且不修改 build.number
+    -p:BuildNumberOverride=900      强制本次版本，且不修改 Version/build.number
     -p:GitShortHashOverride=xxxx    强制 hash
     -p:GitWorkingDirectory=<路径>   指定 git 探测目录
 
     只使用 MSBuild 4.0 / VS2015 支持的任务参数（未使用 15+ 新增参数）。
   -->
   <PropertyGroup>
-    <!-- 版本前缀（x.y.z）集中在仓库根 version.prefix 维护；
+    <!-- 版本前缀（x.y.z）集中在仓库 Version/version.prefix 维护；
          文件不存在时回落 1.0.0，命令行 -p:VersionPrefix=2.0.0 可临时覆盖。 -->
-    <VersionPrefixFile>$(MSBuildProjectDirectory)\..\version.prefix</VersionPrefixFile>
-    <BuildNumberFile>$(MSBuildProjectDirectory)\..\build.number</BuildNumberFile>
-    <NsisVersionFile>$(MSBuildProjectDirectory)\..\setup\Version.nsh</NsisVersionFile>
+    <VersionPrefixFile>$(MSBuildProjectDirectory)\..\Version\version.prefix</VersionPrefixFile>
+    <BuildNumberFile>$(MSBuildProjectDirectory)\..\Version\build.number</BuildNumberFile>
+    <NsisVersionFile>$(MSBuildProjectDirectory)\..\Version\Version.nsh</NsisVersionFile>
     <GitVersionFile>$(MSBuildProjectDirectory)\Properties\GitVersionInfo.g.cs</GitVersionFile>
     <GitHashTemp>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)GitHash.tmp</GitHashTemp>
     <GitWorkingDirectory Condition=" '$(GitWorkingDirectory)' == '' ">$(MSBuildProjectDirectory)\..</GitWorkingDirectory>

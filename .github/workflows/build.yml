@@ -76,12 +76,12 @@ jobs:
         call build.cmd
 
     # 读取本次构建实际使用的产品版本号，用于 artifact 命名。
-    # 二次开发副本：MSBuild 生成的 setup\Version.nsh；原版仓库回退到 PPTService.nsi 里的 !define。
+    # MSBuild 生成的 Version\Version.nsh；缺失时回退到 PPTService.nsi 里的 !define。
     - name: Read product version
       id: product_version
       shell: pwsh
       run: |
-        $versionFile = './setup/Version.nsh'
+        $versionFile = './Version/Version.nsh'
         if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTService.nsi' }
         $content = Get-Content -Path $versionFile -Raw
         if ($content -match '(?m)^\s*!define\s+PRODUCT_VERSION\s+"([^"]+)"') {

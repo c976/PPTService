@@ -416,11 +416,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
-  <!-- 版本号 / git 短 hash / NSIS 版本头文件统一由仓库根 Version.targets 生成。
-       本文件所在的 PPTService 项目是版本所有者：负责写 setup\Version.nsh，
-       并在构建成功后把 build.number +1 供下一次构建使用。 -->
+  <!-- 版本号 / git 短 hash / NSIS 版本头文件统一由 Version\Version.targets 生成。
+       本文件所在的 PPTService 项目是版本所有者：负责写 Version\Version.nsh，
+       并在构建成功后把 Version\build.number +1 供下一次构建使用。 -->
   <PropertyGroup>
     <IsVersionOwner>true</IsVersionOwner>
   </PropertyGroup>
-  <Import Project="..\Version.targets" />
+  <Import Project="..\Version\Version.targets" />
 </Project>

@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
 
-// 版本号与 git 短 hash 由仓库根 Version.targets 在每次构建时写入各项目自己的
+// 版本号与 git 短 hash 由 Version/Version.targets 在每次构建时写入各项目自己的
 // Properties\GitVersionInfo.g.cs（namespace 统一为 PPTService），所有项目完全同源。
 // 非 git 仓库 / 无 commit / git 不可用时 hash 为 "unknown"。
 [assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]

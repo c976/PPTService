@@ -106,5 +106,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- 与主程序共用同一套版本号 / git hash 生成逻辑（每个项目写自己的 GitVersionInfo.g.cs） -->
-  <Import Project="..\Version.targets" />
+  <Import Project="..\Version\Version.targets" />
 </Project>

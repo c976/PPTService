@@ -86,7 +86,7 @@ jobs:
         RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
       shell: pwsh
       run: |
-        $versionFile = './setup/Version.nsh'
+        $versionFile = './Version/Version.nsh'
         if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTService.nsi' }
         $content = Get-Content -Path $versionFile -Raw
         if ($content -match '(?m)^\s*!define\s+PRODUCT_VERSION\s+"([^"]+)"') {

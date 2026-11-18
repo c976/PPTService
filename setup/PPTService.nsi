@@ -33,8 +33,8 @@ SetCompressorDictSize 32
 !define PRODUCT_NAME_EN       "PPTServiceUltra"
 ; 实际 exe 文件名（不含扩展名），快捷方式/自启动/进程互守护/App Paths 等由此引用
 !define PRODUCT_EXE_NAME       "PPTService"
-; 全局版本号由 build.number 驱动，编译时由 MSBuild 生成 Version.nsh
-!include "${__FILEDIR__}\Version.nsh"
+; 全局版本号由 Version\build.number 驱动，编译时由 MSBuild 生成 Version\Version.nsh
+!include "${__FILEDIR__}\..\Version\Version.nsh"
 !define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
 !define PRODUCT_WEB_SITE      "https://github.com/c976/PPTService"
 !define PRODUCT_GUID          "{FED7F3E7-97BC-4A64-9903-A783762634B3}"
