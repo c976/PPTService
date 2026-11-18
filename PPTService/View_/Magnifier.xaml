@@ -38,17 +38,11 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="InnerLeftTopThumbBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="10" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="25" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="10" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="11" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CloseTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="10" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="11" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -75,17 +69,11 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="InnerLeftTopThumbBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="32" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="320" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="80" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="28" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="20" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CloseTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="28" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="20" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -97,7 +85,7 @@
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ClosePath" Storyboard.TargetProperty="Margin">
               <DiscreteObjectKeyFrame KeyTime="0">
                 <ObjectKeyFrame.Value>
-                  <Thickness>10</Thickness>
+                  <Thickness>5</Thickness>
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
@@ -147,30 +135,29 @@
           <Ellipse Name="InnerRightBottomThumbBorder" Style="{StaticResource ThumbEllipseStyle}" Width="{Binding Width, ElementName=InnerLeftTopThumbBorder}" Height="{Binding Height, ElementName=InnerLeftTopThumbBorder}" />
         </Border>
       </Grid>
-      <!-- 关灯 / 关闭按钮组：固定在放大镜窗口底部居中，横向排列并显示文字。 -->
-      <Border Name="ButtonBorder" Width="160" Height="40" Background="{DynamicResource Theme.SettingsControl}" CornerRadius="4" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="{DynamicResource Theme.BorderBrush}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0 0 0 40" RenderTransformOrigin="0.5,0.5">
-        <UIElement.RenderTransform>
-          <TransformGroup>
-            <ScaleTransform />
-          </TransformGroup>
-        </UIElement.RenderTransform>
-        <Grid Margin="6 2" HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <CheckBox Name="ChangeBackgroundImageCheckBox" Grid.Column="0" IsChecked="False" Style="{StaticResource Style.MagnifierCheckBox}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.BulbOn}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.BulbOff}" Click="ChangeBackgroundImageCheckBox_OnClick" VerticalAlignment="Center" />
-          <TextBlock Name="LightTextBlock" Grid.Column="1" Text="关灯" FontSize="14" Foreground="#FF666666" Margin="2 0 12 0" VerticalAlignment="Center" />
-          <Button Name="CloseButton" Grid.Column="2" Style="{StaticResource NormalButtonStyleWidthOutMargin}" VerticalAlignment="Center">
+    </Grid>
+    <!-- 关灯 / 关闭按钮组：贴在放大镜矩形下边缘外面、水平居中；图标在上、文字在下。
+         放在 RootCanvas 层用 Canvas.Left/Top 跟随矩形定位（见 AdjustButtonPosition）。 -->
+    <Border Name="ButtonBorder" Width="100" Height="52" Background="#AAFFFFFF" CornerRadius="4" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="#88C6C6C6" RenderTransformOrigin="0.5,0.5">
+      <UIElement.RenderTransform>
+        <TransformGroup>
+          <ScaleTransform />
+        </TransformGroup>
+      </UIElement.RenderTransform>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6 0">
+          <CheckBox Name="ChangeBackgroundImageCheckBox" Width="28" Height="28" IsChecked="False" Style="{StaticResource Style.MagnifierCheckBox}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.BulbOn}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.BulbOff}" Click="ChangeBackgroundImageCheckBox_OnClick" HorizontalAlignment="Center" />
+          <TextBlock Name="LightTextBlock" Text="关灯" FontSize="12" Foreground="#FF666666" HorizontalAlignment="Center" Margin="0 2 0 0" />
+        </StackPanel>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6 0">
+          <Button Name="CloseButton" Width="28" Height="28" Style="{StaticResource NormalButtonStyleWidthOutMargin}" HorizontalAlignment="Center">
             <ContentControl.Content>
-              <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="#666666" Stretch="Fill" Margin="5" />
+              <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="#666666" Stretch="Fill" Margin="3" />
             </ContentControl.Content>
           </Button>
-          <TextBlock Name="CloseTextBlock" Grid.Column="3" Text="关闭" FontSize="14" Foreground="#FF666666" Margin="2 0 0 0" VerticalAlignment="Center" />
-        </Grid>
-      </Border>
-    </Grid>
+          <TextBlock Name="CloseTextBlock" Text="关闭" FontSize="12" Foreground="#FF666666" HorizontalAlignment="Center" Margin="0 2 0 0" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
   </Canvas>
 </Window>

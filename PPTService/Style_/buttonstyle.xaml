@@ -74,9 +74,18 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type Button}">
-          <Border Name="RootBorder" Background="{TemplateBinding Control.Background}">
+          <Border Name="RootBorder" Background="{TemplateBinding Control.Background}" CornerRadius="3">
             <ContentPresenter Name="ContentPresenter" Content="{TemplateBinding ContentControl.Content}" Focusable="False" FocusVisualStyle="{x:Null}" />
           </Border>
+          <ControlTemplate.Triggers>
+            <!-- 鼠标悬停 / 触控按下时给出不同的背景反馈（放大镜等工具按钮）。 -->
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="RootBorder" Property="Background" Value="#26FFFFFF" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="RootBorder" Property="Background" Value="#4DFFFFFF" />
+            </Trigger>
+          </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
