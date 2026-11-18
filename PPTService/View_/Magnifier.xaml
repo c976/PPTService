@@ -175,10 +175,10 @@
         </Border>
       </Grid>
     </Grid>
-    <!-- 关灯 / 关闭按钮组：贴在放大镜矩形下边缘外面、与矩形同宽；两个按钮平分工具条宽度，
+    <!-- 关灯 / 关闭按钮组：贴在放大镜矩形下边缘外面、水平居中；两个按钮平分工具条宽度，
          图标与文字都在按钮 Content 里，整块一起响应悬停 / 按下变色。
          背景用主题画刷，深浅主题与透明度自动适配。 -->
-    <Border Name="ButtonBorder" Height="72" Background="{DynamicResource Theme.PanelBackground}" CornerRadius="5" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="{DynamicResource Theme.BorderBrush}" RenderTransformOrigin="0.5,0.5">
+    <Border Name="ButtonBorder" Width="100" Height="52" Background="{DynamicResource Theme.PanelBackground}" CornerRadius="4" BorderThickness="1" SnapsToDevicePixels="True" BorderBrush="{DynamicResource Theme.BorderBrush}" RenderTransformOrigin="0.5,0.5">
       <UIElement.RenderTransform>
         <TransformGroup>
           <ScaleTransform />
@@ -191,7 +191,7 @@
         </Grid.ColumnDefinitions>
         <CheckBox Name="ChangeBackgroundImageCheckBox" Grid.Column="0" Style="{StaticResource Style.MagnifierToolToggle}" IsChecked="False" Click="ChangeBackgroundImageCheckBox_OnClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
           <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid Width="36" Height="36" HorizontalAlignment="Center">
+            <Grid Width="28" Height="28" HorizontalAlignment="Center">
               <Image Source="{StaticResource ImageSource.BulbOn}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
               <Image Source="{StaticResource ImageSource.BulbOff}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image.Style>
@@ -206,13 +206,13 @@
                 </Image.Style>
               </Image>
             </Grid>
-            <TextBlock Name="LightTextBlock" Text="关灯" FontSize="13" Foreground="{DynamicResource Theme.IconBrush}" HorizontalAlignment="Center" />
+            <TextBlock Name="LightTextBlock" Text="关灯" FontSize="12" Foreground="{DynamicResource Theme.IconBrush}" HorizontalAlignment="Center" />
           </StackPanel>
         </CheckBox>
         <Button Name="CloseButton" Grid.Column="1" Style="{StaticResource Style.MagnifierToolButton}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
           <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="{DynamicResource Theme.IconBrush}" Stretch="Uniform" Width="36" Height="36" HorizontalAlignment="Center" />
-            <TextBlock Name="CloseTextBlock" Text="关闭" FontSize="13" Foreground="{DynamicResource Theme.IconBrush}" HorizontalAlignment="Center" />
+            <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="{DynamicResource Theme.IconBrush}" Stretch="Uniform" Width="28" Height="28" HorizontalAlignment="Center" />
+            <TextBlock Name="CloseTextBlock" Text="关闭" FontSize="12" Foreground="{DynamicResource Theme.IconBrush}" HorizontalAlignment="Center" />
           </StackPanel>
         </Button>
       </Grid>
