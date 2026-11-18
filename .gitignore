@@ -8,3 +8,8 @@
 
 # NSIS 编译产物（setup 下的安装包）
 setup/*.exe
+
+# 版本信息：每次编译由 Version/Version.targets 动态生成，不进版本库
+# （版本号只改 Version/build.ver 即可；g.cs 与 Version.nsh 均为生成物）
+**/Properties/GitVersionInfo.g.cs
+Version/Version.nsh
