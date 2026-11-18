@@ -399,6 +399,13 @@ namespace PPTService
 		private void Exit_OnClick(object sender, RoutedEventArgs e)
 		{
 			ViewHelper.MainWindow.IsExiting = true;
+			// 调试模式：不依赖隐藏动画的 Completed 回调（动画被打断时回调不触发、进程残留），
+			// 直接终止进程，保证「结束放映」必定干净退出。
+			if (DebugMode.IsEnabled)
+			{
+				PptOperator.Instance.Exit();
+				return;
+			}
 			bool isShowing = ViewHelper.InnerBoardWindow.IsShowing;
 			ViewHelper.InnerBoardWindow.HiddenAndClearInkCanvas();
 			if (!isShowing)

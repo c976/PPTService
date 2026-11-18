@@ -198,9 +198,10 @@ namespace PPTService
 			if (DebugMode.IsEnabled)
 			{
 				IsShowing = false;
-				// 主窗口启用了关闭保护，程序内部主动退出时显式放行。
-				ViewHelper.MainWindow?.AllowClose();
-				System.Windows.Application.Current.Shutdown();
+				// 调试模式直接终止进程，绕过主窗口关闭保护 / 模拟放映窗口等所有 Closing 拦截，
+				// 保证「结束放映」和 ESC 都能立即干净退出，不留后台进程。
+				// 调试模式不启动 DefenderGuardian，无需 OnExit 里的收尾。
+				System.Environment.Exit(0);
 				return;
 			}
 			SetActive((IntPtr)_app.HWND);
