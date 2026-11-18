@@ -34,8 +34,6 @@ namespace PPTService
 
 		private static int _buttonBorderVerticalAlignmentMargin = 40;
 
-		private static int _buttonBorderHorizontalAlignmentMargin = 55;
-
 		public Magnifier()
 		{
 			InitializeComponent();
@@ -342,64 +340,34 @@ namespace PPTService
 			AdjustButtonPosition(left, top);
 		}
 
+		/// <summary>
+		/// 按钮组固定在放大镜窗口底部居中，不再随放大镜矩形靠边而左右翻转。
+		/// 保留方法签名给原有缩放回调调用。
+		/// </summary>
 		private void AdjustButtonPosition(double left, double top)
 		{
-			double top2 = 0.0;
-			double left2 = 0.0;
-			double bottom = _buttonBorderVerticalAlignmentMargin;
-			double right = -_buttonBorderHorizontalAlignmentMargin;
-			double left3 = MagnifierBorder.Margin.Left;
-			VerticalAlignment verticalAlignment = VerticalAlignment.Bottom;
-			System.Windows.HorizontalAlignment horizontalAlignment = System.Windows.HorizontalAlignment.Right;
-			VerticalAlignment verticalAlignment2 = ButtonBorder.VerticalAlignment;
-			System.Windows.HorizontalAlignment horizontalAlignment2 = ButtonBorder.HorizontalAlignment;
-			if (left < 0.0)
-			{
-				horizontalAlignment = System.Windows.HorizontalAlignment.Right;
-				right = -_buttonBorderHorizontalAlignmentMargin;
-			}
-			if (top < 0.0)
-			{
-				verticalAlignment = VerticalAlignment.Bottom;
-				bottom = _buttonBorderVerticalAlignmentMargin;
-			}
-			if (left > ActualWidth - MagnifierBorder.ActualWidth)
-			{
-				horizontalAlignment = System.Windows.HorizontalAlignment.Left;
-				left2 = -_buttonBorderHorizontalAlignmentMargin;
-			}
-			if (top > ActualHeight - MagnifierBorder.ActualHeight - left3 * 2.0)
-			{
-				verticalAlignment = VerticalAlignment.Top;
-				top2 = _buttonBorderVerticalAlignmentMargin;
-			}
-			ButtonBorder.Margin = new Thickness(left2, top2, right, bottom);
-			ButtonBorder.HorizontalAlignment = horizontalAlignment;
-			ButtonBorder.VerticalAlignment = verticalAlignment;
-			if (horizontalAlignment != horizontalAlignment2 || verticalAlignment != verticalAlignment2)
-			{
-				(Resources["ShowButtonStoryboard"] as Storyboard)?.Begin();
-			}
+			ButtonBorder.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
+			ButtonBorder.VerticalAlignment = VerticalAlignment.Bottom;
+			ButtonBorder.Margin = new Thickness(0.0, 0.0, 0.0, _buttonBorderVerticalAlignmentMargin);
 		}
 
 		private void AdjustButtonBorderMargin()
 		{
 			if (Height > 2100.0)
 			{
-				_buttonBorderHorizontalAlignmentMargin = 110;
 				_buttonBorderVerticalAlignmentMargin = 80;
 			}
 			if (Height > 770.0 && Height <= 2100.0)
 			{
-				_buttonBorderHorizontalAlignmentMargin = 55;
 				_buttonBorderVerticalAlignmentMargin = 40;
 			}
 			if (Height > 0.0 && Height <= 770.0)
 			{
-				_buttonBorderHorizontalAlignmentMargin = 35;
 				_buttonBorderVerticalAlignmentMargin = 25;
 			}
-			ButtonBorder.Margin = new Thickness(0.0, 0.0, -_buttonBorderHorizontalAlignmentMargin, _buttonBorderVerticalAlignmentMargin);
+			ButtonBorder.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
+			ButtonBorder.VerticalAlignment = VerticalAlignment.Bottom;
+			ButtonBorder.Margin = new Thickness(0.0, 0.0, 0.0, _buttonBorderVerticalAlignmentMargin);
 		}
 
 		private void AdjustMagnifierBorder()
