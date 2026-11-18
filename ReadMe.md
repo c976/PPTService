@@ -1,6 +1,6 @@
 # PPTServiceUltra
 
-基于 PPTService 1.0.0.795 版本二次开发增强版本
+基于 PPTService 1.0.0.795 二次开发增强版本
 
 目标框架 Visual Studio 2015 .Net Framework 4.5
 
@@ -8,29 +8,53 @@
 
 ```
 \
-├── PPTService.sln
-├── Version\                    版本公共文件（Version.targets / version.prefix / build.ver / Version.nsh）
+├── PPTService.sln                  解决方案（含下列全部项目）
+├── Version\                        版本公共文件（Version.targets / version.prefix / build.ver / Version.nsh）
+├── AssemblyInfo.Shared.cs          各项目共用的程序集信息
 ├── ReadMe.md
-├── lib\                        第三方依赖（非 CVTE 库）
-├── PPTService\                 主程序（WPF）
-├── PPTService.Core\            整合后的核心库（单一程序集）
-├── PPTService.Collection\
-├── .github\workflows\          GitHub Actions 编译 / 发布
-└── setup\                       NSIS 安装脚本
+├── lib\                            第三方依赖 DLL
+├── PPTService\                     主程序（WPF 工具栏 / 设置 / 放映交互）
+├── PPTService.Core\                核心库
+├── PPTService.Collection\          数据集合与访问
+├── PPTService.Defender\            守护进程（主程序崩溃后自动拉起）
+├── PPTService.Ink\                 桌面批注白板
+├── PPTService.Ink.Core\            批注核心层
+├── PPTService.Ink.Hardware\        希沃硬件插件（可选）
+├── PPTService.Ink.Hardware.Core\   硬件插件依赖（可选）
+├── PPTService.NetShared\           二维码分享插件（可选）
+├── setup\                          NSIS 安装 / 卸载脚本、皮肤、插件与配置
+│   ├── PPTService.nsi / build.cmd
+│   └── Skin\ / Addon\ / Plugins\ / Config.ini
+└── .github\workflows\              build.yml（编译）/ release.yml（发布）
 ```
 
-## 修改
+## 功能与改进
 
-### 动态构建版本号与界面调整
+### 批注与教学
 
-- **全局版本号（build 号每次编译自动 +1）**：逻辑集中在 `Version\Version.targets`，由各 csproj 共同导入。`Version\build.ver` 保存**本次构建使用的 build 号**，`Version\version.prefix` 保存前缀；完整版本 = `VersionPrefix`（`1.0.0`）+ build 号，例如 `1.0.0.799`。构建**成功后**由主程序项目（`IsVersionOwner=true`）把 `Version\build.ver` `+1` 写回，供下一次构建使用。递增放在构建之后，是为了让同一次构建（含 `/m` 并行、项目依赖顺序）三个项目都读到同一个值；失败的构建不消耗版本号。三个 csproj 均设 `DisableFastUpToDateCheck=true`，避免 VS 快速更新检查跳过某个项目造成版本落后一次构建（代价是每次 Build 都会重新编译）。
-- **三个程序集同源**：`Version.targets` 在每个项目的 `Properties\GitVersionInfo.g.cs` 写入相同的 `ProductVersion` / `Hash` / `InformationalVersion` 常量（namespace `PPTService`，各程序集各自 internal）。三个 `AssemblyInfo.cs` 的 `AssemblyVersion` / `AssemblyFileVersion` / `AssemblyInformationalVersion` 全部引用这些常量，并加 `[AssemblyMetadata("CommitHash", ...)]`。所以 `PPTService.exe` 与两个 dll（`PPTService.Core.dll`、`PPTService.Collection.dll`）不再固定 `1.0.0.0`，文件版本跟随全局版本号，产品版本都带 git 短 hash，例如 `1.0.0.799 (a1b2c3d4)`。
-- **git hash**：构建时执行 `git rev-parse --short=8 HEAD` 注入 8 位短 hash，**非 git 仓库 / 无 commit / git 不可用**统一回退 `unknown`。`GitVersionInfo.g.cs` 与 `Version.nsh` 均为构建生成物、已加入 `.gitignore` 不进版本库（首次构建由 `Version.targets` 自动补出，设计期也生成）；**改版本号只需改 `Version\build.ver` 一处**，不要手改这些生成文件。`AssemblyInfo.cs` 也不再写死 `1.0.0.795 (37e1afca)`。
-- **NSIS 同源**：主程序项目同时生成 `Version\Version.nsh`（`!define PRODUCT_VERSION`），`setup\PPTService.nsi` 用 `!include "${__FILEDIR__}\..\Version\Version.nsh"` 引入；安装包 `Name` / `VIProductVersion` / 注册表 `DisplayVersion` 与程序集版本一致，加载环文字、工具栏弹窗也读同一份常量。
-- **开关**：`-p:SkipVersionIncrement=true` 本次不递增、`-p:BuildNumberOverride=900` 强制本次版本且不改 `Version\build.ver`、`-p:GitShortHashOverride=xxxx` 指定 hash、`-p:GitWorkingDirectory=<路径>` 指定 git 探测目录。目标带 `DesignTimeBuild != true` 条件，避免 VS 设计时构建误递增。只使用 MSBuild 4.0 / VS2015 支持的任务参数（`WriteOnlyWhenDifferent` 是 15+ 新增参数，在 VS2015 会报「任务不支持该参数」，已移除）。
-- **CI 发布**：`.github\workflows\build.yml` 在编译后读取 `Version\Version.nsh`（缺失时回退到 `setup\PPTService.nsi` 里的 `PRODUCT_VERSION`）得到版本号，Release 的 **tag / 标题 / 说明都使用该版本号**，不再使用 `latest` 滚动 tag；同名版本重跑时改为覆盖已有 Release 的安装包附件。`Version\build.ver` 的改动需要提交回仓库才能持续递增，否则 CI 每次都产出同一个版本（此时 tag 相同，走覆盖逻辑）；也可在 CI 传 `-p:BuildNumberOverride=<run number>`。
-- 加载转圈（`LoadingView.xaml`）底部的版权文字改为显示 `GitVersionInfo.InformationalVersion`。
-- 工具栏原「希沃白板5推荐下载」按钮改为弹出当前版本号（`MessageBox`）；`View_\RecommendationWindow.xaml` 与 `.xaml.cs` 已从项目移除，csproj 的 Compile / Page 条目同步删除。项目自带的 `MessageWindow` 会在 2 秒后自动关闭，不适合展示版本号，故未采用。
+- **桌面批注白板**：内置自实现批注层，可在 Office 原生批注与自实现批注间切换；批注层始终悬浮在 PPT 放映窗口之上，支持「附着放映窗口」与「全局置顶」两种模式。
+- **批注工具**：笔色 / 粗细可调、橡皮滑动清屏、二维码图片保存；批注随 PPT 翻页自动切换对应页笔迹。
+- **放映不中断**：使用画笔 / 橡皮时保持焦点在批注层，鼠标模式时交还给 PPT，避免误翻页；重复放映、COM 瞬时异常等场景不再导致工具栏消失、重复按钮或崩溃。
+
+### 工具栏与交互
+
+- **工具栏收起 / 拉起**：结束放映按钮旁可收起整个工具栏（设置中可开关），收起后仅保留翻页按钮，屏幕底部居中出现拉起按钮；新放映与放映结束自动恢复展开态。
+- **放大镜**：关灯 / 关闭按钮位于窗口底部居中横排并显示文字。
+- **界面设置**：隐藏功能栏、翻页按钮位置、自动淡化、主题、工具栏透明度、缩略图开关、触控拖动排序等均可实时设置。
+- **分辨率适配**：适配 1366×768、4K 100% 与 250% 缩放，工具栏列宽、图标与弹窗按分辨率自动调整。
+
+### 插件化（可按需删除）
+
+- **希沃硬件**：`Hardware.dll`、`Hardware.Core.dll` 为可选插件，整组删除后主程序与批注照常运行，仅硬件能力降级。
+- **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用；删除后程序正常启动，二维码功能给出缺失提示。
+- 三个 DLL 均随安装包部署，用户可按需要单独移除。
+
+### 版本与安装
+
+- **动态版本号**：`Version\build.ver` 为唯一版本源，程序集文件版本与安装包版本同源并带 git 短 hash；版本随每次构建自动递增，生成文件不进版本库。
+- **安装包**：皮肤安装界面 + 现代卸载界面，支持静默升级与安装日志；卸载会正确关闭程序且不误杀升级器。
+- **自动发布**：编译后自动上传安装包，发布以版本号作为 tag 与标题。
+- **版本信息展示**：原「希沃白板5推荐下载」按钮改为显示当前版本号。
 
 ## 许可协议
 
