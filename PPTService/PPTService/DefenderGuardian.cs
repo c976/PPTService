@@ -43,10 +43,19 @@ namespace PPTService
 			get { return Path.Combine(BaseDirectory, DefenderExeName); }
 		}
 
-		/// <summary>由 App.OnStartup 调用。调试模式不启用守护进程。</summary>
+		/// <summary>
+		/// 由 App.OnStartup 调用。调试模式不启用守护进程。
+		/// Defender 是独立可选组件：文件不存在时静默跳过，连巡检定时器都不启动，
+		/// 主程序照常运行（仅缺少崩溃后自动拉起能力）。
+		/// </summary>
 		public static void Start()
 		{
 			if (DebugMode.IsEnabled || _timer != null || _stopped)
+			{
+				return;
+			}
+			// 可选组件缺失：直接跳过，不空转定时器。
+			if (!File.Exists(DefenderPath))
 			{
 				return;
 			}

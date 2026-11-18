@@ -355,7 +355,7 @@ namespace PPTService
 			double buttonWidth = ButtonBorder.Width;
 			// 水平居中于矩形；垂直贴在矩形下边缘外面（留一点点间距）。
 			Canvas.SetLeft(ButtonBorder, left + margin + (rectWidth - buttonWidth) / 2.0);
-			Canvas.SetTop(ButtonBorder, top + margin + rectHeight + 2.0);
+			Canvas.SetTop(ButtonBorder, top + margin + rectHeight + 1.0);
 		}
 
 		private void AdjustButtonBorderMargin()
