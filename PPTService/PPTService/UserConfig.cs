@@ -47,6 +47,9 @@ namespace PPTService
         /// </summary>
         public bool ShowQrCode { get; set; }
 
+        /// <summary>是否在结束放映按钮旁显示「收起工具栏」按钮。默认 true。</summary>
+        public bool ShowCollapseButton { get; set; }
+
 		/// <summary>
 		/// 批注方式：true（默认）= 使用 PPTService.Ink 里的原版桌面批注白板窗口
 		/// （压感软笔 / 手势橡皮，独立透明窗口、鼠标模式穿透、逐页笔迹），适配希沃设备；
@@ -109,6 +112,7 @@ namespace PPTService
 		{
 			ToolbarButtons = new List<ToolbarButtonSetting>();
 			ShowQrCode = true;
+			ShowCollapseButton = true;
 			PageTurningPosition = "Default";
 			ShowLoadingSpinner = true;
 			// 默认开启自实现批注（压感软笔 / 手势橡皮 / 板中板）。
@@ -200,6 +204,7 @@ namespace PPTService
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
 			ShowQrCode = true,
+			ShowCollapseButton = true,
 			PageTurningPosition = "Default",
 			UseSelfAnnotation = true,
 			ShowLoadingSpinner = true,
@@ -249,6 +254,7 @@ namespace PPTService
             {
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
                 ViewHelper.BottomArea.ApplyFunctionBarVisibility(cfg.HideFunctionBar);
+                ViewHelper.BottomArea.ApplyCollapseButtonVisibility(cfg.ShowCollapseButton);
             }
             // 只在批注方式真的变化时重建/移除 Board：设置窗口实时生效时每次改动都会
             // 走到这里，重复 SetEnabled 会重置当前页视图并造成闪烁。

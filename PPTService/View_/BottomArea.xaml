@@ -64,7 +64,6 @@
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition Width="Auto" />
-      <ColumnDefinition x:Name="CollapseCol" Width="Auto" />
     </Grid.ColumnDefinitions>
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="AdaptiveStates">
@@ -80,12 +79,13 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="2" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CollapseGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
-            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ExitPanelBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>3</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
                 <ObjectKeyFrame.Value>
@@ -117,12 +117,13 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="8" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ExitGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CollapseGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
-            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ExitPanelBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>12</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
                 <ObjectKeyFrame.Value>
@@ -286,11 +287,17 @@
       </Popup>
     </Grid>
     <Grid Name="PlaceholderGrid" Column="3" Width="4" />
-    <Grid Name="ExitGrid" Column="4" Width="50">
-      <pptService:ImageButton Click="Exit_OnClick" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.ExitNormal}" PressedSource="{StaticResource ImageSource.ExitSelected}" />
-    </Grid>
-    <Grid Name="CollapseGrid" Column="5" Width="50">
-      <pptService:ImageButton x:Name="CollapseButton" Click="CollapseToolbar_OnClick" ToolTip="收起工具栏" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" NormalSource="{StaticResource ImageSource.CollapseToolbarNormal}" PressedSource="{StaticResource ImageSource.CollapseToolbarSelected}" />
+    <!-- 结束放映 + 收起工具栏共用同一块面板，不再分成两个独立方块。 -->
+    <Grid Name="ExitGrid" Column="4" Width="100">
+      <Border Name="ExitPanelBorder" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <pptService:ImageButton Grid.Column="0" Click="Exit_OnClick" Background="#00FFFFFF" BorderThickness="0" NormalSource="{StaticResource ImageSource.ExitNormal}" PressedSource="{StaticResource ImageSource.ExitSelected}" />
+        <pptService:ImageButton x:Name="CollapseButton" Grid.Column="1" Click="CollapseToolbar_OnClick" ToolTip="收起工具栏" Background="#00FFFFFF" BorderThickness="0" NormalSource="{StaticResource ImageSource.CollapseToolbarNormal}" PressedSource="{StaticResource ImageSource.CollapseToolbarSelected}" />
+      </Grid>
     </Grid>
   </Grid>
 </UserControl>

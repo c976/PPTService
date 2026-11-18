@@ -1972,20 +1972,12 @@
   <DrawingImage x:Key="ImageSource.CollapseToolbarNormal">
     <DrawingImage.Drawing>
       <DrawingGroup>
-        <GeometryDrawing Brush="#00FFFFFF">
-          <GeometryDrawing.Pen>
-            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="1" />
-          </GeometryDrawing.Pen>
-          <GeometryDrawing.Geometry>
-            <RectangleGeometry RadiusX="4" RadiusY="4" Rect="3,3,26,26" />
-          </GeometryDrawing.Geometry>
-        </GeometryDrawing>
         <GeometryDrawing Brush="Transparent">
           <GeometryDrawing.Pen>
             <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="3" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
           </GeometryDrawing.Pen>
           <GeometryDrawing.Geometry>
-            <PathGeometry Figures="M10,13 L16,19 L22,13" />
+            <PathGeometry Figures="M7,12 L16,21 L25,12" />
           </GeometryDrawing.Geometry>
         </GeometryDrawing>
       </DrawingGroup>
@@ -1993,21 +1985,13 @@
   </DrawingImage>
   <DrawingImage x:Key="ImageSource.CollapseToolbarSelected">
     <DrawingImage.Drawing>
-      <DrawingGroup>
-        <GeometryDrawing Brush="#22FFFFFF">
-          <GeometryDrawing.Pen>
-            <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="1" />
-          </GeometryDrawing.Pen>
-          <GeometryDrawing.Geometry>
-            <RectangleGeometry RadiusX="4" RadiusY="4" Rect="3,3,26,26" />
-          </GeometryDrawing.Geometry>
-        </GeometryDrawing>
+      <DrawingGroup Opacity="0.6">
         <GeometryDrawing Brush="Transparent">
           <GeometryDrawing.Pen>
             <Pen Brush="{DynamicResource Theme.IconBrush}" Thickness="3" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
           </GeometryDrawing.Pen>
           <GeometryDrawing.Geometry>
-            <PathGeometry Figures="M10,13 L16,19 L22,13" />
+            <PathGeometry Figures="M7,12 L16,21 L25,12" />
           </GeometryDrawing.Geometry>
         </GeometryDrawing>
       </DrawingGroup>

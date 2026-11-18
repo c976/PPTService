@@ -525,7 +525,6 @@ namespace PPTService
 			PullupButton.Visibility = Visibility.Collapsed;
 			PullupButton.Opacity = 0.0;
 			PullupButton.IsHitTestVisible = false;
-			((TranslateTransform)PullupButton.RenderTransform).Y = 20.0;
 		}
 
 		private void PullupToolbar_OnClick(object sender, RoutedEventArgs e)

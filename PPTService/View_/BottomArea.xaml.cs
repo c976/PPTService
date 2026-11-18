@@ -52,6 +52,9 @@ namespace PPTService
 		/// 因此不与 StaysOpen 自动收起产生竞态（修复「滑杆已开时再点橡皮无法收起」的老 bug）。</summary>
 		private bool _eraserSliderOpen;
 
+		/// <summary>设置项：是否在结束放映旁边显示收起工具栏按钮。</summary>
+		private bool _collapseButtonVisible = true;
+
 		/// <summary>
 		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
 		/// 板中板打开期间主批注层设为鼠标穿透，避免抢走输入；但工具栏视觉上默认切到「画笔」
@@ -189,7 +192,7 @@ namespace PPTService
 		/// <summary>
 		/// 按窗口宽度（DIP）设置工具栏各列宽，阈值与 XAML 的 AdaptiveTrigger 一致：
 		/// &lt;1440 → 30，1440~3799 → 50（XAML 默认值），≥3800 → 100。
-		/// 只写列宽，不碰行高/ExitGrid 等仍由 XAML VisualState 动画管理的属性。
+		/// 结束放映 + 收起共用一块面板：显示收起按钮时宽度为 2 格，否则 1 格。
 		/// </summary>
 		private void ApplyAdaptiveColumnWidths(double windowWidth)
 		{
@@ -202,7 +205,16 @@ namespace PPTService
 			ToolCol2.Width = width;
 			ToolCol3.Width = width;
 			ToolCol4.Width = width;
-			CollapseCol.Width = width;
+			ExitGrid.Width = value * (_collapseButtonVisible ? 2.0 : 1.0);
+		}
+
+		/// <summary>设置窗口实时下发：收起按钮显隐 + 右侧面板宽度同步。</summary>
+		public void ApplyCollapseButtonVisibility(bool show)
+		{
+			_collapseButtonVisible = show;
+			CollapseButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+			Window window = Window.GetWindow(this);
+			ApplyAdaptiveColumnWidths(window != null ? window.ActualWidth : SystemParameters.PrimaryScreenWidth);
 		}
 
 		public void InitializeBottomArea()

@@ -188,6 +188,7 @@ namespace PPTService
             }
             ToolbarListBox.ItemsSource = _items;
             QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
+            ShowCollapseButtonCheckBox.IsChecked = cfg.ShowCollapseButton;
             ShowLoadingCheckBox.IsChecked = cfg.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
             HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
@@ -399,6 +400,7 @@ namespace PPTService
                 cfg.ToolbarButtons.Add(new ToolbarButtonSetting { Id = vm.Id, Visible = vm.IsVisible });
             }
             cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
+            cfg.ShowCollapseButton = ShowCollapseButtonCheckBox.IsChecked == true;
             cfg.ShowLoadingSpinner = ShowLoadingCheckBox.IsChecked == true;
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
             cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
@@ -424,6 +426,7 @@ namespace PPTService
                     _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
                 }
                 QrCodeCheckBox.IsChecked = def.ShowQrCode;
+                ShowCollapseButtonCheckBox.IsChecked = def.ShowCollapseButton;
                 ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
                 EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
                 HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;

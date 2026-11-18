@@ -466,30 +466,15 @@
           <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1" />
         </DoubleAnimationUsingKeyFrames>
       </Storyboard>
+      <!-- 拉起按钮只做淡入淡出，不做 Y 位移，保证始终紧贴屏幕底边。 -->
       <Storyboard x:Key="ShowToolbarPullupStoryboard">
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
-          <EasingDoubleKeyFrame KeyTime="0" Value="20" />
-          <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0">
-            <EasingDoubleKeyFrame.EasingFunction>
-              <CircleEase EasingMode="EaseOut" />
-            </EasingDoubleKeyFrame.EasingFunction>
-          </EasingDoubleKeyFrame>
-        </DoubleAnimationUsingKeyFrames>
         <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="Opacity">
           <EasingDoubleKeyFrame KeyTime="0" Value="0" />
           <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1" />
         </DoubleAnimationUsingKeyFrames>
       </Storyboard>
       <Storyboard x:Key="HideToolbarPullupStoryboard">
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" Completed="HideToolbarPullupStoryboard_OnCompleted">
-          <EasingDoubleKeyFrame KeyTime="0" Value="0" />
-          <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="20">
-            <EasingDoubleKeyFrame.EasingFunction>
-              <CircleEase EasingMode="EaseIn" />
-            </EasingDoubleKeyFrame.EasingFunction>
-          </EasingDoubleKeyFrame>
-        </DoubleAnimationUsingKeyFrames>
-        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="Opacity">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="Opacity" Completed="HideToolbarPullupStoryboard_OnCompleted">
           <EasingDoubleKeyFrame KeyTime="0" Value="1" />
           <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="0" />
         </DoubleAnimationUsingKeyFrames>
@@ -523,10 +508,10 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <!-- 拉起按钮：1366 下高度为工具栏(30)的一半，图标尺寸同板中板收起按钮。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="15" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
@@ -557,10 +542,10 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <!-- 4K 100%：工具栏高 100，拉起按钮高 50，图标高 20（同板中板收起按钮）。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
@@ -626,12 +611,11 @@
       </Border>
     </Grid>
     <!-- 工具栏收起后的拉起按钮：放在无 Margin 的外层网格，贴屏幕底边居中。 -->
-    <Button Name="PullupButton" Visibility="Collapsed" Opacity="0" Template="{StaticResource ToolbarPullupButtonTemplate}"
-            HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Focusable="False" Click="PullupToolbar_OnClick">
-      <Button.RenderTransform>
-        <TranslateTransform Y="20" />
-      </Button.RenderTransform>
-      <Border Name="PullupBorder" Width="50" Height="25" CornerRadius="4,4,0,0"
+    <Button Name="PullupButton" Width="50" Height="25" Visibility="Collapsed" Opacity="0"
+            Template="{StaticResource ToolbarPullupButtonTemplate}" Panel.ZIndex="10"
+            HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Padding="0"
+            Focusable="False" Click="PullupToolbar_OnClick">
+      <Border Name="PullupBorder" CornerRadius="4,4,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Background="{DynamicResource Theme.PanelBackground}" BorderBrush="{DynamicResource Theme.BorderBrush}"
               BorderThickness="1,1,1,0" SnapsToDevicePixels="True">
         <Path Name="PullupChevron" Data="M0,6 L6,0 L12,6" Stroke="{DynamicResource Theme.IconBrush}"
