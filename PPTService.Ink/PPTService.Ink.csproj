@@ -720,7 +720,7 @@
     <Compile Include="Inks\MS\Utility\EmptyClass.cs" />
     <Compile Include="Inks\System\Windows\Ink\MatrixTypes.cs" />
     <Compile Include="Inks\System\Windows\Ink\StrokeIntersection.cs" />
-    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
     <!-- 本 AssemblyInfo 仅保留本项目专有属性 -->
     <Compile Include="Properties\AssemblyInfo.cs" />
     <!-- 由 Version.targets 生成；仓库内保留 unknown 默认副本 -->

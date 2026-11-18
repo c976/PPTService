@@ -9,8 +9,7 @@
 ```
 \
 ├── PPTService.sln                  解决方案
-├── Version\                        版本公共文件
-├── AssemblyInfo.Shared.cs          各项目共用的程序集信息
+├── Version\                        公共文件（版本与程序集信息：Version.targets / build.ver / AssemblyInfo.Shared.cs 等）
 ├── ReadMe.md
 ├── lib\                            第三方依赖 DLL
 ├── PPTService\                     主程序

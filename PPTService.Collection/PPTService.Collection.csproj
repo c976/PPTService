@@ -100,7 +100,7 @@
     <Compile Include="PPTService.Collection\OfficeVersion.cs" />
     <Compile Include="PPTService.Collection\PptVersionManager.cs" />
     <Compile Include="PPTService\EventID.cs" />
-    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
     <!-- 由 Version.targets 在构建时生成；仓库内保留 unknown 默认副本，脱离 git 也能直接编译 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
   </ItemGroup>

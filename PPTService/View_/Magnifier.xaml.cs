@@ -340,8 +340,8 @@ namespace PPTService
 			AdjustButtonPosition(left, top);
 		}
 
-		/// <summary>按钮条与放大镜可见矩形下边缘的间距。</summary>
-		private const double ButtonRectGap = 2.0;
+		/// <summary>按钮条与放大镜可见矩形下边缘的填充间距（原来约 30px，改为 15px）。</summary>
+		private const double ButtonRectGap = 15.0;
 
 		/// <summary>
 		/// 工具条贴在放大镜可见矩形下边缘外面、水平居中，两个按钮平分。

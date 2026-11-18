@@ -36,7 +36,7 @@
     <Reference Include="Newtonsoft.Json"><HintPath>..\lib\Newtonsoft.Json.dll</HintPath><Private>True</Private><SpecificVersion>False</SpecificVersion></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
     <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="QrShareService.cs" />
     <Compile Include="Pipe.Http.Internal\AttributeHelper.cs" />

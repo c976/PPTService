@@ -31,7 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
     <Compile Include="Properties\GitVersionInfo.g.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

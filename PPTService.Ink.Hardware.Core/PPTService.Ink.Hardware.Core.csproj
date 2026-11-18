@@ -36,7 +36,7 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\AssemblyInfo.Shared.cs" />
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
     <!-- 核心接口 / 空实现 / 反射加载器在必装 PPTService.Ink.Core；这里只留 Hardware 实现独用的数据类型。 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
     <Compile Include="InputDevice.cs" />
