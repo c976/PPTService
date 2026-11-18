@@ -206,6 +206,11 @@ namespace PPTService
 			ToolCol3.Width = width;
 			ToolCol4.Width = width;
 			ExitGrid.Width = value * (_collapseButtonVisible ? 2.0 : 1.0);
+			// ExitGrid 内部两列：收起按钮隐藏时若仍保留第二列等分，结束放映按钮会被挤到
+			// 半格宽，图标因空间不足显示为空白。隐藏时把第二列宽度设为 0，让结束放映占满整格。
+			CollapseButtonCol.Width = _collapseButtonVisible
+				? new GridLength(1.0, GridUnitType.Star)
+				: new GridLength(0.0);
 		}
 
 		/// <summary>设置窗口实时下发：收起按钮显隐 + 右侧面板宽度同步。</summary>
