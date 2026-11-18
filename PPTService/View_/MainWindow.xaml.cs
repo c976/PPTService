@@ -287,7 +287,6 @@ namespace PPTService
 		{
 			SyntacticSugar.TryCatchAction(() =>
 			{
-				ResetToolbarCollapsedState();
 				WindowStateHelper.UpdateWindowRect(this);
 				Task.Factory.StartNew(() =>
 				{
@@ -295,6 +294,11 @@ namespace PPTService
 				});
 				SyntacticSugar.CurrentDispatcherInvoke(() =>
 				{
+					// ResetToolbarCollapsedState 会写 BottomCenterButtonGrid / PullupButton 等 UI 元素，
+					// 必须在 UI 线程执行。放映开始事件来自 COM 后台线程，直接调用会抛
+					// InvalidOperationException（调用线程无法访问此对象），异常被 TryCatchAction
+					// 吞掉后 Show()/Opacity=1 都不会执行 —— 表现为重新放映后工具栏不显示。
+					ResetToolbarCollapsedState();
 					_releaseTimer?.Stop();
 					Show();
 					// 显示态先行：XAML 初始 Opacity="0"，必须尽早置 1。

@@ -508,10 +508,10 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <!-- 拉起按钮：1366 下高度为工具栏(30)的一半，图标尺寸同板中板收起按钮。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Width)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="30" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Height)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="15" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
@@ -542,10 +542,10 @@
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
             <!-- 4K 100%：工具栏高 100，拉起按钮高 50，图标高 20（同板中板收起按钮）。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Width)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupButton" Storyboard.TargetProperty="(FrameworkElement.Height)">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
@@ -610,12 +610,15 @@
         <Image Name="QrImage" Width="700" Height="700" Visibility="Collapsed" />
       </Border>
     </Grid>
-    <!-- 工具栏收起后的拉起按钮：放在无 Margin 的外层网格，贴屏幕底边居中。 -->
-    <Button Name="PullupButton" Width="50" Height="25" Visibility="Collapsed" Opacity="0"
+  </Grid>
+    <!-- 工具栏收起后的拉起按钮：必须放在无 Margin、无行列的 WindowRootGrid 里，
+         并显式指定 Grid.Row/Column 之外不要落在 RootGrid 的 Row0/Column0（否则会贴到
+         翻页按钮上方、第一列居中的错误位置）。这里相对整个窗口贴底边、水平居中。 -->
+    <Button Name="PullupButton" Visibility="Collapsed" Opacity="0"
             Template="{StaticResource ToolbarPullupButtonTemplate}" Panel.ZIndex="10"
             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Padding="0"
             Focusable="False" Click="PullupToolbar_OnClick">
-      <Border Name="PullupBorder" CornerRadius="4,4,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+      <Border Name="PullupBorder" Width="50" Height="25" CornerRadius="4,4,0,0"
               Background="{DynamicResource Theme.PanelBackground}" BorderBrush="{DynamicResource Theme.BorderBrush}"
               BorderThickness="1,1,1,0" SnapsToDevicePixels="True">
         <Path Name="PullupChevron" Data="M0,6 L6,0 L12,6" Stroke="{DynamicResource Theme.IconBrush}"
@@ -623,6 +626,5 @@
               Width="12" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
       </Border>
     </Button>
-  </Grid>
   </Grid>
 </Window>
