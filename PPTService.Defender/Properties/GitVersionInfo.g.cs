@@ -3,8 +3,8 @@ namespace PPTService
 {
 internal static class GitVersionInfo
 {
-internal const string ProductVersion = "1.0.0.813";
-internal const string Hash = "70be00a4";
-internal const string InformationalVersion = "1.0.0.813 (70be00a4)";
+internal const string ProductVersion = "1.0.0.814";
+internal const string Hash = "e1a9fceb";
+internal const string InformationalVersion = "1.0.0.814 (e1a9fceb)";
 }
 }
