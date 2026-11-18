@@ -8,24 +8,22 @@
 
 ```
 \
-├── PPTService.sln                  解决方案（含下列全部项目）
-├── Version\                        版本公共文件（Version.targets / version.prefix / build.ver / Version.nsh）
+├── PPTService.sln                  解决方案
+├── Version\                        版本公共文件
 ├── AssemblyInfo.Shared.cs          各项目共用的程序集信息
 ├── ReadMe.md
 ├── lib\                            第三方依赖 DLL
-├── PPTService\                     主程序（WPF 工具栏 / 设置 / 放映交互）
+├── PPTService\                     主程序
 ├── PPTService.Core\                核心库
 ├── PPTService.Collection\          数据集合与访问
-├── PPTService.Defender\            守护进程（主程序崩溃后自动拉起）
-├── PPTService.Ink\                 桌面批注白板
+├── PPTService.Defender\            守护进程
+├── PPTService.Ink\                 批注实现库
 ├── PPTService.Ink.Core\            批注核心层
 ├── PPTService.Ink.Hardware\        希沃硬件插件（可选）
 ├── PPTService.Ink.Hardware.Core\   硬件插件依赖（可选）
 ├── PPTService.NetShared\           二维码分享插件（可选）
-├── setup\                          NSIS 安装 / 卸载脚本、皮肤、插件与配置
-│   ├── PPTService.nsi / build.cmd
-│   └── Skin\ / Addon\ / Plugins\ / Config.ini
-└── .github\workflows\              build.yml（编译）/ release.yml（发布）
+├── setup\                          NSIS 安装程序
+└── .github\workflows\              Github Action build.yml（编译）/ release.yml（发布）
 ```
 
 ## 功能与改进
@@ -34,7 +32,6 @@
 
 - **桌面批注白板**：内置自实现批注层，可在 Office 原生批注与自实现批注间切换；批注层始终悬浮在 PPT 放映窗口之上，支持「附着放映窗口」与「全局置顶」两种模式。
 - **批注工具**：笔色 / 粗细可调、橡皮滑动清屏、二维码图片保存；批注随 PPT 翻页自动切换对应页笔迹。
-- **放映不中断**：使用画笔 / 橡皮时保持焦点在批注层，鼠标模式时交还给 PPT，避免误翻页；重复放映、COM 瞬时异常等场景不再导致工具栏消失、重复按钮或崩溃。
 
 ### 工具栏与交互
 
@@ -43,18 +40,10 @@
 - **界面设置**：隐藏功能栏、翻页按钮位置、自动淡化、主题、工具栏透明度、缩略图开关、触控拖动排序等均可实时设置。
 - **分辨率适配**：适配 1366×768、4K 100% 与 250% 缩放，工具栏列宽、图标与弹窗按分辨率自动调整。
 
-### 插件化（可按需删除）
+### 插件化
 
-- **希沃硬件**：`Hardware.dll`、`Hardware.Core.dll` 为可选插件，整组删除后主程序与批注照常运行，仅硬件能力降级。
-- **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用；删除后程序正常启动，二维码功能给出缺失提示。
-- 三个 DLL 均随安装包部署，用户可按需要单独移除。
-
-### 版本与安装
-
-- **动态版本号**：`Version\build.ver` 为唯一版本源，程序集文件版本与安装包版本同源并带 git 短 hash；版本随每次构建自动递增，生成文件不进版本库。
-- **安装包**：皮肤安装界面 + 现代卸载界面，支持静默升级与安装日志；卸载会正确关闭程序且不误杀升级器。
-- **自动发布**：编译后自动上传安装包，发布以版本号作为 tag 与标题。
-- **版本信息展示**：原「希沃白板5推荐下载」按钮改为显示当前版本号。
+- **希沃硬件**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，希沃硬件优化。
+- **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
 
 ## 许可协议
 
