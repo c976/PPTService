@@ -202,6 +202,7 @@ namespace PPTService
 			ToolCol2.Width = width;
 			ToolCol3.Width = width;
 			ToolCol4.Width = width;
+			CollapseCol.Width = width;
 		}
 
 		public void InitializeBottomArea()
@@ -388,6 +389,13 @@ namespace PPTService
 				PptOperator.Instance.Exit();
 			}
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionExit);
+		}
+
+		/// <summary>结束放映按钮右侧的收起按钮：只收工具栏中心区，翻页按钮保留。</summary>
+		private void CollapseToolbar_OnClick(object sender, RoutedEventArgs e)
+		{
+			CloseToolPopups();
+			ViewHelper.MainWindow?.CollapseToolbar();
 		}
 
 		private void RadioButton_OnClick(object sender, RoutedEventArgs e)

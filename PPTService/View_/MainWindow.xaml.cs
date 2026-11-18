@@ -41,6 +41,10 @@ namespace PPTService
 
 		private readonly DispatcherTimer _releaseTimer;
 
+		// 工具栏收起 / 拉起状态：只影响中心工具栏，翻页按钮始终保留。
+		private bool _toolbarCollapsed;
+		private bool _toolbarAnimating;
+
 		public static readonly DependencyProperty SlideItemsProperty = DependencyProperty.Register("SlideItems", typeof(ObservableCollection<SlideItem>), typeof(MainWindow), new PropertyMetadata((object)null));
 
 		private bool IsTransparent => Opacity < 0.1;
@@ -283,6 +287,7 @@ namespace PPTService
 		{
 			SyntacticSugar.TryCatchAction(() =>
 			{
+				ResetToolbarCollapsedState();
 				WindowStateHelper.UpdateWindowRect(this);
 				Task.Factory.StartNew(() =>
 				{
@@ -476,6 +481,94 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>收起中心工具栏（结束放映按钮右侧的按钮触发），翻页按钮不动。</summary>
+		public void CollapseToolbar()
+		{
+			if (_toolbarCollapsed || _toolbarAnimating)
+			{
+				return;
+			}
+			_toolbarCollapsed = true;
+			_toolbarAnimating = true;
+			BottomCenterButtonGrid.IsHitTestVisible = false;
+			PullupButton.IsHitTestVisible = false;
+			(Resources["HideToolbarStoryboard"] as Storyboard)?.Begin();
+		}
+
+		/// <summary>点底部中央的拉起按钮恢复工具栏。</summary>
+		public void ExpandToolbar()
+		{
+			if (!_toolbarCollapsed || _toolbarAnimating)
+			{
+				return;
+			}
+			_toolbarCollapsed = false;
+			_toolbarAnimating = true;
+			PullupButton.IsHitTestVisible = false;
+			(Resources["HideToolbarPullupStoryboard"] as Storyboard)?.Begin();
+		}
+
+		/// <summary>新一场放映 / 放映结束：无条件回到展开状态，避免上一场残留。</summary>
+		public void ResetToolbarCollapsedState()
+		{
+			string[] names = { "HideToolbarStoryboard", "ShowToolbarStoryboard", "ShowToolbarPullupStoryboard", "HideToolbarPullupStoryboard" };
+			foreach (string name in names)
+			{
+				(Resources[name] as Storyboard)?.Stop(this);
+			}
+			_toolbarCollapsed = false;
+			_toolbarAnimating = false;
+			BottomCenterButtonGrid.Visibility = Visibility.Visible;
+			BottomCenterButtonGrid.Opacity = 1.0;
+			BottomCenterButtonGrid.IsHitTestVisible = true;
+			((TranslateTransform)BottomCenterButtonGrid.RenderTransform).Y = 0.0;
+			PullupButton.Visibility = Visibility.Collapsed;
+			PullupButton.Opacity = 0.0;
+			PullupButton.IsHitTestVisible = false;
+			((TranslateTransform)PullupButton.RenderTransform).Y = 20.0;
+		}
+
+		private void PullupToolbar_OnClick(object sender, RoutedEventArgs e)
+		{
+			ExpandToolbar();
+		}
+
+		private void HideToolbarStoryboard_OnCompleted(object sender, EventArgs e)
+		{
+			_toolbarAnimating = false;
+			BottomCenterButtonGrid.Visibility = Visibility.Collapsed;
+			if (!_toolbarCollapsed)
+			{
+				return;
+			}
+			PullupButton.Visibility = Visibility.Visible;
+			PullupButton.IsHitTestVisible = true;
+			(Resources["ShowToolbarPullupStoryboard"] as Storyboard)?.Begin();
+		}
+
+		private void ShowToolbarStoryboard_OnCompleted(object sender, EventArgs e)
+		{
+			_toolbarAnimating = false;
+			BottomCenterButtonGrid.Opacity = 1.0;
+			BottomCenterButtonGrid.IsHitTestVisible = true;
+			((TranslateTransform)BottomCenterButtonGrid.RenderTransform).Y = 0.0;
+			PullupButton.Visibility = Visibility.Collapsed;
+			PullupButton.IsHitTestVisible = false;
+		}
+
+		private void HideToolbarPullupStoryboard_OnCompleted(object sender, EventArgs e)
+		{
+			PullupButton.Visibility = Visibility.Collapsed;
+			if (_toolbarCollapsed || !_toolbarAnimating)
+			{
+				return;
+			}
+			BottomCenterButtonGrid.Visibility = Visibility.Visible;
+			BottomCenterButtonGrid.Opacity = 0.0;
+			BottomCenterButtonGrid.IsHitTestVisible = true;
+			(Resources["ShowToolbarStoryboard"] as Storyboard)?.Begin();
+		}
+
 		public void UpdatePageIndex()
 		{
 			if (_isAnalyzing)
@@ -651,6 +744,8 @@ namespace PPTService
 			{
 				SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 				{
+					// 放映结束也回到展开态，下一场放映直接显示完整工具栏。
+					ResetToolbarCollapsedState();
 					// 放映窗口即将销毁：先解除 Owner，避免系统连带销毁本窗口（下次放映还要复用）。
 					WindowStateHelper.DetachFromPpt(this);
 					if (ConfigHelper.Instance.IsNeedStart() || !IsTransparent)
