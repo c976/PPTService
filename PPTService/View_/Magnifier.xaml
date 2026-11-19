@@ -65,6 +65,13 @@
                 <Border Name="CoverBorder" Background="Transparent" CornerRadius="3" IsHitTestVisible="False" />
               </Grid>
               <ControlTemplate.Triggers>
+                <!-- 选中态（关灯模式）：按钮保持一层常亮底色，与开灯（未选中、全透明）明确区分。
+                     数值低于 hover(0.35) / pressed(0.7)，保证悬停、按下能自然叠加更亮反馈；
+                     图标本身也已按 IsChecked 在「亮灯泡 / 灭灯泡」间切换。 -->
+                <Trigger Property="IsChecked" Value="True">
+                  <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
+                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.3" />
+                </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
                   <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
                   <Setter TargetName="CoverBorder" Property="Opacity" Value="0.35" />

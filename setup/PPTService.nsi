@@ -718,9 +718,15 @@ Section "Uninstall"
   Delete "$INSTDIR\install.log"
   RMDir "$INSTDIR"
 
-  ; 用户选择删除数据文件夹时，清理 %LOCALAPPDATA%\PPTServiceUltra（配置/日志等用户数据）
+  ; 用户选择删除数据文件夹时，清理 %APPDATA%\PPTServiceUltra（Roaming，配置/日志等用户数据）。
+  ; 程序自 v808 起把数据目录从 Local 迁到 Roaming（AppPath.LocalRoot 用
+  ; Environment.SpecialFolder.ApplicationData），卸载必须删同一个位置。
+  ; 卸载段前面是 SetShellVarContext all，$APPDATA 会指向「所有用户」的 Roaming（ProgramData）；
+  ; 这里临时切回 current 才是当前登录用户的 %APPDATA%，删完再恢复 all。
   ${If} $DeleteDataFolder == "1"
-    RMDir /r "$LOCALAPPDATA\PPTServiceUltra"
+    SetShellVarContext current
+    RMDir /r "$APPDATA\PPTServiceUltra"
+    SetShellVarContext all
   ${EndIf}
 
   ; 停留在卸载窗口，用户点「关闭」后才弹出完成提示
@@ -733,7 +739,7 @@ Function un.onInit
   IfSilent SilentUninstall 0
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_UninstallConfirm)" IDYES +2
   Abort
-  ; 是否删除数据文件夹（%LOCALAPPDATA%\PPTServiceUltra）；默认按钮为「否」，不主动删数据
+  ; 是否删除数据文件夹（%APPDATA%\PPTServiceUltra，Roaming）；默认按钮为「否」，不主动删数据
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_AskDeleteData)" IDYES +2
   Goto SkipDeleteData
   StrCpy $DeleteDataFolder "1"
