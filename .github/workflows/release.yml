@@ -195,9 +195,9 @@ jobs:
         }
         Write-Host "Prerelease: $isPrerelease ; Latest: $isLatest"
 
-        # 先创建（或更新已有 Release 的资源与说明），标志位在最后统一用 edit 设置，
-        # 因为 gh release edit 同时支持 --prerelease/--no-prerelease 与 --latest/--no-latest，
-        # 而 gh release create 只支持正向的 --prerelease / --latest。
+        # 先创建（或更新已有 Release 的资源与说明），标志位在最后统一用 edit 设置。
+        # 注意 gh release edit 的布尔开关语法是 --prerelease=true|false / --latest=true|false，
+        # 并没有 --no-prerelease / --no-latest（实测会报 unknown flag）。
         $null = gh release view $tag --json tagName 2>$null
         if ($LASTEXITCODE -eq 0) {
           Write-Host "Release $tag already exists - replacing asset and notes."
@@ -211,7 +211,7 @@ jobs:
         }
 
         $releaseFlags = @()
-        if ($isPrerelease) { $releaseFlags += '--prerelease' } else { $releaseFlags += '--no-prerelease' }
-        if ($isLatest)     { $releaseFlags += '--latest' }     else { $releaseFlags += '--no-latest' }
+        if ($isPrerelease) { $releaseFlags += '--prerelease=true' } else { $releaseFlags += '--prerelease=false' }
+        if ($isLatest)     { $releaseFlags += '--latest=true' }     else { $releaseFlags += '--latest=false' }
         gh release edit $tag @releaseFlags
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
