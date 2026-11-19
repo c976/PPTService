@@ -514,8 +514,11 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="15" />
             </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="7" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="8" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="90" />
@@ -541,15 +544,19 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <!-- 4K 100%：工具栏高 100，拉起按钮高 50，图标高 20（同板中板收起按钮）。 -->
+            <!-- 4K 100%：工具栏高 100，拉起按钮高 50，图标按工具栏图标的方式同比放大（宽 50 / 高 25，
+                 约占按钮一半）。此前只改高度、宽度仍是 12，Uniform 按较窄的宽撑满导致图标只有 12 宽。 -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="20" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="25" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="310" />
@@ -623,7 +630,7 @@
               BorderThickness="1,1,1,0" SnapsToDevicePixels="True">
         <Path Name="PullupChevron" Data="M0,6 L6,0 L12,6" Stroke="{DynamicResource Theme.IconBrush}"
               StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Stretch="Uniform"
-              Width="12" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              Width="28" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
       </Border>
     </Button>
   </Grid>

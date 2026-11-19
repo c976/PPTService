@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using PPTService.Collection;
@@ -89,17 +90,58 @@ namespace PPTService
 			UpdateMagnifierImageViewBox();
 		}
 
+		/// <summary>
+		/// 窗口 DIP 与物理像素的实际换算比例。用 WPF 运行时的 TransformToDevice，
+		/// 而不是反射 SystemParameters.DpiX（后者在 4K 100% 缩放下曾得到 120，比实际高 25%，
+		/// 导致窗口只有屏幕 80%、右下黑边）。拿不到 PresentationSource 时按 1:1 处理。
+		/// </summary>
+		private double GetDeviceScaleX()
+		{
+			PresentationSource source = PresentationSource.FromVisual(this);
+			if (source != null && source.CompositionTarget != null)
+			{
+				double scale = source.CompositionTarget.TransformToDevice.M11;
+				if (scale > 0.0)
+				{
+					return scale;
+				}
+			}
+			return 1.0;
+		}
+
+		private double GetDeviceScaleY()
+		{
+			PresentationSource source = PresentationSource.FromVisual(this);
+			if (source != null && source.CompositionTarget != null)
+			{
+				double scale = source.CompositionTarget.TransformToDevice.M22;
+				if (scale > 0.0)
+				{
+					return scale;
+				}
+			}
+			return 1.0;
+		}
+
 		private void SetWindowRect()
 		{
 			WindowStartupLocation = WindowStartupLocation.Manual;
-			// 与主窗口（MainWindow 用 SystemParameters.PrimaryScreenWidth/Height 直接设 DIP）保持一致：
-			// 全部用 SystemParameters 的虚拟屏 DIP 值，不再用 SystemInformation.VirtualScreen 的物理像素
-			// 去除以 ScreenHelper.DpiFactor。4K 100% 缩放下该反射值曾得到约 1.5，导致窗口宽高只有
-			// 屏幕的 2/3，截图被 Stretch=Fill 压到左上角、右下留黑边。
-			Left = SystemParameters.VirtualScreenLeft;
-			Top = SystemParameters.VirtualScreenTop;
-			Width = SystemParameters.VirtualScreenWidth;
-			Height = SystemParameters.VirtualScreenHeight;
+			// 必须用「屏幕真实尺寸 ÷ 窗口运行时 DPI 缩放」来设窗口，两者取自同一坐标系：
+			//   - 屏幕尺寸用 Snapshot 的位图像素（SystemInformation.VirtualScreen 抓取，物理像素），
+			//     这是背景图 Inflation 铺满所依据的真实像素数；
+			//   - 缩放用 TransformToDevice（本窗口 DIP→物理的真实比例）。
+			// 之前用 SystemParameters.VirtualScreenWidth 得到的 3072 是被反射 DPI 缩过的逻辑值，
+			// 而窗口按 96 DIP 渲染，于是只覆盖 3840 屏幕的 80%，右下留黑边。
+			BitmapSource snapshot = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+			Rectangle virtualScreen = SystemInformation.VirtualScreen;
+			double physicalWidth = snapshot != null && snapshot.PixelWidth > 0 ? snapshot.PixelWidth : virtualScreen.Width;
+			double physicalHeight = snapshot != null && snapshot.PixelHeight > 0 ? snapshot.PixelHeight : virtualScreen.Height;
+			double scaleX = GetDeviceScaleX();
+			double scaleY = GetDeviceScaleY();
+			Left = virtualScreen.Left / scaleX;
+			Top = virtualScreen.Top / scaleY;
+			Width = physicalWidth / scaleX;
+			Height = physicalHeight / scaleY;
 			AdjustButtonBorderMargin();
 			AdjustMagnifierBorder();
 		}
