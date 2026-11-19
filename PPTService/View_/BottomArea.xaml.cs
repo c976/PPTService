@@ -55,6 +55,10 @@ namespace PPTService
 		/// <summary>设置项：是否在结束放映旁边显示收起工具栏按钮。</summary>
 		private bool _collapseButtonVisible = true;
 
+		/// <summary>当前分辨率档位下的单格列宽。ApplyToolbarConfig 重建列时复用它，
+		/// 否则会把自适应列宽重置成固定 50（1366 太宽 / 4K 显示不全）。</summary>
+		private double _adaptiveColumnWidth = 50.0;
+
 		/// <summary>
 		/// 板中板显示/隐藏时同步工具栏按钮归属与批注窗口模式。
 		/// 板中板打开期间主批注层设为鼠标穿透，避免抢走输入；但工具栏视觉上默认切到「画笔」
@@ -174,6 +178,10 @@ namespace PPTService
 			// 滑动清屏滑杆任意方式关闭（失焦自动 / 手动 / 清屏完成）都收起真值标记，
 			// 让「再点橡皮」的 toggle 判断始终基于真实状态，不受 StaysOpen 时序影响。
 			EraserSliderPopup.Closed += (object s, EventArgs e) => { _eraserSliderOpen = false; };
+			// 颜色盘 / 橡皮滑窗整体按分辨率档位等比缩放（LayoutTransform），里层色点、间距、
+			// 滑杆拇指一并缩放，避免只改 Popup 外框导致内容挤在一起。初始 1.0，Loaded 后按档位设置。
+			PenPopupRootBorder.LayoutTransform = new ScaleTransform(1.0, 1.0);
+			EraserPopupRootBorder.LayoutTransform = new ScaleTransform(1.0, 1.0);
 			// 列宽自适应由代码设置，不再走 XAML 的 ObjectAnimationUsingKeyFrames：
 			// VS2015/MSBuild 14 会把 <GridLength>30</GridLength> 动画值编译成字符串 "30"，
 			// 运行时抛 AnimationException（Width 属性动画计算值无效），导致主界面渲染中断。
@@ -194,17 +202,62 @@ namespace PPTService
 		/// &lt;1440 → 30，1440~3799 → 50（XAML 默认值），≥3800 → 100。
 		/// 结束放映 + 收起共用一块面板：显示收起按钮时宽度为 2 格，否则 1 格。
 		/// </summary>
+		private double GetAdaptiveColumnWidth(double windowWidth)
+		{
+			return windowWidth >= 3800.0 ? 100.0 : (windowWidth > 0.0 && windowWidth < 1440.0 ? 30.0 : 50.0);
+		}
+
+		/// <summary>
+		/// 颜色盘与橡皮滑窗按工具栏列宽档位等比缩放：1366→0.6、1920→1.0、4K→2.0。
+		/// 原尺寸 280x192 / 230x100 是按 1920 基准设计的，1366 下显得过大，4K 下偏小。
+		/// 用 LayoutTransform 整体缩放内容（色点、间距、滑杆拇指），保持参考图的相对比例。
+		/// </summary>
+		private void ApplyPopupScale()
+		{
+			double scale = _adaptiveColumnWidth / 50.0;
+			ScaleTransform colorScale = PenPopupRootBorder.LayoutTransform as ScaleTransform;
+			if (colorScale != null)
+			{
+				colorScale.ScaleX = scale;
+				colorScale.ScaleY = scale;
+			}
+			ScaleTransform eraserScale = EraserPopupRootBorder.LayoutTransform as ScaleTransform;
+			if (eraserScale != null)
+			{
+				eraserScale.ScaleX = scale;
+				eraserScale.ScaleY = scale;
+			}
+			// Popup 自身宽高同步缩放，否则内层缩小后 Popup 仍按原尺寸占位，
+			// 出现大片透明留白、Placement=Top 的定位也会偏。
+			ColorDiskPopup.Width = 280.0 * scale;
+			ColorDiskPopup.Height = 192.0 * scale;
+			EraserSliderPopup.Width = 230.0 * scale;
+			EraserSliderPopup.Height = 100.0 * scale;
+		}
+
 		private void ApplyAdaptiveColumnWidths(double windowWidth)
 		{
-			double value = windowWidth >= 3800.0 ? 100.0 : (windowWidth > 0.0 && windowWidth < 1440.0 ? 30.0 : 50.0);
+			double value = GetAdaptiveColumnWidth(windowWidth);
+			_adaptiveColumnWidth = value;
+			ApplyPopupScale();
 			GridLength width = new GridLength(value);
-			ShareCol0.Width = width;
-			ShareCol1.Width = width;
-			ToolCol0.Width = width;
-			ToolCol1.Width = width;
-			ToolCol2.Width = width;
-			ToolCol3.Width = width;
-			ToolCol4.Width = width;
+			// ApplyToolbarConfig 会按用户配置重建 ShareGrid / BottomCenterButtonGrid 的列定义，
+			// 此时 XAML 命名的 ShareCol0..4 / ToolCol0..4 已失效。直接遍历当前列集合赋值，
+			// 保证重建前 / 重建后、窗口缩放时都能同步到每一格。
+			if (ShareGrid != null)
+			{
+				foreach (ColumnDefinition column in ShareGrid.ColumnDefinitions)
+				{
+					column.Width = width;
+				}
+			}
+			if (BottomCenterButtonGrid != null)
+			{
+				foreach (ColumnDefinition column in BottomCenterButtonGrid.ColumnDefinitions)
+				{
+					column.Width = width;
+				}
+			}
 			ExitGrid.Width = value * (_collapseButtonVisible ? 2.0 : 1.0);
 			// ExitGrid 内部两列：收起按钮隐藏时若仍保留第二列等分，结束放映按钮会被挤到
 			// 半格宽，图标因空间不足显示为空白。隐藏时把第二列宽度设为 0，让结束放映占满整格。
@@ -914,7 +967,8 @@ namespace PPTService
 
 		/// <summary>
 		/// 依据用户配置重排/显隐工具栏中央功能按钮（选择/画笔/橡皮/放大镜/板中板），
-		/// 以及左侧「创建二维码（分享）」按钮的显隐。中心区每列固定 50，宽度随可见按钮数自适应，
+		/// 以及左侧「创建二维码（分享）」按钮的显隐。每列宽沿用当前分辨率档位
+		/// （1366→30 / 1920→50 / 4K→100），宽度随可见按钮数自适应，
 		/// 避免隐藏按钮后剩余图标（如放大镜）被拉宽变形。
 		/// </summary>
 		public void ApplyToolbarConfig(UserConfig config)
@@ -923,6 +977,13 @@ namespace PPTService
 			{
 				return;
 			}
+			// 与 ApplyAdaptiveColumnWidths 同档位：重建列时不得写死 50，否则会抹掉
+			// 1366 的 30 / 4K 的 100，造成「小屏太宽、大屏显示不全」。
+			Window configWindow = Window.GetWindow(this);
+			_adaptiveColumnWidth = GetAdaptiveColumnWidth(configWindow != null && configWindow.ActualWidth > 0.0
+				? configWindow.ActualWidth
+				: SystemParameters.PrimaryScreenWidth);
+			GridLength columnWidth = new GridLength(_adaptiveColumnWidth);
 			// 左侧「设置 + 创建二维码（分享）」按钮组：
 			// 设置按钮常驻；二维码按钮按 ShowQrCode 显隐。与中央工具栏一致——
 			// 动态重建 ShareGrid 列定义并据可见按钮数自适应宽度，避免隐藏二维码后
@@ -948,7 +1009,7 @@ namespace PPTService
 				ShareGrid.ColumnDefinitions.Clear();
 				for (int i = 0; i < leftVisible.Count; i++)
 				{
-					ShareGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50.0) });
+					ShareGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = columnWidth });
 					Grid.SetColumn(leftVisible[i], i);
 					leftVisible[i].Visibility = Visibility.Visible;
 				}
@@ -988,7 +1049,7 @@ namespace PPTService
 			BottomCenterButtonGrid.ColumnDefinitions.Clear();
 			for (int i = 0; i < visible.Count; i++)
 			{
-				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50.0) });
+				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = columnWidth });
 				Grid.SetColumn(visible[i], i);
 				visible[i].Visibility = Visibility.Visible;
 			}

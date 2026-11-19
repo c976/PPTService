@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using PPTService.Collection;
 
 namespace PPTService
@@ -83,18 +84,51 @@ namespace PPTService
 			RootCanvasBackgroundImage.ImageSource = Snapshot.Take(virtualScreen);
 			MagnifierImage.ImageSource = RootCanvasBackgroundImage.ImageSource;
 			SetWindowRect();
+			// Loaded 里设置截图源之前算过一次 Viewbox（那时只能回退到 DpiFactor）。
+			// 截图与窗口尺寸就位后按真实像素/DIP 比值再算一次，保证首次打开取景正确。
+			UpdateMagnifierImageViewBox();
 		}
 
 		private void SetWindowRect()
 		{
-			Rectangle virtualScreen = SystemInformation.VirtualScreen;
 			WindowStartupLocation = WindowStartupLocation.Manual;
-			Left = virtualScreen.Left;
-			Top = virtualScreen.Top;
-			Width = (double)virtualScreen.Width / ScreenHelper.DpiFactor;
-			Height = (double)virtualScreen.Height / ScreenHelper.DpiFactor;
+			// 与主窗口（MainWindow 用 SystemParameters.PrimaryScreenWidth/Height 直接设 DIP）保持一致：
+			// 全部用 SystemParameters 的虚拟屏 DIP 值，不再用 SystemInformation.VirtualScreen 的物理像素
+			// 去除以 ScreenHelper.DpiFactor。4K 100% 缩放下该反射值曾得到约 1.5，导致窗口宽高只有
+			// 屏幕的 2/3，截图被 Stretch=Fill 压到左上角、右下留黑边。
+			Left = SystemParameters.VirtualScreenLeft;
+			Top = SystemParameters.VirtualScreenTop;
+			Width = SystemParameters.VirtualScreenWidth;
+			Height = SystemParameters.VirtualScreenHeight;
 			AdjustButtonBorderMargin();
 			AdjustMagnifierBorder();
+		}
+
+		/// <summary>
+		/// 截图像素 → 窗口 DIP 的换算比例。截图由 SystemInformation.VirtualScreen（物理像素）抓取，
+		/// 窗口用 SystemParameters（DIP）定位，两者比值即真实缩放。用实际像素/实际 DIP 计算而不是
+		/// 反射的 ScreenHelper.DpiFactor，避免 DPI 感知不一致时取景框定位偏移。
+		/// </summary>
+		private double GetSnapshotScaleX()
+		{
+			BitmapSource source = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+			double dipWidth = ActualWidth > 0.0 ? ActualWidth : Width;
+			if (source != null && source.PixelWidth > 0 && dipWidth > 0.0)
+			{
+				return (double)source.PixelWidth / dipWidth;
+			}
+			return ScreenHelper.DpiFactor;
+		}
+
+		private double GetSnapshotScaleY()
+		{
+			BitmapSource source = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+			double dipHeight = ActualHeight > 0.0 ? ActualHeight : Height;
+			if (source != null && source.PixelHeight > 0 && dipHeight > 0.0)
+			{
+				return (double)source.PixelHeight / dipHeight;
+			}
+			return ScreenHelper.DpiFactor;
 		}
 
 		private void SetMagnifierShapeToRectangle()
@@ -311,10 +345,14 @@ namespace PPTService
 			num2 += num4 / 2.0;
 			double num5 = num + MagnifierRectangle.ActualWidth / _enlargementFactor;
 			double num6 = num2 + MagnifierRectangle.ActualHeight / _enlargementFactor;
-			num *= ScreenHelper.DpiFactor;
-			num2 *= ScreenHelper.DpiFactor;
-			num5 *= ScreenHelper.DpiFactor;
-			num6 *= ScreenHelper.DpiFactor;
+			// 取景框坐标是窗口 DIP，Viewbox 用的是截图像素；用实际像素/DIP 比值换算，
+			// 与窗口尺寸（SystemParameters DIP）保持同一坐标系，避免反射 DpiFactor 不一致。
+			double scaleX = GetSnapshotScaleX();
+			double scaleY = GetSnapshotScaleY();
+			num *= scaleX;
+			num2 *= scaleY;
+			num5 *= scaleX;
+			num6 *= scaleY;
 			MagnifierImage.Viewbox = new Rect(new System.Windows.Point(num, num2), new System.Windows.Point(num5, num6));
 		}
 

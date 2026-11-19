@@ -91,11 +91,23 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="InnerLeftTopThumbBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="10" />
             </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightIconGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="18" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightIconGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="18" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ClosePath" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="18" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ClosePath" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="18" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="11" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="10" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CloseTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="11" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="10" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -115,11 +127,23 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="InnerLeftTopThumbBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
               <EasingDoubleKeyFrame KeyTime="0" Value="32" />
             </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightIconGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="44" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightIconGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="44" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ClosePath" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="44" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ClosePath" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="44" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LightTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="20" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="24" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CloseTextBlock" Storyboard.TargetProperty="FontSize">
-              <EasingDoubleKeyFrame KeyTime="0" Value="20" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="24" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="CornerRadius">
               <DiscreteObjectKeyFrame KeyTime="0">
@@ -191,7 +215,7 @@
         </Grid.ColumnDefinitions>
         <CheckBox Name="ChangeBackgroundImageCheckBox" Grid.Column="0" Style="{StaticResource Style.MagnifierToolToggle}" IsChecked="False" Click="ChangeBackgroundImageCheckBox_OnClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
           <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid Width="28" Height="28" HorizontalAlignment="Center">
+            <Grid x:Name="LightIconGrid" Width="22" Height="22" HorizontalAlignment="Center">
               <Image Source="{StaticResource ImageSource.BulbOn}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
               <Image Source="{StaticResource ImageSource.BulbOff}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image.Style>
@@ -211,7 +235,7 @@
         </CheckBox>
         <Button Name="CloseButton" Grid.Column="1" Style="{StaticResource Style.MagnifierToolButton}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
           <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="{DynamicResource Theme.IconBrush}" Stretch="Uniform" Width="28" Height="28" HorizontalAlignment="Center" />
+            <Path Name="ClosePath" Data="M0,0 M24,24 M13.5,12 L18.7,6.8 C19.1,6.4 19.1,5.7 18.7,5.3 C18.3,4.9 17.6,4.9 17.2,5.3 L12,10.5 L6.8,5.3 C6.4,4.9 5.7,4.9 5.3,5.3 C4.9,5.7 4.9,6.4 5.3,6.8 L10.5,12 L5.3,17.2 C4.9,17.6 4.9,18.3 5.3,18.7 C5.7,19.1 6.4,19.1 6.8,18.7 L12,13.5 L17.2,18.7 C17.6,19.1 18.3,19.1 18.7,18.7 C19.1,18.3 19.1,17.6 18.7,17.2 L13.5,12" Fill="{DynamicResource Theme.IconBrush}" Stretch="Uniform" Width="22" Height="22" HorizontalAlignment="Center" />
             <TextBlock Name="CloseTextBlock" Text="关闭" FontSize="12" Foreground="{DynamicResource Theme.IconBrush}" HorizontalAlignment="Center" />
           </StackPanel>
         </Button>
