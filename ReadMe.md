@@ -44,6 +44,12 @@
 - **希沃硬件**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，希沃硬件优化。
 - **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
 
+## 基于原版修复的问题
+
+在 1.0.0.795 基础上开发时，修正了原版遗留的缺陷：
+
+- **开场动画资源名拼写错误**：`LoadingView` 中有三处把动画资源键写成 `StoryBoard.HiddenRootGridImmediatly`（`Immediately` 少了一个 `e`），而 XAML 中实际定义的键名为 `StoryBoard.HiddenRootGridImmediately`。原版因此找不到资源、开场加载界面的隐藏动画不会触发。现已将三处引用统一修正为正确拼写。
+
 ## 许可协议
 
 本项目仅供个人学习、研究，严禁用于任何商业盈利或非法破解；使用者需自行承担使用本项目可能导致的软件不稳定、数据丢失或被杀毒软件误报等风险，作者不对由此产生的任何直接或间接法律纠纷与损失承担任何责任。
