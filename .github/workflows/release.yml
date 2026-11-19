@@ -125,11 +125,12 @@ jobs:
         RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
       shell: pwsh
       run: |
-        # 下面几个 gh / git 命令「找不到」是正常分支，靠 $LASTEXITCODE 判断，
-        # 不能被 GitHub pwsh 默认的「原生命令出错即终止」打断。
+        # 依据上次发布以来的提交生成 Release 说明。
         $ErrorActionPreference = 'Continue'
         $PSNativeCommandUseErrorActionPreference = $false
 
+        # 下面几个 gh / git 命令「找不到」是正常分支，靠 $LASTEXITCODE 判断，
+        # 不能被 GitHub pwsh 默认的「原生命令出错即终止」打断。
         $repo = $env:GITHUB_REPOSITORY
         $tag  = $env:RELEASE_TAG
 
@@ -176,6 +177,7 @@ jobs:
         SET_LATEST: ${{ inputs.latest }}
       shell: pwsh
       run: |
+        # 发布 Release：上传安装包，并按手动开关设置 Prerelease / Latest。
         $ErrorActionPreference = 'Continue'
         $PSNativeCommandUseErrorActionPreference = $false
 
