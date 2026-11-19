@@ -8,6 +8,16 @@ on:
         description: '发布版本号 / tag（留空则使用编译时生成的 PRODUCT_VERSION）'
         required: false
         default: ''
+      prerelease:
+        description: '标记为预发布版本（Prerelease）'
+        required: false
+        default: false
+        type: boolean
+      latest:
+        description: '设置为最新发布版本（Latest）'
+        required: false
+        default: true
+        type: boolean
 
 # 创建 Release 需要写权限
 permissions:
@@ -162,6 +172,8 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
         RELEASE_ASSET: ${{ steps.release_info.outputs.asset }}
+        PRERELEASE: ${{ inputs.prerelease }}
+        SET_LATEST: ${{ inputs.latest }}
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Continue'
@@ -171,13 +183,35 @@ jobs:
         $asset     = $env:RELEASE_ASSET
         $notesFile = './release-notes.md'
 
+        # 手动运行时的两个开关：预发布 / 是否设为 Latest。
+        # workflow_dispatch 的 boolean 输入经 env 传入后是字符串 'true' / 'false'。
+        $isPrerelease = ([string]$env:PRERELEASE).Trim() -ieq 'true'
+        $isLatest     = ([string]$env:SET_LATEST).Trim() -ieq 'true'
+
+        # GitHub 语义：预发布版本不能同时是 Latest；两者都勾选时以预发布为准，自动取消 Latest。
+        if ($isPrerelease -and $isLatest) {
+          Write-Host 'Prerelease cannot be Latest - turning Latest off.'
+          $isLatest = $false
+        }
+        Write-Host "Prerelease: $isPrerelease ; Latest: $isLatest"
+
+        # 先创建（或更新已有 Release 的资源与说明），标志位在最后统一用 edit 设置，
+        # 因为 gh release edit 同时支持 --prerelease/--no-prerelease 与 --latest/--no-latest，
+        # 而 gh release create 只支持正向的 --prerelease / --latest。
         $null = gh release view $tag --json tagName 2>$null
         if ($LASTEXITCODE -eq 0) {
           Write-Host "Release $tag already exists - replacing asset and notes."
           gh release upload $tag $asset --clobber
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           gh release edit $tag --notes-file $notesFile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         } else {
-          gh release create $tag $asset --title "PPTServiceUltra $tag" --notes-file $notesFile --latest
+          gh release create $tag $asset --title "PPTServiceUltra $tag" --notes-file $notesFile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         }
+
+        $releaseFlags = @()
+        if ($isPrerelease) { $releaseFlags += '--prerelease' } else { $releaseFlags += '--no-prerelease' }
+        if ($isLatest)     { $releaseFlags += '--latest' }     else { $releaseFlags += '--no-latest' }
+        gh release edit $tag @releaseFlags
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
