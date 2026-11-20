@@ -315,13 +315,23 @@ namespace PPTService
 					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 					AdjustFontSizeAndStyle();
 					ViewHelper.BottomArea?.InitializeBottomArea();
-					_currentPageIndex = PptOperator.Instance.CurrentShowPosition;
-					SetPageIndex(_currentPageIndex);
-					SetLeftRightOpacity();
+					// 批注层状态同步不依赖任何 COM 调用，必须先做且不受后面 COM 失败影响：
+					// 之前这些都排在 SetPageIndex/ShowPage 等 COM 调用之后，放映刚启动时
+					// 一个 RPC_E_CALL_REJECTED 就会跳过它们，导致工具栏显示了但批注层没启用、
+					// 按钮选中态没同步（笔与鼠标同时选中 / 批注关不掉）。
 					AnnotationController.SetEnabled(UserConfigManager.Load().UseSelfAnnotation);
-					// 重新放映 / 切换 PPT：清掉上一场残留笔迹，再切到当前页
+					// 重新放映 / 切换 PPT：清掉上一场残留笔迹，再切到当前页。
+					// 下面的 COM 调用各自独立保护，任何一个失败都只跳过它自己，
+					// 不再中断整条工具栏/批注状态初始化链。
 					AnnotationController.Reset();
-					AnnotationController.ShowPage(PptOperator.Instance.CurrentShowPosition);
+					SyntacticSugar.TryComAction(() =>
+					{
+						_currentPageIndex = PptOperator.Instance.CurrentShowPosition;
+					});
+					SyntacticSugar.TryComAction(() => SetPageIndex(_currentPageIndex));
+					SyntacticSugar.TryComAction(() => SetLeftRightOpacity());
+					SyntacticSugar.TryComAction(() =>
+						AnnotationController.ShowPage(PptOperator.Instance.CurrentShowPosition));
 				});
 				SyntacticSugar.CurrentDispatcherBeginInvoke(AnalyzePpt);
 			});
