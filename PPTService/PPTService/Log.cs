@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PPTService
@@ -12,9 +13,16 @@ namespace PPTService
 
 		private static readonly object Locker = new object();
 
-		public static void WriteError(string error)
+		// 调用方信息由 C# 编译器在调用点内联填入，无需 PDB / 无需改动任何调用处。
+		// sourceFile 只取文件名（不含完整路径），避免日志里出现编译机绝对路径。
+		public static void WriteError(string error,
+			[CallerFilePath] string sourceFile = "",
+			[CallerLineNumber] int sourceLine = 0)
 		{
-			Write(ErrorFilePath, error);
+			string location = string.IsNullOrEmpty(sourceFile)
+				? ""
+				: $" [{Path.GetFileName(sourceFile)}:{sourceLine}]";
+			Write(ErrorFilePath, location + "  " + error);
 		}
 
 		public static void WriteDebug(string info)
