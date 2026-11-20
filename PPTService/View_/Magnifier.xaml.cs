@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.IO;
+using System.Text;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
@@ -72,6 +74,58 @@ namespace PPTService
 			UpdateMagnifierImageViewBox();
 			InitializeMagnifierWindow();
 			PptOperator.Instance.ShowEnd += Instance_ShowEnd;
+			// 诊断：布局稳定后把铺屏相关真实数值写日志，供 4K 设备定位黑边根因。
+			Dispatcher.BeginInvoke(new System.Windows.Threading.DispatcherOperationCallback(delegate
+			{
+				DumpMagnifierDiagnostics();
+				return null;
+			}), System.Windows.Threading.DispatcherPriority.Background);
+		}
+
+		/// <summary>
+		/// 把放大镜窗口/截图位图/DPI/布局的真实数值写到 %APPDATA%\PPTServiceUltra\magnifier-diag.txt。
+		/// 仅诊断用，不改变任何行为；异常一律吞掉，不影响放大镜正常工作。
+		/// </summary>
+		private void DumpMagnifierDiagnostics()
+		{
+			try
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.AppendLine("=== Magnifier diagnostic " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ===");
+				Rectangle virtualScreen = SystemInformation.VirtualScreen;
+				sb.AppendLine("SystemInformation.VirtualScreen(px): " + virtualScreen.Left + "," + virtualScreen.Top + " " + virtualScreen.Width + "x" + virtualScreen.Height);
+				sb.AppendLine("SystemParameters.VirtualScreen(DIP): " + SystemParameters.VirtualScreenLeft + "," + SystemParameters.VirtualScreenTop + " " + SystemParameters.VirtualScreenWidth + "x" + SystemParameters.VirtualScreenHeight);
+				sb.AppendLine("ScreenHelper.DpiX=" + ScreenHelper.DpiX + " DpiFactor=" + ScreenHelper.DpiFactor.ToString("F4"));
+				PresentationSource source = PresentationSource.FromVisual(this);
+				if (source != null && source.CompositionTarget != null)
+				{
+					sb.AppendLine("TransformToDevice(M11,M22)=" + source.CompositionTarget.TransformToDevice.M11.ToString("F4") + "," + source.CompositionTarget.TransformToDevice.M22.ToString("F4"));
+				}
+				else
+				{
+					sb.AppendLine("TransformToDevice: no PresentationSource");
+				}
+				BitmapSource bmp = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+				if (bmp != null)
+				{
+					sb.AppendLine("Snapshot bitmap: " + bmp.PixelWidth + "x" + bmp.PixelHeight + " px, DPI=" + bmp.DpiX.ToString("F2") + "x" + bmp.DpiY.ToString("F2"));
+				}
+				sb.AppendLine("Window Left/Top=" + Left + "," + Top + " Width/Height(DIP)=" + Width + "x" + Height);
+				sb.AppendLine("Window ActualWidth/Height(DIP)=" + ActualWidth.ToString("F1") + "x" + ActualHeight.ToString("F1"));
+				sb.AppendLine("RootCanvas ActualWidth/Height(DIP)=" + RootCanvas.ActualWidth.ToString("F1") + "x" + RootCanvas.ActualHeight.ToString("F1"));
+				sb.AppendLine("RootCanvas Background Stretch=" + RootCanvasBackgroundImage.Stretch);
+				sb.AppendLine("MagnifierImage.Viewbox=" + MagnifierImage.Viewbox);
+				sb.AppendLine();
+				string dir = AppPath.LocalRoot();
+				if (!Directory.Exists(dir))
+				{
+					Directory.CreateDirectory(dir);
+				}
+				File.AppendAllText(System.IO.Path.Combine(dir, "magnifier-diag.txt"), sb.ToString(), Encoding.UTF8);
+			}
+			catch
+			{
+			}
 		}
 
 		private void Magnifier_Unloaded(object sender, RoutedEventArgs e)
