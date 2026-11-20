@@ -235,6 +235,21 @@ namespace PPTService
 				{
 					// 笔 / 橡皮：批注窗口持有焦点，PPT 失焦 → 手写横滑不被识别成翻页手势。
 					WindowsApi.SetForegroundWindow(hwnd);
+					// SetForegroundWindow 只设「前台窗口」，不保证键盘焦点落在 WPF 窗口上。
+					// 若键盘焦点不在 MainWindow，MainWindow_KeyDown 收不到翻页键，
+					// 自实现批注下翻页笔/键盘翻页就失效（鼠标模式焦点在 PPT、走原生翻页故正常）。
+					// 显式在 UI 线程把键盘焦点给工具栏，让翻页键能被捕获并转发到 PPT COM。
+					System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+					{
+						try
+						{
+							_toolbarWindow.Focus();
+						}
+						catch
+						{
+							// 焦点设置失败不影响批注本身。
+						}
+					}));
 				}
 			}
 			catch (Exception)
