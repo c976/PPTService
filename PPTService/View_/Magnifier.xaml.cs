@@ -49,14 +49,11 @@ namespace PPTService
 			DataContext = this;
 			Loaded += Magnifier_Loaded;
 			Unloaded += Magnifier_Unloaded;
-			SizeChanged += (object s, SizeChangedEventArgs e) =>
-			{
-				SetWindowRect();
-			};
-			LocationChanged += (object s, EventArgs e) =>
-			{
-				SetWindowRect();
-			};
+			// 不要订阅 SizeChanged / LocationChanged 去调 SetWindowRect：
+			// SetWindowRect 里的 SetWindowPos 会改窗口尺寸/位置，进而再次触发这两个事件，
+			// 形成同步重入循环；异步排队的事件在重入标志复位后仍会涌入，
+			// 不断 PostMessage(WM_SIZE) 最终耗尽 USER 对象配额，抛 0x80004005「配额不足」。
+			// 窗口尺寸只需在 InitializeMagnifierWindow 里确定一次即可。
 			PreviewKeyDown += Magnifier_PreviewKeyDown;
 			CloseButton.Click += (object s, RoutedEventArgs e) =>
 			{
@@ -93,7 +90,9 @@ namespace PPTService
 				StringBuilder sb = new StringBuilder();
 				sb.AppendLine("=== Magnifier diagnostic " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ===");
 				Rectangle virtualScreen = SystemInformation.VirtualScreen;
+				Rectangle presentationScreen = GetPresentationScreenBounds();
 				sb.AppendLine("SystemInformation.VirtualScreen(px): " + virtualScreen.Left + "," + virtualScreen.Top + " " + virtualScreen.Width + "x" + virtualScreen.Height);
+				sb.AppendLine("PresentationScreen(px): " + presentationScreen.Left + "," + presentationScreen.Top + " " + presentationScreen.Width + "x" + presentationScreen.Height);
 				sb.AppendLine("SystemParameters.VirtualScreen(DIP): " + SystemParameters.VirtualScreenLeft + "," + SystemParameters.VirtualScreenTop + " " + SystemParameters.VirtualScreenWidth + "x" + SystemParameters.VirtualScreenHeight);
 				sb.AppendLine("ScreenHelper.DpiX=" + ScreenHelper.DpiX + " DpiFactor=" + ScreenHelper.DpiFactor.ToString("F4"));
 				PresentationSource source = PresentationSource.FromVisual(this);
@@ -138,10 +137,47 @@ namespace PPTService
 			SyntacticSugar.CurrentDispatcherBeginInvoke(Close);
 		}
 
+		/// <summary>
+		/// 取 PPT 放映窗口所在显示器的物理矩形。用户实测：同一台机器 Win10 4K 100% 无黑边、
+		/// Win11 有黑边，且问题只在多屏虚拟桌面/多显示器 DPI 不一致时出现。
+		/// 放映本来就是整屏，直接按放映窗口所在这一块屏幕截图并铺屏，
+		/// 而不是用 SystemInformation.VirtualScreen 把所有显示器的虚拟桌面拼起来。
+		/// </summary>
+		private Rectangle GetPresentationScreenBounds()
+		{
+			IntPtr hwnd = PptOperator.Instance.SlideShowWindowIntPtr;
+			if (hwnd != IntPtr.Zero)
+			{
+				Screen screen = Screen.FromHandle(hwnd);
+				if (screen != null && screen.Bounds.Width > 0 && screen.Bounds.Height > 0)
+				{
+					return screen.Bounds;
+				}
+			}
+			// 兜底：主窗口所在屏（debug 模拟放映没有真实 PPT 句柄）。
+			IntPtr mainHandle = IntPtr.Zero;
+			try
+			{
+				mainHandle = new WindowInteropHelper(System.Windows.Application.Current.MainWindow).Handle;
+			}
+			catch
+			{
+			}
+			if (mainHandle != IntPtr.Zero)
+			{
+				Screen screen = Screen.FromHandle(mainHandle);
+				if (screen != null && screen.Bounds.Width > 0 && screen.Bounds.Height > 0)
+				{
+					return screen.Bounds;
+				}
+			}
+			return SystemInformation.VirtualScreen;
+		}
+
 		private void InitializeMagnifierWindow()
 		{
-			Rectangle virtualScreen = SystemInformation.VirtualScreen;
-			RootCanvasBackgroundImage.ImageSource = Snapshot.Take(virtualScreen);
+			Rectangle screenBounds = GetPresentationScreenBounds();
+			RootCanvasBackgroundImage.ImageSource = Snapshot.Take(screenBounds);
 			MagnifierImage.ImageSource = RootCanvasBackgroundImage.ImageSource;
 			SetWindowRect();
 			// Loaded 里设置截图源之前算过一次 Viewbox（那时只能回退到 DpiFactor）。
@@ -192,27 +228,23 @@ namespace PPTService
 			try
 			{
 				WindowStartupLocation = WindowStartupLocation.Manual;
-				Rectangle virtualScreen = SystemInformation.VirtualScreen;
-				// 背景截图取自 SystemInformation.VirtualScreen（物理像素），且以 Stretch=Fill
-				// 铺满窗口。要让它无黑边地铺满整屏，窗口的物理矩形必须与该截图矩形严格一致。
-				// 之前用「物理像素 ÷ TransformToDevice / 反射 DpiFactor」推算窗口 DIP，
-				// 但在 DPI 感知不一致的机器上该缩放返回 1.25 而窗口实际按 1.0 渲染，
-				// 于是窗口只有 3840×2160 的 80%（3072×1728），右下留黑边。
-				// 这里改为用 SetWindowPos 直接以「物理像素」设置窗口 HWND 矩形——
-				// SetWindowPos 的参数就是物理像素，不受进程 DPI 感知/虚拟化影响，
-				// 与截图位图使用同一坐标系，因此必然精确铺满，无黑边。
+				// 与 InitializeMagnifierWindow 的截图取同一矩形：PPT 放映窗口所在显示器的物理像素。
+				// 背景 ImageBrush 以 Stretch=Fill 铺满窗口，窗口物理矩形与该位图严格一致即可无黑边。
+				// 用 SetWindowPos 直接设 HWND 的物理像素，不受反射 DpiFactor / DPI 虚拟化影响；
+				// 不再用 SystemInformation.VirtualScreen（多屏虚拟桌面，Win11 下易与截图尺寸错配）。
+				Rectangle screenBounds = GetPresentationScreenBounds();
 				IntPtr hwnd = new WindowInteropHelper(this).Handle;
 				const int swpNoZorderNoActivate = 0x0004 | 0x0010;
 				if (hwnd != IntPtr.Zero)
 				{
-					WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, virtualScreen.Left, virtualScreen.Top, virtualScreen.Width, virtualScreen.Height, swpNoZorderNoActivate);
+					WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, screenBounds.Left, screenBounds.Top, screenBounds.Width, screenBounds.Height, swpNoZorderNoActivate);
 				}
-				// 同时把 WPF 的 Left/Top/Width/Height 同步为同一数值，避免 WPF 布局系统
-				// 之后按自己的 DIP 认知把 HWND 改回去；这些值仅用于内部定位参考。
-				Left = virtualScreen.Left;
-				Top = virtualScreen.Top;
-				Width = virtualScreen.Width;
-				Height = virtualScreen.Height;
+				// WPF 的 Left/Top/Width/Height 用同一物理数值作内部定位参考：
+				// 本进程 dpiAware=true，4K 100% 下 DIP 与物理像素 1:1，与 SetWindowPos 一致。
+				Left = screenBounds.Left;
+				Top = screenBounds.Top;
+				Width = screenBounds.Width;
+				Height = screenBounds.Height;
 				AdjustButtonBorderMargin();
 				AdjustMagnifierBorder();
 			}
