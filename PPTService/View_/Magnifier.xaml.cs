@@ -60,18 +60,30 @@ namespace PPTService
 		private void Magnifier_Loaded(object sender, RoutedEventArgs e)
 		{
 			SetMagnifierShapeToRectangle();
-			Rect screenBoundsByWindow = ScreenHelper.GetScreenBoundsByWindow(System.Windows.Application.Current.MainWindow);
-			Canvas.SetLeft(RootGrid, screenBoundsByWindow.Left - Left + (screenBoundsByWindow.Width - RootGrid.ActualWidth) / 2.0);
-			Canvas.SetTop(RootGrid, screenBoundsByWindow.Top - Top + (screenBoundsByWindow.Height - RootGrid.ActualHeight) / 2.0);
-			UpdateMagnifierImageViewBox();
 			InitializeMagnifierWindow();
 			PptOperator.Instance.ShowEnd += Instance_ShowEnd;
-			// 诊断：布局稳定后把铺屏相关真实数值写日志，供 4K 设备定位黑边根因。
+			// 布局稳定后：重新居中取景框 + 重算按钮位置 + 写诊断日志。
+			// Loaded 时 RootGrid.ActualWidth/Height 常还是布局前默认值，导致按钮条被算到
+			// 屏幕中间；拖动取景框后 LayoutUpdated 重算才归位。这里在后台优先级补一次定位。
 			// 用无参 Action 的安全封装；之前用 DispatcherOperationCallback 又没传参数，
 			// BeginInvoke 回调时抛 TargetParameterCountException「参数计数不匹配」导致程序崩溃。
 			SyntacticSugar.CurrentDispatcherBeginInvoke(
 				System.Windows.Threading.DispatcherPriority.Background,
-				DumpMagnifierDiagnostics);
+				() =>
+				{
+					CenterRootGridAndButton();
+					DumpMagnifierDiagnostics();
+				});
+		}
+
+		/// <summary>把取景框居中到放映屏，并按其真实尺寸重算关灯/关闭按钮条位置。</summary>
+		private void CenterRootGridAndButton()
+		{
+			Rectangle screenBounds = GetPresentationScreenBounds();
+			Canvas.SetLeft(RootGrid, (screenBounds.Width - RootGrid.ActualWidth) / 2.0);
+			Canvas.SetTop(RootGrid, (screenBounds.Height - RootGrid.ActualHeight) / 2.0);
+			UpdateMagnifierImageViewBox();
+			AdjustButtonPosition(Canvas.GetLeft(RootGrid), Canvas.GetTop(RootGrid));
 		}
 
 		/// <summary>
@@ -140,33 +152,17 @@ namespace PPTService
 		/// </summary>
 		private Rectangle GetPresentationScreenBounds()
 		{
-			IntPtr hwnd = PptOperator.Instance.SlideShowWindowIntPtr;
-			if (hwnd != IntPtr.Zero)
-			{
-				Screen screen = Screen.FromHandle(hwnd);
-				if (screen != null && screen.Bounds.Width > 0 && screen.Bounds.Height > 0)
-				{
-					return screen.Bounds;
-				}
-			}
-			// 兜底：主窗口所在屏（debug 模拟放映没有真实 PPT 句柄）。
-			IntPtr mainHandle = IntPtr.Zero;
-			try
-			{
-				mainHandle = new WindowInteropHelper(System.Windows.Application.Current.MainWindow).Handle;
-			}
-			catch
-			{
-			}
-			if (mainHandle != IntPtr.Zero)
-			{
-				Screen screen = Screen.FromHandle(mainHandle);
-				if (screen != null && screen.Bounds.Width > 0 && screen.Bounds.Height > 0)
-				{
-					return screen.Bounds;
-				}
-			}
-			return SystemInformation.VirtualScreen;
+			// 用户设备：Windows 设置 3840×2160 @100%，4800×2700 根本设不了。
+			// 但 SystemInformation.VirtualScreen / Screen.Bounds 在这台机器的 DPI 虚拟化下
+			// 报 4800×2700（= 3840 × 1.25 的虚胖值）。用它做 Snapshot.Take 会 BitBlt 到
+			// 真实屏幕之外，抓回全黑 → 位图右下 20% 黑边，这正是黑边的真正根因。
+			// SystemParameters.VirtualScreen* 实测为 3840×2160，与用户在设置里看到的一致，
+			// 截图和窗口都用它，就不会抓到屏幕外。
+			return new Rectangle(
+				(int)SystemParameters.VirtualScreenLeft,
+				(int)SystemParameters.VirtualScreenTop,
+				(int)SystemParameters.VirtualScreenWidth,
+				(int)SystemParameters.VirtualScreenHeight);
 		}
 
 		private void InitializeMagnifierWindow()
@@ -216,25 +212,24 @@ namespace PPTService
 		private void SetWindowRect()
 		{
 			WindowStartupLocation = WindowStartupLocation.Manual;
-			// 与 InitializeMagnifierWindow 的截图取同一矩形：PPT 放映窗口所在显示器的物理像素。
-			// WPF 的 Left/Top/Width/Height 是 DIP（已按系统 DPI 放大），所以要把物理分辨率
-			// 除以缩放比例反推 DIP：scale = DpiFactor = DpiX / 96（与原版 795/812 的公式一致）。
-			// 不再用 SetWindowPos 直接设物理像素——那会触发 SizeChanged/LocationChanged 重入循环，
-			// 也曾导致 4K 黑边；这套「物理 ÷ DpiFactor」在 4K 100% 下已被原版验证铺满正常。
+			// 与 InitializeMagnifierWindow 的截图用同一个 SystemParameters 虚拟屏矩形：
+			// SystemParameters.VirtualScreen* 是 WPF 的 DIP 值，实测=3840×2160，与用户在
+			// Windows 设置里看到的 100% 3840×2160 一致。直接赋给 Left/Top/Width/Height 即可，
+			// 不再除以 DpiFactor（那会把 3840 错误地缩成 3072）。
+			// 位图与窗口用同一来源同一数值，Stretch=Fill 必然铺满，且不会 BitBlt 到屏幕外产生黑边。
 			Rectangle screenBounds = GetPresentationScreenBounds();
-			double scaleX = ScreenHelper.DpiFactor > 0.0 ? ScreenHelper.DpiFactor : 1.0;
-			Left = screenBounds.Left / scaleX;
-			Top = screenBounds.Top / scaleX;
-			Width = (double)screenBounds.Width / scaleX;
-			Height = (double)screenBounds.Height / scaleX;
+			Left = screenBounds.Left;
+			Top = screenBounds.Top;
+			Width = (double)screenBounds.Width;
+			Height = (double)screenBounds.Height;
 			AdjustButtonBorderMargin();
 			AdjustMagnifierBorder();
 		}
 
 		/// <summary>
-		/// 截图像素 → 窗口 DIP 的换算比例。截图由 SystemInformation.VirtualScreen（物理像素）抓取，
-		/// 窗口用 SystemParameters（DIP）定位，两者比值即真实缩放。用实际像素/实际 DIP 计算而不是
-		/// 反射的 ScreenHelper.DpiFactor，避免 DPI 感知不一致时取景框定位偏移。
+		/// 截图像素 → 窗口 DIP 的换算比例。截图源与窗口都用 SystemParameters 虚拟屏 DIP，
+		/// 但在 DPI 虚拟化设备上 Snapshot 位图像素仍可能 ≥ 窗口 DIP；用实际像素/实际 DIP 比值，
+		/// 与窗口尺寸保持同一坐标系，避免反射 DpiFactor 不一致时取景框定位偏移。
 		/// </summary>
 		private double GetSnapshotScaleX()
 		{
