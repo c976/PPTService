@@ -28,6 +28,14 @@ namespace PPTService
 		// 否则会重复触发 ShowBegin，进而建出两个工具栏。
 		private bool _isHandlingShowBegin;
 
+		// 放映开始时 PPT COM 可能瞬时拒绝（RPC_E_CALL_REJECTED 0x80010001），典型场景是
+		// CheckMainObject() 里读 SlideShowWindow.HWND。此时隔 ShowBeginRetryInterval 秒重试，
+		// 累计 ShowBeginMaxRetryCount 次仍失败则放弃，避免无限重试；任一成功即清零计数。
+		private const int ShowBeginRetryIntervalSeconds = 10;
+		private const int ShowBeginMaxRetryCount = 6;
+		private int _showBeginRetryCount;
+		private DispatcherTimer _showBeginRetryTimer;
+
 		private SlideShowWindow _slideShowWindow;
 
 		private const int PptProcessCheckInterval = 2500;
@@ -581,6 +589,8 @@ namespace PPTService
 					Slides = Presentation.Slides.Cast<Slide>().ToList();
 					PptAnalyzer.InitPptAnalyzer(PptFilePath);
 					IsShowing = true;
+					// 放映终于初始化成功：清零瞬时错误重试计数、停掉重试定时器。
+					ResetShowBeginRetry();
 					OnShowBegin();
 					SetSlideAdvanceOnClickProperty(MsoTriState.msoFalse);
 					ConfigHelper.Instance.IsShowing = IsShowing;
@@ -598,10 +608,64 @@ namespace PPTService
 				// 初始化失败必须把放映态收回，否则下一场放映会被误判为「已放映」。
 				IsShowing = false;
 				Log.WriteError($"ShowBeginError：{arg}");
+				// 瞬时 COM 拒绝（PPT 忙，如读 HWND 时的 0x80010001）：隔 10s 重试一次，
+				// 累计到上限仍失败则放弃，避免无限重试；任一次成功会清零计数（见成功分支）。
+				// 这样偶发一次 RPC_E_CALL_REJECTED 不会再让整场放映的工具栏永久消失。
+				if (SyntacticSugar.IsTransientComException(arg) && wn != null)
+				{
+					ScheduleShowBeginRetry(wn);
+				}
 			}
 			finally
 			{
 				_isHandlingShowBegin = false;
+			}
+		}
+
+		/// <summary>安排一次延时重试放映初始化；超过上限则放弃。DispatcherTimer 只能在 UI 线程操作。</summary>
+		private void ScheduleShowBeginRetry(SlideShowWindow wn)
+		{
+			Dispatcher dispatcher = System.Windows.Application.Current != null
+				? System.Windows.Application.Current.Dispatcher
+				: Dispatcher.CurrentDispatcher;
+			if (!dispatcher.CheckAccess())
+			{
+				dispatcher.BeginInvoke(new Action(() => ScheduleShowBeginRetry(wn)));
+				return;
+			}
+			if (_showBeginRetryCount >= ShowBeginMaxRetryCount)
+			{
+				return;
+			}
+			_showBeginRetryCount++;
+			if (_showBeginRetryTimer == null)
+			{
+				_showBeginRetryTimer = new DispatcherTimer();
+				_showBeginRetryTimer.Tick += (object s, EventArgs e) =>
+				{
+					_showBeginRetryTimer.Stop();
+					SyntacticSugar.TryCatchAction(() => AppSlideShowBegin(wn));
+				};
+			}
+			_showBeginRetryTimer.Interval = TimeSpan.FromSeconds(ShowBeginRetryIntervalSeconds);
+			_showBeginRetryTimer.Start();
+		}
+
+		/// <summary>放映初始化成功后清零重试计数并停止重试定时器。</summary>
+		private void ResetShowBeginRetry()
+		{
+			Dispatcher dispatcher = System.Windows.Application.Current != null
+				? System.Windows.Application.Current.Dispatcher
+				: Dispatcher.CurrentDispatcher;
+			if (!dispatcher.CheckAccess())
+			{
+				dispatcher.BeginInvoke(new Action(ResetShowBeginRetry));
+				return;
+			}
+			_showBeginRetryCount = 0;
+			if (_showBeginRetryTimer != null)
+			{
+				_showBeginRetryTimer.Stop();
 			}
 		}
 
