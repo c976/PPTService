@@ -531,6 +531,21 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
+            <!-- 拉起按钮：4K 100% 下缩放=1，DIP=物理像素。默认 50×25 在 4K 下只有 50×25
+                 物理像素，比参考（1920@125% 的 62×29）偏小；此档放大到 62×29 物理，
+                 箭头按同比例 15×7.5，保持箭头占框约 24% 的比例不变。 -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="62" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="29" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="7.5" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="310" />
             </DoubleAnimationUsingKeyFrames>

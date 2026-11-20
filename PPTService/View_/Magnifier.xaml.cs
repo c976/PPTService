@@ -67,11 +67,11 @@ namespace PPTService
 			InitializeMagnifierWindow();
 			PptOperator.Instance.ShowEnd += Instance_ShowEnd;
 			// 诊断：布局稳定后把铺屏相关真实数值写日志，供 4K 设备定位黑边根因。
-			Dispatcher.BeginInvoke(new System.Windows.Threading.DispatcherOperationCallback(delegate
-			{
-				DumpMagnifierDiagnostics();
-				return null;
-			}), System.Windows.Threading.DispatcherPriority.Background);
+			// 用无参 Action 的安全封装；之前用 DispatcherOperationCallback 又没传参数，
+			// BeginInvoke 回调时抛 TargetParameterCountException「参数计数不匹配」导致程序崩溃。
+			SyntacticSugar.CurrentDispatcherBeginInvoke(
+				System.Windows.Threading.DispatcherPriority.Background,
+				DumpMagnifierDiagnostics);
 		}
 
 		/// <summary>
