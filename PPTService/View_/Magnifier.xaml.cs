@@ -6,9 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using PPTService.Collection;
 
 namespace PPTService
@@ -29,6 +31,10 @@ namespace PPTService
 
 		private double _enlargementFactor = 2.0;
 
+		// SetWindowPos 改尺寸会触发 SizeChanged/LocationChanged，二者又会调 SetWindowRect，
+		// 用这个标志防止重入。
+		private bool _settingWindowRect;
+
 		private double _minEnlargementFactor = 1.0;
 
 		private double _maxEnlargementFactor = 3.0;
@@ -41,6 +47,14 @@ namespace PPTService
 			DataContext = this;
 			Loaded += Magnifier_Loaded;
 			Unloaded += Magnifier_Unloaded;
+			SizeChanged += (object s, SizeChangedEventArgs e) =>
+			{
+				SetWindowRect();
+			};
+			LocationChanged += (object s, EventArgs e) =>
+			{
+				SetWindowRect();
+			};
 			PreviewKeyDown += Magnifier_PreviewKeyDown;
 			CloseButton.Click += (object s, RoutedEventArgs e) =>
 			{
@@ -76,24 +90,109 @@ namespace PPTService
 			RootCanvasBackgroundImage.ImageSource = Snapshot.Take(virtualScreen);
 			MagnifierImage.ImageSource = RootCanvasBackgroundImage.ImageSource;
 			SetWindowRect();
+			// Loaded 里设置截图源之前算过一次 Viewbox（那时只能回退到 DpiFactor）。
+			// 截图与窗口尺寸就位后按真实像素/DIP 比值再算一次，保证首次打开取景正确。
+			UpdateMagnifierImageViewBox();
+		}
+
+		/// <summary>
+		/// 窗口 DIP 与物理像素的实际换算比例。用 WPF 运行时的 TransformToDevice，
+		/// 而不是反射 SystemParameters.DpiX（后者在 4K 100% 缩放下曾得到 120，比实际高 25%，
+		/// 导致窗口只有屏幕 80%、右下黑边）。拿不到 PresentationSource 时按 1:1 处理。
+		/// </summary>
+		private double GetDeviceScaleX()
+		{
+			PresentationSource source = PresentationSource.FromVisual(this);
+			if (source != null && source.CompositionTarget != null)
+			{
+				double scale = source.CompositionTarget.TransformToDevice.M11;
+				if (scale > 0.0)
+				{
+					return scale;
+				}
+			}
+			return 1.0;
+		}
+
+		private double GetDeviceScaleY()
+		{
+			PresentationSource source = PresentationSource.FromVisual(this);
+			if (source != null && source.CompositionTarget != null)
+			{
+				double scale = source.CompositionTarget.TransformToDevice.M22;
+				if (scale > 0.0)
+				{
+					return scale;
+				}
+			}
+			return 1.0;
 		}
 
 		private void SetWindowRect()
 		{
-			// 回归修复：恢复 v814 及之前的原始实现。v815 曾把这里的
-			// 「物理像素 ÷ ScreenHelper.DpiFactor」改成 SystemParameters.VirtualScreenWidth，
-			// 后者在 4K 100% 缩放下返回被 DPI 虚拟化过的值（3072 而非 3840），
-			// 导致截图只铺左上 80%、右下黑边。原始实现在同一台 4K 100% 机器上实测正常：
-			// 截图取 SystemInformation.VirtualScreen 物理像素，窗口 DIP = 物理像素 / DpiFactor
-			// （100% 时 DpiFactor=1，3840/1=3840 精确铺满），与 Viewbox 的 ×DpiFactor 自洽。
-			Rectangle virtualScreen = SystemInformation.VirtualScreen;
-			WindowStartupLocation = WindowStartupLocation.Manual;
-			Left = virtualScreen.Left;
-			Top = virtualScreen.Top;
-			Width = (double)virtualScreen.Width / ScreenHelper.DpiFactor;
-			Height = (double)virtualScreen.Height / ScreenHelper.DpiFactor;
-			AdjustButtonBorderMargin();
-			AdjustMagnifierBorder();
+			if (_settingWindowRect)
+			{
+				return;
+			}
+			_settingWindowRect = true;
+			try
+			{
+				WindowStartupLocation = WindowStartupLocation.Manual;
+				Rectangle virtualScreen = SystemInformation.VirtualScreen;
+				// 背景截图取自 SystemInformation.VirtualScreen（物理像素），且以 Stretch=Fill
+				// 铺满窗口。要让它无黑边地铺满整屏，窗口的物理矩形必须与该截图矩形严格一致。
+				// 之前用「物理像素 ÷ TransformToDevice / 反射 DpiFactor」推算窗口 DIP，
+				// 但在 DPI 感知不一致的机器上该缩放返回 1.25 而窗口实际按 1.0 渲染，
+				// 于是窗口只有 3840×2160 的 80%（3072×1728），右下留黑边。
+				// 这里改为用 SetWindowPos 直接以「物理像素」设置窗口 HWND 矩形——
+				// SetWindowPos 的参数就是物理像素，不受进程 DPI 感知/虚拟化影响，
+				// 与截图位图使用同一坐标系，因此必然精确铺满，无黑边。
+				IntPtr hwnd = new WindowInteropHelper(this).Handle;
+				const int swpNoZorderNoActivate = 0x0004 | 0x0010;
+				if (hwnd != IntPtr.Zero)
+				{
+					WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, virtualScreen.Left, virtualScreen.Top, virtualScreen.Width, virtualScreen.Height, swpNoZorderNoActivate);
+				}
+				// 同时把 WPF 的 Left/Top/Width/Height 同步为同一数值，避免 WPF 布局系统
+				// 之后按自己的 DIP 认知把 HWND 改回去；这些值仅用于内部定位参考。
+				Left = virtualScreen.Left;
+				Top = virtualScreen.Top;
+				Width = virtualScreen.Width;
+				Height = virtualScreen.Height;
+				AdjustButtonBorderMargin();
+				AdjustMagnifierBorder();
+			}
+			finally
+			{
+				_settingWindowRect = false;
+			}
+		}
+
+		/// <summary>
+		/// 截图像素 → 窗口 DIP 的换算比例。截图由 SystemInformation.VirtualScreen（物理像素）抓取，
+		/// 窗口用 SystemParameters（DIP）定位，两者比值即真实缩放。用实际像素/实际 DIP 计算而不是
+		/// 反射的 ScreenHelper.DpiFactor，避免 DPI 感知不一致时取景框定位偏移。
+		/// </summary>
+		private double GetSnapshotScaleX()
+		{
+			BitmapSource source = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+			double dipWidth = ActualWidth > 0.0 ? ActualWidth : Width;
+			if (source != null && source.PixelWidth > 0 && dipWidth > 0.0)
+			{
+				return (double)source.PixelWidth / dipWidth;
+			}
+			return ScreenHelper.DpiFactor;
+		}
+
+		private double GetSnapshotScaleY()
+		{
+			BitmapSource source = RootCanvasBackgroundImage.ImageSource as BitmapSource;
+			double dipHeight = ActualHeight > 0.0 ? ActualHeight : Height;
+			if (source != null && source.PixelHeight > 0 && dipHeight > 0.0)
+			{
+				return (double)source.PixelHeight / dipHeight;
+			}
+			return ScreenHelper.DpiFactor;
 		}
 
 		private void SetMagnifierShapeToRectangle()
@@ -343,14 +442,14 @@ namespace PPTService
 			num2 += num4 / 2.0;
 			double num5 = num + MagnifierRectangle.ActualWidth / _enlargementFactor;
 			double num6 = num2 + MagnifierRectangle.ActualHeight / _enlargementFactor;
-			// 恢复 v812~814 的原始自洽换算：窗口 DIP = 物理像素 / DpiFactor，
-			// 所以取景框 DIP 坐标换算回截图像素要 ×DpiFactor（与 SetWindowRect 成对）。
-			// 这套在用户 4K 100% 机器上实测铺屏正常；v815 改为按位图像素/窗口 DIP 动态算
-			// 反而引入了黑边回归。
-			num *= ScreenHelper.DpiFactor;
-			num2 *= ScreenHelper.DpiFactor;
-			num5 *= ScreenHelper.DpiFactor;
-			num6 *= ScreenHelper.DpiFactor;
+			// 取景框坐标是窗口 DIP，Viewbox 用的是截图像素；用实际像素/DIP 比值换算，
+			// 与窗口尺寸（SystemParameters DIP）保持同一坐标系，避免反射 DpiFactor 不一致。
+			double scaleX = GetSnapshotScaleX();
+			double scaleY = GetSnapshotScaleY();
+			num *= scaleX;
+			num2 *= scaleY;
+			num5 *= scaleX;
+			num6 *= scaleY;
 			MagnifierImage.Viewbox = new Rect(new System.Windows.Point(num, num2), new System.Windows.Point(num5, num6));
 		}
 
