@@ -224,8 +224,34 @@ namespace PPTService
 			}
 		}
 
+		/// <summary>
+		/// 事件是否落在底部「关灯 / 关闭」按钮组上。ButtonBorder 是 RootCanvas 的子元素，
+		/// 而 RootCanvas 挂了取景框的拖动 handler（无条件 e.Handled + CaptureDevice）。
+		/// 触控点击按钮时事件会冒泡到 RootCanvas，若被取景框 handler 拦截并把触摸/触控笔
+		/// 捕获到 MagnifierRectangle，CheckBox 的点击状态就无法刷新——表现为点了「开灯」
+		/// 后按钮仍显示选中，直到点按钮外才恢复。因此按钮区的事件必须放行给按钮自己处理。
+		/// </summary>
+		private bool IsOnButtonArea(DependencyObject source)
+		{
+			DependencyObject dep = source;
+			while (dep != null)
+			{
+				if (ReferenceEquals(dep, ButtonBorder))
+				{
+					return true;
+				}
+				dep = VisualTreeHelper.GetParent(dep);
+			}
+			return false;
+		}
+
 		private void MagnifierRectangle_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
+			// 按钮区（关灯 / 关闭）交给按钮自己处理，不要拦截或抢捕获。
+			if (IsOnButtonArea(e.OriginalSource as DependencyObject))
+			{
+				return;
+			}
 			e.Handled = true;
 			MagnifierRectangle.CaptureDevice();
 			_mouseStartPoint = e.GetPosition(this);
@@ -237,21 +263,28 @@ namespace PPTService
 
 		private void MagnifierRectangle_OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
-			e.Handled = true;
-			if (_isMagnifierRectangleMouseLeftButtonDown)
+			// 只有真正在拖动取景框时才处理；经过按钮区不影响拖动。
+			if (!_isMagnifierRectangleMouseLeftButtonDown)
 			{
-				Vector vector = e.GetPosition(this) - _mouseStartPoint;
-				double left = _rectangleStartPoint.X + vector.X;
-				double top = _rectangleStartPoint.Y + vector.Y;
-				AdjustMagnifierPosition(ref left, ref top);
-				Canvas.SetLeft(RootGrid, left);
-				Canvas.SetTop(RootGrid, top);
-				UpdateMagnifierImageViewBox();
+				return;
 			}
+			e.Handled = true;
+			Vector vector = e.GetPosition(this) - _mouseStartPoint;
+			double left = _rectangleStartPoint.X + vector.X;
+			double top = _rectangleStartPoint.Y + vector.Y;
+			AdjustMagnifierPosition(ref left, ref top);
+			Canvas.SetLeft(RootGrid, left);
+			Canvas.SetTop(RootGrid, top);
+			UpdateMagnifierImageViewBox();
 		}
 
 		private void MagnifierRectangle_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
+			// 未处于拖动状态时（例如只是点按钮），不要拦截，也不要释放捕获。
+			if (!_isMagnifierRectangleMouseLeftButtonDown)
+			{
+				return;
+			}
 			e.Handled = true;
 			_isMagnifierRectangleMouseLeftButtonDown = false;
 			LayoutUpdated -= Magnifier_LayoutUpdated;
