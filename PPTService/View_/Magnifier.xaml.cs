@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -29,6 +30,10 @@ namespace PPTService
 		private bool _isMagnifierRectangleMouseLeftButtonDown;
 
 		private double _enlargementFactor = 2.0;
+
+		// SetWindowPos 改尺寸会触发 SizeChanged/LocationChanged，二者又会调 SetWindowRect，
+		// 用这个标志防止重入。
+		private bool _settingWindowRect;
 
 		private double _minEnlargementFactor = 1.0;
 
@@ -125,25 +130,42 @@ namespace PPTService
 
 		private void SetWindowRect()
 		{
-			WindowStartupLocation = WindowStartupLocation.Manual;
-			// 必须用「屏幕真实尺寸 ÷ 窗口运行时 DPI 缩放」来设窗口，两者取自同一坐标系：
-			//   - 屏幕尺寸用 Snapshot 的位图像素（SystemInformation.VirtualScreen 抓取，物理像素），
-			//     这是背景图 Inflation 铺满所依据的真实像素数；
-			//   - 缩放用 TransformToDevice（本窗口 DIP→物理的真实比例）。
-			// 之前用 SystemParameters.VirtualScreenWidth 得到的 3072 是被反射 DPI 缩过的逻辑值，
-			// 而窗口按 96 DIP 渲染，于是只覆盖 3840 屏幕的 80%，右下留黑边。
-			BitmapSource snapshot = RootCanvasBackgroundImage.ImageSource as BitmapSource;
-			Rectangle virtualScreen = SystemInformation.VirtualScreen;
-			double physicalWidth = snapshot != null && snapshot.PixelWidth > 0 ? snapshot.PixelWidth : virtualScreen.Width;
-			double physicalHeight = snapshot != null && snapshot.PixelHeight > 0 ? snapshot.PixelHeight : virtualScreen.Height;
-			double scaleX = GetDeviceScaleX();
-			double scaleY = GetDeviceScaleY();
-			Left = virtualScreen.Left / scaleX;
-			Top = virtualScreen.Top / scaleY;
-			Width = physicalWidth / scaleX;
-			Height = physicalHeight / scaleY;
-			AdjustButtonBorderMargin();
-			AdjustMagnifierBorder();
+			if (_settingWindowRect)
+			{
+				return;
+			}
+			_settingWindowRect = true;
+			try
+			{
+				WindowStartupLocation = WindowStartupLocation.Manual;
+				Rectangle virtualScreen = SystemInformation.VirtualScreen;
+				// 背景截图取自 SystemInformation.VirtualScreen（物理像素），且以 Stretch=Fill
+				// 铺满窗口。要让它无黑边地铺满整屏，窗口的物理矩形必须与该截图矩形严格一致。
+				// 之前用「物理像素 ÷ TransformToDevice / 反射 DpiFactor」推算窗口 DIP，
+				// 但在 DPI 感知不一致的机器上该缩放返回 1.25 而窗口实际按 1.0 渲染，
+				// 于是窗口只有 3840×2160 的 80%（3072×1728），右下留黑边。
+				// 这里改为用 SetWindowPos 直接以「物理像素」设置窗口 HWND 矩形——
+				// SetWindowPos 的参数就是物理像素，不受进程 DPI 感知/虚拟化影响，
+				// 与截图位图使用同一坐标系，因此必然精确铺满，无黑边。
+				IntPtr hwnd = new WindowInteropHelper(this).Handle;
+				const int swpNoZorderNoActivate = 0x0004 | 0x0010;
+				if (hwnd != IntPtr.Zero)
+				{
+					WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, virtualScreen.Left, virtualScreen.Top, virtualScreen.Width, virtualScreen.Height, swpNoZorderNoActivate);
+				}
+				// 同时把 WPF 的 Left/Top/Width/Height 同步为同一数值，避免 WPF 布局系统
+				// 之后按自己的 DIP 认知把 HWND 改回去；这些值仅用于内部定位参考。
+				Left = virtualScreen.Left;
+				Top = virtualScreen.Top;
+				Width = virtualScreen.Width;
+				Height = virtualScreen.Height;
+				AdjustButtonBorderMargin();
+				AdjustMagnifierBorder();
+			}
+			finally
+			{
+				_settingWindowRect = false;
+			}
 		}
 
 		/// <summary>

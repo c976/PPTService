@@ -65,20 +65,28 @@
                 <Border Name="CoverBorder" Background="Transparent" CornerRadius="3" IsHitTestVisible="False" />
               </Grid>
               <ControlTemplate.Triggers>
-                <!-- 选中态（关灯模式）：按钮保持一层常亮底色，与开灯（未选中、全透明）明确区分。
-                     数值低于 hover(0.35) / pressed(0.7)，保证悬停、按下能自然叠加更亮反馈；
-                     图标本身也已按 IsChecked 在「亮灯泡 / 灭灯泡」间切换。 -->
+                <!-- 未选中的悬停：只给一层很淡的底色，明确表示「这只是鼠标经过，不是选中」。
+                     关灯/开灯只由 IsChecked 决定，图标也按它在亮/灭灯泡间切换。 -->
+                <MultiTrigger>
+                  <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsChecked" Value="False" />
+                  </MultiTrigger.Conditions>
+                  <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
+                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.15" />
+                </MultiTrigger>
+                <!-- 选中态（关灯模式）：明显的常亮底色 + 描边，一眼可辨；放在 hover 之后，
+                     保证鼠标停留时也维持选中视觉，不会看起来像「没关灯」。 -->
                 <Trigger Property="IsChecked" Value="True">
-                  <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
-                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.3" />
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
-                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.35" />
+                  <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.IconBrush}" />
+                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.22" />
+                  <Setter TargetName="CoverBorder" Property="BorderBrush" Value="{DynamicResource Theme.IconBrush}" />
+                  <Setter TargetName="CoverBorder" Property="BorderThickness" Value="1" />
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                   <Setter TargetName="CoverBorder" Property="Background" Value="{DynamicResource Theme.BorderBrush}" />
-                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.7" />
+                  <Setter TargetName="CoverBorder" Property="Opacity" Value="0.5" />
+                  <Setter TargetName="CoverBorder" Property="BorderThickness" Value="0" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>

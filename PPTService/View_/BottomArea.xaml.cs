@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using Microsoft.Office.Interop.PowerPoint;
 using PPTService.Collection;
 
@@ -826,23 +827,40 @@ namespace PPTService
 			storyboard.Children = new TimelineCollection { doubleAnimationUsingKeyFrames };
 			storyboard.Completed += (object s, EventArgs e) =>
 			{
-				SyntacticSugar.TryCatchAction(() =>
+				Visibility = Visibility.Collapsed;
+				// 等屏幕真正合成出「工具栏已消失」的画面后再创建放大镜并截图。
+				// Visibility=Collapsed 只改了逻辑树，桌面像素要到下一次 DWM 合成才更新；
+				// 低帧率设备（4K 30fps，一帧约 33ms）若紧接着 ShowDialog→Snapshot.Take，
+				// GDI 抓屏拿到的还是上一帧——表现为工具栏残留一半。延时 120ms（约 3~4 帧）
+				// 再截图，给慢设备留出足够的合成时间。
+				DispatcherTimer shareTimer = new DispatcherTimer
 				{
-					Visibility = Visibility.Collapsed;
-					ViewHelper.Magnifier = new Magnifier
+					Interval = TimeSpan.FromMilliseconds(120.0)
+				};
+				EventHandler tickHandler = null;
+				tickHandler = (object ts, EventArgs te) =>
+				{
+					shareTimer.Tick -= tickHandler;
+					shareTimer.Stop();
+					SyntacticSugar.TryCatchAction(() =>
 					{
-						Owner = ViewHelper.MainWindow
-					};
-					ViewHelper.Magnifier.ShowDialog();
-					ViewHelper.Magnifier = null;
-					PlayShowLeftAreaStoryBoard();
-					ViewHelper.MainWindow.UpdatePageIndex();
-					ViewHelper.LeftArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
-					ViewHelper.RightArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
-					ViewHelper.LeftBottomArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
-					ViewHelper.RightBottomArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
-				});
-				WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
+						ViewHelper.Magnifier = new Magnifier
+						{
+							Owner = ViewHelper.MainWindow
+						};
+						ViewHelper.Magnifier.ShowDialog();
+						ViewHelper.Magnifier = null;
+						PlayShowLeftAreaStoryBoard();
+						ViewHelper.MainWindow.UpdatePageIndex();
+						ViewHelper.LeftArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
+						ViewHelper.RightArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
+						ViewHelper.LeftBottomArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
+						ViewHelper.RightBottomArea.PlayHiddenOrShowLeftAreaStoryBoard(false);
+					});
+					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
+				};
+				shareTimer.Tick += tickHandler;
+				shareTimer.Start();
 			};
 			storyboard.Begin();
 		}
