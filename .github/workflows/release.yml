@@ -117,6 +117,45 @@ jobs:
         Write-Host "Release tag: $tag"
         Write-Host "Installer:   $asset"
 
+    # 重复 tag 直接重建：先删掉旧 Release 及其 tag（包括只有 tag 没有 Release 的残留），
+    # 再让 gh release create 重新打 tag，而不是沿用旧 Release 覆盖资源。
+    - name: Remove existing release and tag for a fresh publish
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+      shell: pwsh
+      run: |
+        # 这些 gh / git 查询「找不到」是正常分支，靠 $LASTEXITCODE 判断。
+        $ErrorActionPreference = 'Continue'
+        $PSNativeCommandUseErrorActionPreference = $false
+        $tag = $env:RELEASE_TAG
+
+        # 确保本地 tag 列表与远端同步，便于后面识别残留 tag。
+        git fetch --tags --force
+
+        # --cleanup-tag 会同时删掉远端 Release 和它对应的 tag。
+        $null = gh release view $tag --json tagName 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "Deleting existing release and tag: $tag"
+          gh release delete $tag --yes --cleanup-tag
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+
+        # 兜底：没有 Release 但 tag 仍存在时也要删除，否则新建 tag 会冲突。
+        $null = git ls-remote --exit-code --tags origin "refs/tags/$tag" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "Deleting leftover remote tag: $tag"
+          git push origin --delete "refs/tags/$tag"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+        $null = git show-ref --verify --quiet "refs/tags/$tag" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          Write-Host "Deleting leftover local tag: $tag"
+          git tag -d $tag
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+        Write-Host "Tag $tag is now free for a fresh release."
+
     # Release 正文：自「上一次发布的 Release」以来的所有提交，每行 "- 提交信息"。
     # git 的 %s 只取 subject（首行），多行提交信息天然只保留第一行。
     - name: Build release notes from commits since last release
@@ -197,20 +236,11 @@ jobs:
         }
         Write-Host "Prerelease: $isPrerelease ; Latest: $isLatest"
 
-        # 先创建（或更新已有 Release 的资源与说明），标志位在最后统一用 edit 设置。
+        # 旧 Release 与 tag 已在上一步清理，这里总是全新创建，避免残留旧 tag / 旧资源。
         # 注意 gh release edit 的布尔开关语法是 --prerelease=true|false / --latest=true|false，
         # 并没有 --no-prerelease / --no-latest（实测会报 unknown flag）。
-        $null = gh release view $tag --json tagName 2>$null
-        if ($LASTEXITCODE -eq 0) {
-          Write-Host "Release $tag already exists - replacing asset and notes."
-          gh release upload $tag $asset --clobber
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          gh release edit $tag --notes-file $notesFile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        } else {
-          gh release create $tag $asset --title "PPTServiceUltra $tag" --notes-file $notesFile
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        }
+        gh release create $tag $asset --title "PPTServiceUltra $tag" --notes-file $notesFile
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         $releaseFlags = @()
         if ($isPrerelease) { $releaseFlags += '--prerelease=true' } else { $releaseFlags += '--prerelease=false' }
