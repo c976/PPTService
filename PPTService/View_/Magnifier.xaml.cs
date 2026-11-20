@@ -33,10 +33,6 @@ namespace PPTService
 
 		private double _enlargementFactor = 2.0;
 
-		// SetWindowPos 改尺寸会触发 SizeChanged/LocationChanged，二者又会调 SetWindowRect，
-		// 用这个标志防止重入。
-		private bool _settingWindowRect;
-
 		private double _minEnlargementFactor = 1.0;
 
 		private double _maxEnlargementFactor = 3.0;
@@ -50,10 +46,9 @@ namespace PPTService
 			Loaded += Magnifier_Loaded;
 			Unloaded += Magnifier_Unloaded;
 			// 不要订阅 SizeChanged / LocationChanged 去调 SetWindowRect：
-			// SetWindowRect 里的 SetWindowPos 会改窗口尺寸/位置，进而再次触发这两个事件，
-			// 形成同步重入循环；异步排队的事件在重入标志复位后仍会涌入，
-			// 不断 PostMessage(WM_SIZE) 最终耗尽 USER 对象配额，抛 0x80004005「配额不足」。
-			// 窗口尺寸只需在 InitializeMagnifierWindow 里确定一次即可。
+			// 放大镜是全屏固定窗口，尺寸只在 InitializeMagnifierWindow 里确定一次即可。
+			// 之前订阅它们配合 SetWindowPos 改尺寸，形成重入循环、不断 PostMessage(WM_SIZE)
+			// 耗尽 USER 对象配额，抛过 0x80004005「配额不足」。
 			PreviewKeyDown += Magnifier_PreviewKeyDown;
 			CloseButton.Click += (object s, RoutedEventArgs e) =>
 			{
@@ -220,38 +215,20 @@ namespace PPTService
 
 		private void SetWindowRect()
 		{
-			if (_settingWindowRect)
-			{
-				return;
-			}
-			_settingWindowRect = true;
-			try
-			{
-				WindowStartupLocation = WindowStartupLocation.Manual;
-				// 与 InitializeMagnifierWindow 的截图取同一矩形：PPT 放映窗口所在显示器的物理像素。
-				// 背景 ImageBrush 以 Stretch=Fill 铺满窗口，窗口物理矩形与该位图严格一致即可无黑边。
-				// 用 SetWindowPos 直接设 HWND 的物理像素，不受反射 DpiFactor / DPI 虚拟化影响；
-				// 不再用 SystemInformation.VirtualScreen（多屏虚拟桌面，Win11 下易与截图尺寸错配）。
-				Rectangle screenBounds = GetPresentationScreenBounds();
-				IntPtr hwnd = new WindowInteropHelper(this).Handle;
-				const int swpNoZorderNoActivate = 0x0004 | 0x0010;
-				if (hwnd != IntPtr.Zero)
-				{
-					WindowsApi.SetWindowPos(hwnd, IntPtr.Zero, screenBounds.Left, screenBounds.Top, screenBounds.Width, screenBounds.Height, swpNoZorderNoActivate);
-				}
-				// WPF 的 Left/Top/Width/Height 用同一物理数值作内部定位参考：
-				// 本进程 dpiAware=true，4K 100% 下 DIP 与物理像素 1:1，与 SetWindowPos 一致。
-				Left = screenBounds.Left;
-				Top = screenBounds.Top;
-				Width = screenBounds.Width;
-				Height = screenBounds.Height;
-				AdjustButtonBorderMargin();
-				AdjustMagnifierBorder();
-			}
-			finally
-			{
-				_settingWindowRect = false;
-			}
+			WindowStartupLocation = WindowStartupLocation.Manual;
+			// 与 InitializeMagnifierWindow 的截图取同一矩形：PPT 放映窗口所在显示器的物理像素。
+			// WPF 的 Left/Top/Width/Height 是 DIP（已按系统 DPI 放大），所以要把物理分辨率
+			// 除以缩放比例反推 DIP：scale = DpiFactor = DpiX / 96（与原版 795/812 的公式一致）。
+			// 不再用 SetWindowPos 直接设物理像素——那会触发 SizeChanged/LocationChanged 重入循环，
+			// 也曾导致 4K 黑边；这套「物理 ÷ DpiFactor」在 4K 100% 下已被原版验证铺满正常。
+			Rectangle screenBounds = GetPresentationScreenBounds();
+			double scaleX = ScreenHelper.DpiFactor > 0.0 ? ScreenHelper.DpiFactor : 1.0;
+			Left = screenBounds.Left / scaleX;
+			Top = screenBounds.Top / scaleX;
+			Width = (double)screenBounds.Width / scaleX;
+			Height = (double)screenBounds.Height / scaleX;
+			AdjustButtonBorderMargin();
+			AdjustMagnifierBorder();
 		}
 
 		/// <summary>
