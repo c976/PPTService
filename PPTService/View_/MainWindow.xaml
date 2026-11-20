@@ -507,19 +507,6 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <!-- 拉起按钮：1366 下高度为工具栏(30)的一半，箭头保持原版小尺寸。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="12" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="7" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="90" />
             </DoubleAnimationUsingKeyFrames>
@@ -544,20 +531,6 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <!-- 4K 100%：拉起按钮不再随分辨率放大，保持与原版 1080 一致的小尺寸（按钮 50×25、箭头 12×10）。
-                 此前放大到按钮 100×50 / 箭头 50×25，在 4K 和 1920 下都显得过大。 -->
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="25" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="12" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="10" />
-            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="310" />
             </DoubleAnimationUsingKeyFrames>
@@ -620,7 +593,10 @@
   </Grid>
     <!-- 工具栏收起后的拉起按钮：必须放在无 Margin、无行列的 WindowRootGrid 里，
          并显式指定 Grid.Row/Column 之外不要落在 RootGrid 的 Row0/Column0（否则会贴到
-         翻页按钮上方、第一列居中的错误位置）。这里相对整个窗口贴底边、水平居中。 -->
+         翻页按钮上方、第一列居中的错误位置）。这里相对整个窗口贴底边、水平居中。
+         尺寸与工具栏图标同样只给一份固定 DIP（Border 50×25、箭头 12×10 + Stretch=Uniform），
+         不在 Adaptive0/Adaptive3800 里按分辨率覆盖：DPI 缩放下由 WPF 统一放大，
+         按钮在界面中的占比在所有分辨率下与 1080 一致（此前按档放大到 100×50 显得过大）。 -->
     <Button Name="PullupButton" Visibility="Collapsed" Opacity="0"
             Template="{StaticResource ToolbarPullupButtonTemplate}" Panel.ZIndex="10"
             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Padding="0"
