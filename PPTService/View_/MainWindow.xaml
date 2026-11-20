@@ -507,28 +507,6 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <!-- 拉起按钮（照搬工具栏图标缩放）：格子 Border 30×15、圆角 3（同图标 Adaptive0），
-                 箭头 Grid Margin 8/4（同图标 Margin=8，纵向取半），箭头 Stretch=Uniform 自适应。 -->
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="CornerRadius">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <CornerRadius>3,3,0,0</CornerRadius>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
-            </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PullupChevronGrid" Storyboard.TargetProperty="Margin">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <Thickness>8,4,8,4</Thickness>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="90" />
             </DoubleAnimationUsingKeyFrames>
@@ -550,28 +528,6 @@
               <DiscreteObjectKeyFrame KeyTime="0">
                 <ObjectKeyFrame.Value>
                   <Thickness>12 1 12 12</Thickness>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <!-- 拉起按钮（照搬工具栏图标缩放）：格子 Border 100×50、圆角 12（同图标 Adaptive3800），
-                 箭头 Grid Margin 25/12.5（同图标 Margin=25，纵向取半），箭头 Stretch=Uniform 自适应。 -->
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="CornerRadius">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <CornerRadius>12,12,0,0</CornerRadius>
-                </ObjectKeyFrame.Value>
-              </DiscreteObjectKeyFrame>
-            </ObjectAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
-            </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PullupChevronGrid" Storyboard.TargetProperty="Margin">
-              <DiscreteObjectKeyFrame KeyTime="0">
-                <ObjectKeyFrame.Value>
-                  <Thickness>25,12.5,25,12.5</Thickness>
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
@@ -638,10 +594,9 @@
     <!-- 工具栏收起后的拉起按钮：必须放在无 Margin、无行列的 WindowRootGrid 里，
          并显式指定 Grid.Row/Column 之外不要落在 RootGrid 的 Row0/Column0（否则会贴到
          翻页按钮上方、第一列居中的错误位置）。这里相对整个窗口贴底边、水平居中。
-         缩放完全照搬工具栏图标（imagebutton.xaml）：按钮框 PullupBorder 当作"按钮格子"按 Adaptive
-         分档缩放；箭头 PullupChevron 和图标一样从不写死宽高，只用 Stretch=Uniform，靠外层
-         PullupChevronGrid 的 Margin 分档挤出空间（同 BackgroundImageGrid 的 8/11/25）。
-         这样箭头随格子等比缩放、占格子约一半，各分辨率下视觉占比一致。 -->
+         尺寸所有分辨率统一：按钮框 PullupBorder 固定 50×25 DIP、箭头固定 12×10 DIP（Data 是 2:1，
+         Stretch=Uniform 后实际 12×6），与 1920×1080@125% 的参考效果一致；不在 Adaptive 档里按
+         分辨率放大。之前的档位放大（4K 100×50）和撑满 Grid 的箭头都偏大，已移除。 -->
     <Button Name="PullupButton" Visibility="Collapsed" Opacity="0"
             Template="{StaticResource ToolbarPullupButtonTemplate}" Panel.ZIndex="10"
             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Padding="0"
@@ -649,11 +604,9 @@
       <Border Name="PullupBorder" Width="50" Height="25" CornerRadius="6,6,0,0"
               Background="{DynamicResource Theme.PanelBackground}" BorderBrush="{DynamicResource Theme.BorderBrush}"
               BorderThickness="1,1,1,0" SnapsToDevicePixels="True">
-        <Grid Name="PullupChevronGrid" Margin="11,5.5">
-          <Path Name="PullupChevron" Data="M0,6 L6,0 L12,6" Stroke="{DynamicResource Theme.IconBrush}"
-                StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Stretch="Uniform"
-                HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="True" />
-        </Grid>
+        <Path Name="PullupChevron" Data="M0,6 L6,0 L12,6" Stroke="{DynamicResource Theme.IconBrush}"
+              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Stretch="Uniform"
+              Width="12" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="True" />
       </Border>
     </Button>
   </Grid>
