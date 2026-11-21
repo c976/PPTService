@@ -276,6 +276,7 @@
     <Compile Include="View\DebugSlideWindow.cs" />
     <Compile Include="View\InkBoardStyleFallback.cs" />
     <Compile Include="PPTService\DebugMode.cs" />
+    <Compile Include="PPTService\SettingMode.cs" />
     <Compile Include="PPTService\UserConfig.cs" />
     <Compile Include="PPTService\ThemeManager.cs" />
   </ItemGroup>

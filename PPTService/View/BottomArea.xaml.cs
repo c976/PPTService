@@ -893,12 +893,9 @@ namespace PPTService
 		{
 			CloseToolPopups();
 			FridayReporter.ReportEventImmediately(EventID.BottomRegionRecommendation);
-			// 原「关于/版本」按钮改为打开设置窗口（含版本信息显示）
-			SettingsWindow settingsWindow = new SettingsWindow
-			{
-				Owner = ViewHelper.MainWindow
-			};
-			settingsWindow.ShowDialog();
+			// 原「关于/版本」按钮改为打开设置窗口（含版本信息显示）。
+			// 统一走 ViewHelper 入口：停鼠标手势、屏蔽主界面输入，避免设置时误拖动 PPT。
+			ViewHelper.OpenSettingsWindow();
 		}
 
 		/// <summary>

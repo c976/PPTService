@@ -31,25 +31,46 @@ namespace PPTService
 		{
 			// /debug：无需 Office/WPS，直接模拟放映状态下的界面（工具栏 + 翻页 + 批注）。
 			DebugMode.Enable(args.Args);
+			// /settingmode：通过命令行调用已有实例打开设置窗口（见 SettingMode）。
+			SettingMode.Enable(args.Args);
 			// 单实例判定尽早执行：原来在 StartProcess() 之后才创建互斥体，
 			// 重复启动的实例会先跑完主题/配置/COM 初始化才退出；提前后直接退出，
 			// 也不会与守护进程拉起的实例交错形成两个 PPTService.exe。
 			bool createdNew;
 			_mutex = new Mutex(true, AppMutex, out createdNew);
-			// 调试模式允许与正式实例并存，方便对照测试；
-			// Restart 参数用于取消加载后的主动重启（旧实例随后 Environment.Exit）。
-			bool allowSecondInstance = DebugMode.IsEnabled ||
-				(args.Args.Any() && args.Args.First() == AppRestart);
-			if (!createdNew && !allowSecondInstance)
+			if (!createdNew)
 			{
-				Environment.Exit(0);
-				return;
+				// 已有实例：设置模式把请求转交给它（命名管道），其余重复启动直接退出。
+				// 注意必须放在 allowSecondInstance 之前，否则 /settingmode 会被当成普通第二实例。
+				if (SettingMode.IsEnabled)
+				{
+					SettingMode.NotifyRunningInstance();
+					Environment.Exit(0);
+					return;
+				}
+				// 调试模式允许与正式实例并存，方便对照测试；
+				// Restart 参数用于取消加载后的主动重启（旧实例随后 Environment.Exit）。
+				bool allowSecondInstance = DebugMode.IsEnabled ||
+					(args.Args.Any() && args.Args.First() == AppRestart);
+				if (!allowSecondInstance)
+				{
+					Environment.Exit(0);
+					return;
+				}
 			}
 			base.OnStartup(args);
+			// 主实例立即开启设置调用通道：第二实例可能在 StartProcess() 完成前就发起通知，
+			// 尽早监听可避免这段窗口期连接失败（回调由 Dispatcher 投递，仍会等 UI 就绪）。
+			SettingMode.StartServer();
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
 			StartProcess();
 			stopwatch.Stop();
+			// 冷启动（此前没有实例）时：初始化完成后按参数打开设置窗口。
+			if (SettingMode.IsEnabled)
+			{
+				SyntacticSugar.CurrentDispatcherBeginInvoke(new Action(ViewHelper.OpenSettingsWindow));
+			}
 			DispatcherTask.Start(6000.0, () =>
 			{
 				SyntacticSugar.TryCatchAction(() =>

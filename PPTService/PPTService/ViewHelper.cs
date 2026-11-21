@@ -91,5 +91,46 @@ namespace PPTService
 			MainWindow.UpdateTimer.Start();
 			MouseHelper.Instance.Start();
 		}
+
+		/// <summary>
+		/// 统一打开设置窗口（工具栏按钮与 /settingmode 调用共用）。
+		/// 设置窗口是全屏半透明遮罩，打开期间用户要能看到主界面的调节效果，
+		/// 但不能再拖动 PPT：这里停掉鼠标手势（含横滑翻页/画线跟踪）并让主界面
+		/// 不再接收输入；跟随 PPT 的 300ms 定时器保持运行，不影响位置同步。
+		/// 设置窗口关闭后在 finally 中无条件恢复，避免异常导致工具栏永久失效。
+		/// </summary>
+		public static void OpenSettingsWindow()
+		{
+			MainWindow mainWindow = MainWindow;
+			bool wasHitTestVisible = mainWindow != null && mainWindow.IsHitTestVisible;
+			// 仅在放映中（工具栏已创建）才干预鼠标手势与主界面输入；
+			// settingmode 冷启动时 MainWindow 为 null，不做任何句柄级操作。
+			if (mainWindow != null)
+			{
+				MouseHelper.Instance.Stop();
+				mainWindow.IsHitTestVisible = false;
+			}
+			try
+			{
+				SettingsWindow settingsWindow = new SettingsWindow
+				{
+					Owner = mainWindow
+				};
+				settingsWindow.ShowDialog();
+			}
+			finally
+			{
+				if (mainWindow != null)
+				{
+					mainWindow.IsHitTestVisible = wasHitTestVisible;
+					// 只有当前没有其它弹窗需要停手势时才恢复；跟随定时器未停，
+					// 下次 tick 的 UpdateGestureAndMouseLineTrackState 也会按状态重新校准。
+					if (BottomArea == null || !BottomArea.IsNeedStopMouseLineTrack)
+					{
+						MouseHelper.Instance.Start();
+					}
+				}
+			}
+		}
 	}
 }
