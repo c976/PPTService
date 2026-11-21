@@ -12,7 +12,7 @@ namespace PPTService
 		/// 位于 %APPDATA%（Roaming）下，不再散落在安装目录。</summary>
 		public static readonly string AppFolderName = "PPTServiceUltra";
 
-		private static readonly string Log = "Log";
+		private static readonly string Log = "Logs";
 
 		private static readonly string Temporary = "Temp";
 

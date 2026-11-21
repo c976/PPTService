@@ -1,4 +1,5 @@
 using System;
+using PPTService.Shared;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -55,6 +56,12 @@ namespace PPTService.Defender
 			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 			"PPTServiceUltra", "Defender");
 
+		/// <summary>守护程序日志目录：与主程序统一放在 %APPDATA%\PPTServiceUltra\Logs 下，按程序分目录。</summary>
+		private static string LogDirectory()
+		{
+			return Path.Combine(Path.GetDirectoryName(DataDir) ?? DataDir, "Logs", "Defender");
+		}
+
 		private static string BaseDirectory
 		{
 			get { return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "."; }
@@ -88,14 +95,14 @@ namespace PPTService.Defender
 				try
 				{
 					string exePath = ResolveWatchedPath();
-					Log($"守护进程已启动（每 {CheckIntervalMs}ms 巡检主程序，1s 内拉起），目标：{exePath}");
+					Log("Defender started.");
 					// 初始化完成：删除启动标记。此后被强杀不再算「首发崩溃」。
 					TryDelete(BootMarkerPath);
 					Run(exePath);
 				}
 				catch (Exception ex)
 				{
-					Log("守护循环异常：" + ex);
+					Log("Loop error: " + ex.Message);
 				}
 			}
 		}
@@ -109,10 +116,10 @@ namespace PPTService.Defender
 				if (File.Exists(BootMarkerPath))
 				{
 					int crashes = ReadInt(BootCrashCountPath) + 1;
-					Log($"检测到守护进程上次启动未完成即崩溃（第 {crashes} 次）。");
+					Log("Boot crash detected (#" + crashes + ").");
 					if (crashes >= MaxBootCrashes)
 					{
-						Log($"连续 {MaxBootCrashes} 次启动崩溃，停止自启以避免死循环。");
+						Log("Stop after " + MaxBootCrashes + " boot crashes.");
 						TryDelete(BootCrashCountPath);
 						return false;
 					}
@@ -127,7 +134,7 @@ namespace PPTService.Defender
 			}
 			catch (Exception ex)
 			{
-				Log("自检阶段异常：" + ex);
+				Log("Self-check error: " + ex.Message);
 				return true;
 			}
 		}
@@ -156,7 +163,7 @@ namespace PPTService.Defender
 					}
 					if (!File.Exists(exePath))
 					{
-						Log("目标程序不存在，跳过本次拉起。");
+						Log("Target not found.");
 						continue;
 					}
 
@@ -168,10 +175,10 @@ namespace PPTService.Defender
 					restartCount++;
 					if (restartCount > MaxRestartStorm)
 					{
-						Log($"主程序连续 {MaxRestartStorm} 次拉起后快速退出，停止拉起以避免重启风暴。");
+						Log("Restart storm limit reached.");
 						return;
 					}
-					Log($"主程序不在运行，尝试重新启动（第 {restartCount} 次）……");
+					Log("Restarting main (#" + restartCount + ").");
 					// 不带 Restart 参数：主程序单实例互斥体会自动去掉重复实例，
 					// 避免与 PostErrorAndShutdown 里的 Restart.PPTService() 抢出双份。
 					Process.Start(new ProcessStartInfo(exePath)
@@ -180,11 +187,10 @@ namespace PPTService.Defender
 						WorkingDirectory = BaseDirectory
 					});
 					lastRestart = DateTime.Now;
-					Log("已发出启动请求。");
 				}
 				catch (Exception ex)
 				{
-					Log("巡检异常：" + ex.Message);
+					Log("Check error: " + ex.Message);
 				}
 			}
 		}
@@ -289,10 +295,11 @@ namespace PPTService.Defender
 		{
 			try
 			{
-				Directory.CreateDirectory(DataDir);
-				File.AppendAllText(
-					Path.Combine(DataDir, "Defender.log"),
+				string directory = LogDirectory();
+				Directory.CreateDirectory(directory);
+				File.AppendAllText(LogCleaner.FilePath(directory),
 					$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\r\n");
+				LogCleaner.Clean(directory);
 			}
 			catch
 			{

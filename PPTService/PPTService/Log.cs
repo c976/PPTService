@@ -2,14 +2,22 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using PPTService.Shared;
 
 namespace PPTService
 {
 	public static class Log
 	{
-		public static readonly string ErrorFilePath = Path.Combine(AppPath.LogPath(), "error.txt");
+		/// <summary>主程序日志：%APPDATA%\PPTServiceUltra\Log\yyyy-MM-dd.log（仅清理本目录内的日期日志）。</summary>
+		public static string ErrorFilePath
+		{
+			get { return LogCleaner.FilePath(AppPath.LogPath()); }
+		}
 
-		public static readonly string DebugFilePath = Path.Combine(AppPath.LogPath(), "debug.txt");
+		public static string DebugFilePath
+		{
+			get { return LogCleaner.FilePath(AppPath.LogPath()); }
+		}
 
 		private static readonly object Locker = new object();
 
@@ -37,6 +45,7 @@ namespace PPTService
 				StringBuilder stringBuilder = new StringBuilder();
 				stringBuilder.AppendLine($"{DateTime.Now:G}  {str}");
 				File.AppendAllText(filePath, stringBuilder.ToString());
+				LogCleaner.Clean(Path.GetDirectoryName(filePath));
 			}
 		}
 	}

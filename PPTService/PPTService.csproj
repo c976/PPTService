@@ -201,6 +201,7 @@
     <Compile Include="PPTService\InteropExtension.cs" />
     <Compile Include="PPTService\Loading.cs" />
     <Compile Include="PPTService\Log.cs" />
+    <Compile Include="..\Shared\LogCleaner.cs" />
     <Compile Include="PPTService\LongExtension.cs" />
     <Compile Include="PPTService\McuService.cs" />
     <Compile Include="PPTService\Md5SecurityUtility.cs" />

@@ -607,7 +607,7 @@ namespace PPTService
 				ConfigHelper.Instance.IsComOk = false;
 				// 初始化失败必须把放映态收回，否则下一场放映会被误判为「已放映」。
 				IsShowing = false;
-				Log.WriteError($"ShowBeginError：{arg}");
+				Log.WriteError($"ShowBeginError: {arg}");
 				// 瞬时 COM 拒绝（PPT 忙，如读 HWND 时的 0x80010001）：隔 10s 重试一次，
 				// 累计到上限仍失败则放弃，避免无限重试；任一次成功会清零计数（见成功分支）。
 				// 这样偶发一次 RPC_E_CALL_REJECTED 不会再让整场放映的工具栏永久消失。
