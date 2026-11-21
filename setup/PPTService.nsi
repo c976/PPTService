@@ -157,8 +157,6 @@ LangString STR_InternalError    2052 "安装包存在一个内部错误。请下
 Var SkinDir          ; $TEMP\Seewo\PPTService
 Var SkinPage         ; $SkinDir\2052
 Var SkinHandle       ; 皮肤窗口句柄
-Var RunOnFinish      ; 完成页「立即运行」勾选状态
-Var ProcessDir       ; 进程检查的目标目录
 Var OldInstallDir    ; 上一版本的安装目录
 Var DeleteDataFolder  ; 卸载时用户是否选择删除数据文件夹（1=删除）
 ; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
@@ -170,7 +168,7 @@ Var DeleteDataFolder  ; 卸载时用户是否选择删除数据文件夹（1=删
 ;  LogSet / LogText 需要 NSIS_CONFIG_LOG 日志构建的 NSIS（编译器与 Stubs 配套），
 ;  日志由引擎自动逐指令写入（File / CreateDirectory / Exec / WriteRegStr 等）。
 ; -----------------------------------------------------------------------------
-!macro EasiLog TEXT
+!macro NSISLog TEXT
   LogText '${TEXT}'
 !macroend
 
@@ -348,11 +346,7 @@ Function OnChangePath
 FunctionEnd
 
 Function OnFinish
-  nsSkinEngine::GetControlData /NOUNLOAD "checkbox_RunNow" "Checked"
-  Pop $RunOnFinish
-  ${If} $RunOnFinish == 1
-    Exec 'explorer "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"'
-  ${EndIf}
+  ; 主程序已在安装完成时自动启动，这里只负责关闭安装界面。
   SendMessage $HWNDPARENT 0x0111 1 0
   nsSkinEngine::HideNSISSkinEngine
 FunctionEnd
@@ -373,31 +367,43 @@ FunctionEnd
 ;  安装前准备：升级流程 + 进程重试循环
 ; =============================================================================
 
-; 结束目标目录中的进程；一次未清理干净则等待 1 秒重试，并允许用户选择继续重试
-Function KillProcessesInDirectory
-  Push $0
-KPD_Retry:
-  ; 主程序与守护进程互守护：守护进程每 0.5s 拉起主程序、主程序每 1s 拉起守护进程。
-  ; 先按名字结束守护进程，再按目录结束剩余进程，否则单独结束主程序会被立刻拉起。
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
-  Pop $0
-  Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
-  Pop $0
-  ${If} $0 == 0
-    Goto KPD_Done
+; 用系统自带 taskkill 结束主程序与守护进程，替代 Cvte.ProcessKiller 插件。
+; 主程序与守护进程互守护，必须先结束守护进程；再结束主程序。
+; 栈顶返回：0 = 复查时两个进程都已不存在，1 = 仍有进程（外层按需重试 / 提示）。
+; taskkill 返回 0 表示确实结束过进程，1 表示未找到进程；复查时用这个判断是否已清干净。
+; 做成宏，安装器与卸载器各生成一份函数（NSIS 卸载段只能 Call un.* 函数）。
+!macro KillProductProcessesCore
+  ; 第一遍：直接结束，不关心结果
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.Defender.exe"'
+  Pop $R0
+  Pop $R1
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.exe"'
+  Pop $R0
+  Pop $R1
+
+  ; 第二遍：覆盖互守护在两次结束之间重新拉起的实例，同时作为是否清干净的依据
+  StrCpy $R2 0
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.Defender.exe"'
+  Pop $R0
+  Pop $R1
+  ${If} $R0 == 0
+    StrCpy $R2 1
   ${EndIf}
-  Sleep 1000
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
-  Pop $0
-  Cvte.ProcessKiller::KillProcessesByDirectory /NOUNLOAD "$ProcessDir"
-  Pop $0
-  ${If} $0 == 0
-    Goto KPD_Done
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.exe"'
+  Pop $R0
+  Pop $R1
+  ${If} $R0 == 0
+    StrCpy $R2 1
   ${EndIf}
-  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(STR_ProcessBusy)" /SD IDCANCEL \
-      IDRETRY KPD_Retry IDCANCEL KPD_Done
-KPD_Done:
-  Pop $0
+  Push $R2
+!macroend
+
+Function KillProductProcesses
+  !insertmacro KillProductProcessesCore
+FunctionEnd
+
+Function un.KillProductProcesses
+  !insertmacro KillProductProcessesCore
 FunctionEnd
 
 Function PrepareInstall
@@ -406,9 +412,22 @@ Function PrepareInstall
   ; 卸载所有已安装的旧版本（无论此前装在 Seewo 路径还是当前路径），再继续安装。
   Call UninstallOldVersions
 
-  ; 当前安装目录中仍有进程时循环重试
-  StrCpy $ProcessDir "$INSTDIR"
-  Call KillProcessesInDirectory
+  ; 主程序 / 守护进程仍在运行时循环重试（不重复执行旧版本卸载）
+PI_Retry:
+  Call KillProductProcesses
+  Pop $0
+  ${If} $0 == 0
+    Return
+  ${EndIf}
+  Sleep 1000
+  Call KillProductProcesses
+  Pop $0
+  ${If} $0 == 0
+    Return
+  ${EndIf}
+  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(STR_ProcessBusy)" /SD IDCANCEL \
+      IDRETRY PI_Retry IDCANCEL PI_Done
+PI_Done:
 FunctionEnd
 
 ; -----------------------------------------------------------------------------
@@ -445,8 +464,8 @@ Function DoUninstallOld
   ${AndIf} ${FileExists} "$OldInstallDir\*.*"
     DetailPrint "$(STR_InstallingOld) ($OldInstallDir)"
     nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "$(STR_InstallingOld)" "text"
-    StrCpy $ProcessDir "$OldInstallDir"
-    Call KillProcessesInDirectory
+    Call KillProductProcesses
+    Pop $0
     ExecWait '"$4" /S _?=$OldInstallDir' $R1
     RMDir /r "$OldInstallDir"
   ${EndIf}
@@ -460,16 +479,16 @@ Section "MainSection" SEC01
   CreateDirectory "$INSTDIR"
   Delete "$INSTDIR\install.log"
   LogSet on
-  !insertmacro EasiLog 'EasiSetup: "BeforeInstall" Entered...'
+  !insertmacro NSISLog 'NSISSetup: "BeforeInstall" Entered...'
   Call PrepareInstall
-  !insertmacro EasiLog 'EasiSetup: "BeforeInstall" Left...'
-  !insertmacro EasiLog 'EasiSetup: Files Entered...'
+  !insertmacro NSISLog 'NSISSetup: "BeforeInstall" Left...'
+  !insertmacro NSISLog 'NSISSetup: Files Entered...'
 
   DetailPrint "正在解压文件……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在解压文件……" "text"
 
   ; --- 根目录：配置文件 ---
-  !insertmacro EasiLog 'EasiSetup: 安装程序文件...'
+  !insertmacro NSISLog 'NSISSetup: 安装程序文件...'
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "${__FILEDIR__}\Config.ini"
@@ -511,8 +530,8 @@ Section "MainSection" SEC01
   ;  启用时还需：取消上方 SupportFiles 的 File 注释，以及变量区
   ;  FrameworkVersion / NeedReboot 两行 Var 声明的注释。
   ; ---------------------------------------------------------------------------
-  ; !insertmacro EasiLog 'EasiSetup: ThirdPackages Entered...'
-  ; !insertmacro EasiLog 'EasiSetup: 安装 Microsoft .Net 4.5 ...'
+  ; !insertmacro NSISLog 'NSISSetup: ThirdPackages Entered...'
+  ; !insertmacro NSISLog 'NSISSetup: 安装 Microsoft .Net 4.5 ...'
   ;
   ;
   ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在安装 .Net Framework 4.5，预计需要五分钟..." "text"
@@ -588,36 +607,40 @@ Section "MainSection" SEC01
   ; ---------------------------------------------------------------------------
   ;  静默更新服务（默认不安装；需要时取消注释）
   ; ---------------------------------------------------------------------------
-  ; !insertmacro EasiLog 'EasiSetup: 安装静默更新服务...'
+  ; !insertmacro NSISLog 'NSISSetup: 安装静默更新服务...'
   ; SetOutPath "$INSTDIR\${SUPPORT_DIR}"
   ; ExecWait '"$INSTDIR\${SUPPORT_DIR}\EasiUpdateSetup.exe" /S' $0
   ; ${If} $0 == 2
   ;   MessageBox MB_OK "$(STR_InternalError)"
   ; ${EndIf}
-  ; !insertmacro EasiLog 'EasiSetup: ThirdPackages Left...'
+  ; !insertmacro NSISLog 'NSISSetup: ThirdPackages Left...'
 
-  !insertmacro EasiLog 'EasiSetup: Files Left...'
+  !insertmacro NSISLog 'NSISSetup: Files Left...'
 
   ; --- 快捷方式 / 注册表 ---
-  !insertmacro EasiLog 'EasiSetup: "ShortCuts" Entered...'
+  !insertmacro NSISLog 'NSISSetup: "ShortCuts" Entered...'
   Call CreateShortcuts
-  !insertmacro EasiLog 'EasiSetup: "ShortCuts" Left...'
-  !insertmacro EasiLog 'EasiSetup: "Registry" Entered...'
+  !insertmacro NSISLog 'NSISSetup: "ShortCuts" Left...'
+  !insertmacro NSISLog 'NSISSetup: "Registry" Entered...'
   Call WriteRegistry
-  !insertmacro EasiLog 'EasiSetup: "Registry" Left...'
+  !insertmacro NSISLog 'NSISSetup: "Registry" Left...'
 
   ; --- 卸载程序 ---
-  !insertmacro EasiLog 'EasiSetup: "AfterInstall" Entered...'
+  !insertmacro NSISLog 'NSISSetup: "AfterInstall" Entered...'
   DetailPrint "正在生成卸载程序……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成卸载程序……" "text"
   CreateDirectory "$INSTDIR"
-  !insertmacro EasiLog 'EasiSetup: 发布卸载程序...'
+  !insertmacro NSISLog 'NSISSetup: 发布卸载程序...'
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)"
 
   DetailPrint "正在进行最后的安装步骤……"
   nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在进行最后的安装步骤……" "text"
-  !insertmacro EasiLog 'EasiSetup: "AfterInstall" Left...'
+  !insertmacro NSISLog 'NSISSetup: "AfterInstall" Left...'
+
+  ; 安装完成即启动主程序，不再依赖完成页的「立刻体验」按钮；静默安装不启动。
+  IfSilent +2 0
+  Exec 'explorer "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"'
   LogSet off
 SectionEnd
 
@@ -678,25 +701,16 @@ Section "Uninstall"
   LogSet on
 
   ; 卸载前同时结束「主程序 + 守护进程」两个进程（不在界面与日志中输出）。
-  ; 两者互守护：守护进程每 0.5s 拉起主程序、主程序每 1s 拉起守护进程，
-  ; 只结束一个会在 1s 内被剩下的那个重新拉起，所以必须一起结束。
-  ; 先结束守护进程（否则它会把主程序拉回来），再结束主程序（否则它会把守护进程拉回来）。
-  ; 按进程名结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
-  Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
+  ; 两者互守护，只结束一个会被另一个拉回，所以每轮都按名字结束两者（先守护进程）。
+  ; 按进程名而不是目录结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
+  ; 每轮内部已做两遍 taskkill 复查，三轮之间留 200ms 覆盖互守护的重新拉起。
+  Call un.KillProductProcesses
   Pop $0
   Sleep 200
-  ; 二次清理：覆盖互守护在两次结束之间可能重新拉起的实例（间隔已缩短到 0.5s / 1s）
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
-  Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
+  Call un.KillProductProcesses
   Pop $0
   Sleep 200
-  ; 三次清理：兜底覆盖最后一次巡检周期，确保卸载后两个进程都不再复活
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.Defender.exe"
-  Pop $0
-  Cvte.ProcessKiller::KillProcessesByName /NOUNLOAD "${PRODUCT_EXE_NAME}.exe"
+  Call un.KillProductProcesses
   Pop $0
 
   Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk"
