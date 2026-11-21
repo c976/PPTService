@@ -3,9 +3,9 @@
   <FrameworkElement.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/ButtonStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/EllipseStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/CheckBoxStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/ButtonStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/EllipseStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/CheckBoxStyle.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Storyboard x:Key="ShowBackgroundImageStoryboard">
         <DoubleAnimation Storyboard.TargetName="RootCanvasBackgroundImage" Storyboard.TargetProperty="Opacity" From="0.03" To="1" Duration="0:0:0.1" />

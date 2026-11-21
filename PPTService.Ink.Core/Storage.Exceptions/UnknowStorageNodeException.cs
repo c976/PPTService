@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PPTService.Ink.Core.Storage.Exception_
+namespace PPTService.Ink.Core.Storage.Exceptions
 {
 	
 	

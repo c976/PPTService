@@ -45,7 +45,7 @@ namespace PPTService.Paint.Framework.Shaders
 		{
 			PixelShader = new PixelShader
 			{
-				UriSource = new Uri("pack://application:,,,/" + Assembly.GetExecutingAssembly().FullName + ";component/utils_/shaders/transformshadereffect.ps", UriKind.Absolute)
+				UriSource = new Uri("pack://application:,,,/" + Assembly.GetExecutingAssembly().FullName + ";component/utils/shaders/transformshadereffect.ps", UriKind.Absolute)
 			};
 			UpdateShaderValue(InputProperty);
 			UpdateShaderValue(MPropertyKey.DependencyProperty);

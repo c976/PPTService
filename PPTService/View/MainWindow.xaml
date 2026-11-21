@@ -5,10 +5,10 @@
   <FrameworkElement.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/WindowStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/ButtonStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/ListBoxStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images_/Images.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/WindowStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/ButtonStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/ListBoxStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images/Images.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Storyboard x:Key="ShowLeftSlideManagerViewStoryboard0">
         <ThicknessAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="Margin">

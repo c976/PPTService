@@ -3,7 +3,7 @@
   <FrameworkElement.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/WindowStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/WindowStyle.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Storyboard x:Key="StoryBoard.ShowQrImage">
         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="QrBorder">

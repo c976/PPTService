@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using PPTService.Ink.Core.Storage.AdvancedSaveInfos;
-using PPTService.Ink.Core.Storage.Exception_;
+using PPTService.Ink.Core.Storage.Exceptions;
 
 namespace PPTService.Ink.Core.Storage
 {

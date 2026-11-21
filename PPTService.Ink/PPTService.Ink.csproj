@@ -777,8 +777,8 @@
     <Resource Include="resources\cursor\textcorner.cur"><LogicalName>resources/cursor/textcorner.cur</LogicalName></Resource>
     <Resource Include="resources\cursor\we.cur"><LogicalName>resources/cursor/we.cur</LogicalName></Resource>
     <Resource Include="resources\cursor\we_s.cur"><LogicalName>resources/cursor/we_s.cur</LogicalName></Resource>
-    <Resource Include="utils_\shaders\scaleshadereffect.ps"><LogicalName>utils_/shaders/scaleshadereffect.ps</LogicalName></Resource>
-    <Resource Include="utils_\shaders\transformshadereffect.ps"><LogicalName>utils_/shaders/transformshadereffect.ps</LogicalName></Resource>
+    <Resource Include="utils\shaders\scaleshadereffect.ps"><LogicalName>utils/shaders/scaleshadereffect.ps</LogicalName></Resource>
+    <Resource Include="utils\shaders\transformshadereffect.ps"><LogicalName>utils/shaders/transformshadereffect.ps</LogicalName></Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">

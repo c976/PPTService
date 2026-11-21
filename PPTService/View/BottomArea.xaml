@@ -3,10 +3,10 @@
   <FrameworkElement.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images_/Images.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/ButtonStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/CheckBoxStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/RadioButtonStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images/Images.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/ButtonStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/CheckBoxStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/RadioButtonStyle.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Storyboard x:Key="ShowColorDiskStoryBoard">
         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="ColorDiskStoryBoardGrid">

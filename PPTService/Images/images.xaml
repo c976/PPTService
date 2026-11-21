@@ -1818,10 +1818,10 @@
       </DrawingGroup>
     </DrawingImage.Drawing>
   </DrawingImage>
-  <BitmapImage x:Key="Image.PptServiceText" UriSource="pack://application:,,,/PPTService;component/Images_/pptservicetext.png" />
-  <BitmapImage x:Key="Image.RightArrow" UriSource="pack://application:,,,/PPTService;component/Images_/RightArrow.png" />
-  <BitmapImage x:Key="Image.CloseButtonNormal" UriSource="pack://application:,,,/PPTService;component/Images_/CloseButtonNormal.png" />
-  <BitmapImage x:Key="Image.CloseButtonPressed" UriSource="pack://application:,,,/PPTService;component/Images_/CloseButtonPressed.png" />
+  <BitmapImage x:Key="Image.PptServiceText" UriSource="pack://application:,,,/PPTService;component/Images/pptservicetext.png" />
+  <BitmapImage x:Key="Image.RightArrow" UriSource="pack://application:,,,/PPTService;component/Images/RightArrow.png" />
+  <BitmapImage x:Key="Image.CloseButtonNormal" UriSource="pack://application:,,,/PPTService;component/Images/CloseButtonNormal.png" />
+  <BitmapImage x:Key="Image.CloseButtonPressed" UriSource="pack://application:,,,/PPTService;component/Images/CloseButtonPressed.png" />
 
   <!-- 设置图标 - 正常态（线框） -->
   <DrawingImage x:Key="ImageSource.SettingsNormal">
@@ -1999,5 +1999,5 @@
   </DrawingImage>
 
   <!-- 橡皮「滑动清屏」滑杆的拇指图标（1:1 移植自桌面批注 resources/eraserthumb.png）。 -->
-  <BitmapImage x:Key="Image.EraserThumb" UriSource="pack://application:,,,/PPTService;component/Images_/eraserthumb.png" />
+  <BitmapImage x:Key="Image.EraserThumb" UriSource="pack://application:,,,/PPTService;component/Images/eraserthumb.png" />
 </ResourceDictionary>

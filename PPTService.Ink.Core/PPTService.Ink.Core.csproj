@@ -363,7 +363,7 @@
     <Compile Include="Storage.Encryption\FileContentParserSaveInfo.cs" />
     <Compile Include="Storage.Encryption\IFileContentParser.cs" />
     <Compile Include="Storage.Encryption\IFileContentParserManager.cs" />
-    <Compile Include="Storage.Exception_\UnknowStorageNodeException.cs" />
+    <Compile Include="Storage.Exceptions\UnknowStorageNodeException.cs" />
     <Compile Include="Storage.Log\IStorageStaticLogger.cs" />
     <Compile Include="Storage.Log\StorageStaticLoggerFactory.cs" />
     <Compile Include="Storage.SaveInfoManagerInjections\ManualRegisterAssemblySaveInfoCreatorsInfo.cs" />

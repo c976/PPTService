@@ -3,8 +3,8 @@
   <FrameworkElement.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style_/WindowStyle.xaml" />
-        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images_/Images.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Style/WindowStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTService;component/Images/Images.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Storyboard x:Key="ShowStoryBoard">
         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)" Storyboard.TargetName="RootGrid" Completed="ShowStoryBoard_OnCompleted">

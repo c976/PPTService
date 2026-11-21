@@ -284,7 +284,7 @@ namespace PPTService
 		{
 			string file = dark ? "eraserthumbdark.png" : "eraserthumb.png";
 			return new BitmapImage(new Uri(
-				"pack://application:,,,/PPTService;component/Images_/" + file,
+				"pack://application:,,,/PPTService;component/Images/" + file,
 				UriKind.Absolute));
 		}
 

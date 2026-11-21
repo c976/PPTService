@@ -100,7 +100,7 @@ namespace PPTService.Paint.Framework.Shaders
 		{
 			PixelShader = new PixelShader
 			{
-				UriSource = new Uri("pack://application:,,,/" + Assembly.GetExecutingAssembly().FullName + ";component/utils_/shaders/scaleshadereffect.ps", UriKind.Absolute)
+				UriSource = new Uri("pack://application:,,,/" + Assembly.GetExecutingAssembly().FullName + ";component/utils/shaders/scaleshadereffect.ps", UriKind.Absolute)
 			};
 			UpdateShaderValue(InputProperty);
 			UpdateShaderValue(VirtualProperty);

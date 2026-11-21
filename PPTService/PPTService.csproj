@@ -234,90 +234,90 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <!-- 由 Version.targets 的 GenerateVersionInfo 目标在构建时生成；仓库内保留默认（unknown）副本，供非 git 环境直接编译 -->
     <Compile Include="Properties\GitVersionInfo.g.cs" />
-    <Compile Include="View_\BottomArea.xaml.cs">
+    <Compile Include="View\BottomArea.xaml.cs">
       <DependentUpon>BottomArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\InnerBoardWindow.xaml.cs">
+    <Compile Include="View\InnerBoardWindow.xaml.cs">
       <DependentUpon>InnerBoardWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\LeftArea.xaml.cs">
+    <Compile Include="View\LeftArea.xaml.cs">
       <DependentUpon>LeftArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\LeftBottomArea.xaml.cs">
+    <Compile Include="View\LeftBottomArea.xaml.cs">
       <DependentUpon>LeftBottomArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\LoadingView.xaml.cs">
+    <Compile Include="View\LoadingView.xaml.cs">
       <DependentUpon>LoadingView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\Magnifier.xaml.cs">
+    <Compile Include="View\Magnifier.xaml.cs">
       <DependentUpon>Magnifier.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\MainWindow.xaml.cs">
+    <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\MessageWindow.xaml.cs">
+    <Compile Include="View\MessageWindow.xaml.cs">
       <DependentUpon>MessageWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\QrWindow.xaml.cs">
+    <Compile Include="View\QrWindow.xaml.cs">
       <DependentUpon>QrWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\RightArea.xaml.cs">
+    <Compile Include="View\RightArea.xaml.cs">
       <DependentUpon>RightArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\RightBottomArea.xaml.cs">
+    <Compile Include="View\RightBottomArea.xaml.cs">
       <DependentUpon>RightBottomArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\SettingsWindow.xaml.cs">
+    <Compile Include="View\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View_\AnnotationBoard.cs" />
-    <Compile Include="View_\MouseEnabledPenWritingMode.cs" />
-    <Compile Include="View_\DebugSlideWindow.cs" />
-    <Compile Include="View_\InkBoardStyleFallback.cs" />
+    <Compile Include="View\AnnotationBoard.cs" />
+    <Compile Include="View\MouseEnabledPenWritingMode.cs" />
+    <Compile Include="View\DebugSlideWindow.cs" />
+    <Compile Include="View\InkBoardStyleFallback.cs" />
     <Compile Include="PPTService\DebugMode.cs" />
     <Compile Include="PPTService\UserConfig.cs" />
     <Compile Include="PPTService\ThemeManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Images_\images.xaml">
+    <Page Include="Images\images.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>images_/images.xaml</LogicalName>
+      <LogicalName>images/images.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\buttonstyle.xaml">
+    <Page Include="Style\buttonstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/buttonstyle.xaml</LogicalName>
+      <LogicalName>style/buttonstyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\checkboxstyle.xaml">
+    <Page Include="Style\checkboxstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/checkboxstyle.xaml</LogicalName>
+      <LogicalName>style/checkboxstyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\ellipsestyle.xaml">
+    <Page Include="Style\ellipsestyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/ellipsestyle.xaml</LogicalName>
+      <LogicalName>style/ellipsestyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\listboxstyle.xaml">
+    <Page Include="Style\listboxstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/listboxstyle.xaml</LogicalName>
+      <LogicalName>style/listboxstyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\progressbarstyle.xaml">
+    <Page Include="Style\progressbarstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/progressbarstyle.xaml</LogicalName>
+      <LogicalName>style/progressbarstyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\radiobuttonstyle.xaml">
+    <Page Include="Style\radiobuttonstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/radiobuttonstyle.xaml</LogicalName>
+      <LogicalName>style/radiobuttonstyle.xaml</LogicalName>
     </Page>
-    <Page Include="Style_\windowstyle.xaml">
+    <Page Include="Style\windowstyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>style_/windowstyle.xaml</LogicalName>
+      <LogicalName>style/windowstyle.xaml</LogicalName>
     </Page>
     <Page Include="Themes\Generic\imagebutton.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -329,88 +329,88 @@
       <SubType>Designer</SubType>
       <LogicalName>themes/generic.xaml</LogicalName>
     </Page>
-    <Page Include="View_\BottomArea.xaml">
+    <Page Include="View\BottomArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/bottomarea.xaml</LogicalName>
+      <LogicalName>view/bottomarea.xaml</LogicalName>
     </Page>
-    <Page Include="View_\InnerBoardWindow.xaml">
+    <Page Include="View\InnerBoardWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/innerboardwindow.xaml</LogicalName>
+      <LogicalName>view/innerboardwindow.xaml</LogicalName>
     </Page>
-    <Page Include="View_\LeftArea.xaml">
+    <Page Include="View\LeftArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/leftarea.xaml</LogicalName>
+      <LogicalName>view/leftarea.xaml</LogicalName>
     </Page>
-    <Page Include="View_\LeftBottomArea.xaml">
+    <Page Include="View\LeftBottomArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/leftbottomarea.xaml</LogicalName>
+      <LogicalName>view/leftbottomarea.xaml</LogicalName>
     </Page>
-    <Page Include="View_\LoadingView.xaml">
+    <Page Include="View\LoadingView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/loadingview.xaml</LogicalName>
+      <LogicalName>view/loadingview.xaml</LogicalName>
     </Page>
-    <Page Include="View_\Magnifier.xaml">
+    <Page Include="View\Magnifier.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/magnifier.xaml</LogicalName>
+      <LogicalName>view/magnifier.xaml</LogicalName>
     </Page>
-    <Page Include="View_\MainWindow.xaml">
+    <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/mainwindow.xaml</LogicalName>
+      <LogicalName>view/mainwindow.xaml</LogicalName>
     </Page>
-    <Page Include="View_\MessageWindow.xaml">
+    <Page Include="View\MessageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/messagewindow.xaml</LogicalName>
+      <LogicalName>view/messagewindow.xaml</LogicalName>
     </Page>
-    <Page Include="View_\QrWindow.xaml">
+    <Page Include="View\QrWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/qrwindow.xaml</LogicalName>
+      <LogicalName>view/qrwindow.xaml</LogicalName>
     </Page>
-    <Page Include="View_\RightArea.xaml">
+    <Page Include="View\RightArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/rightarea.xaml</LogicalName>
+      <LogicalName>view/rightarea.xaml</LogicalName>
     </Page>
-    <Page Include="View_\RightBottomArea.xaml">
+    <Page Include="View\RightBottomArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/rightbottomarea.xaml</LogicalName>
+      <LogicalName>view/rightbottomarea.xaml</LogicalName>
     </Page>
-    <Page Include="View_\SettingsWindow.xaml">
+    <Page Include="View\SettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <LogicalName>view_/settingswindow.xaml</LogicalName>
+      <LogicalName>view/settingswindow.xaml</LogicalName>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images_\closebuttonnormal.png">
-      <LogicalName>images_/closebuttonnormal.png</LogicalName>
+    <Resource Include="Images\closebuttonnormal.png">
+      <LogicalName>images/closebuttonnormal.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\closebuttonpressed.png">
-      <LogicalName>images_/closebuttonpressed.png</LogicalName>
+    <Resource Include="Images\closebuttonpressed.png">
+      <LogicalName>images/closebuttonpressed.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\pptservice.ico">
-      <LogicalName>images_/pptservice.ico</LogicalName>
+    <Resource Include="Images\pptservice.ico">
+      <LogicalName>images/pptservice.ico</LogicalName>
     </Resource>
-    <Resource Include="Images_\rightarrow.png">
-      <LogicalName>images_/rightarrow.png</LogicalName>
+    <Resource Include="Images\rightarrow.png">
+      <LogicalName>images/rightarrow.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\pptservicetext.png">
-      <LogicalName>images_/pptservicetext.png</LogicalName>
+    <Resource Include="Images\pptservicetext.png">
+      <LogicalName>images/pptservicetext.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\eraserthumb.png">
-      <LogicalName>images_/eraserthumb.png</LogicalName>
+    <Resource Include="Images\eraserthumb.png">
+      <LogicalName>images/eraserthumb.png</LogicalName>
     </Resource>
-    <Resource Include="Images_\eraserthumbdark.png">
-      <LogicalName>images_/eraserthumbdark.png</LogicalName>
+    <Resource Include="Images\eraserthumbdark.png">
+      <LogicalName>images/eraserthumbdark.png</LogicalName>
     </Resource>
   </ItemGroup>
   <ItemGroup>
