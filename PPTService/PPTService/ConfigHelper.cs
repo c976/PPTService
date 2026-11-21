@@ -6,9 +6,9 @@ namespace PPTService
 	{
 		private static readonly string Section = "StartConfig";
 
-		private static readonly string CheckedTrue = "ChceckedTrue";
-
-		private static readonly string CheckedFalse = "ChceckedFalse";
+		// 希沃设备检测已停用，下面两个结果常量随之注释保留备查。
+		//private static readonly string CheckedTrue = "ChceckedTrue";
+		//private static readonly string CheckedFalse = "ChceckedFalse";
 
 		private static readonly string AppConfigFileName = "app.config";
 
@@ -78,18 +78,21 @@ namespace PPTService
 
 		public ConfigHelper()
 		{
-			CheckSeewoDevice();
+			// 希沃设备检测已停用：IsSeewoDevice 全项目无读取点，IsNeedStart 又恒为 true，
+			// 这个检测除了启动时枚举一次 HID、在 app.config 多写两行外没有任何作用。
+			//CheckSeewoDevice();
 		}
 
-		private void CheckSeewoDevice()
-		{
-			if (!(ConfigController.IsSeewoDevice != ""))
-			{
-				bool flag = McuService.FindMcu();
-				ConfigController.IsNeedStart = true;
-				ConfigController.IsSeewoDevice = (flag ? CheckedTrue : CheckedFalse);
-			}
-		}
+		// 原检测代码保留备查；若将来真要按设备决定是否启用，再取消上面的调用和此处注释。
+		//private void CheckSeewoDevice()
+		//{
+		//	if (!(ConfigController.IsSeewoDevice != ""))
+		//	{
+		//		bool flag = McuService.FindMcu();
+		//		ConfigController.IsNeedStart = true;
+		//		ConfigController.IsSeewoDevice = (flag ? CheckedTrue : CheckedFalse);
+		//	}
+		//}
 
 		public bool IsNeedStart()
 		{
