@@ -91,11 +91,8 @@ namespace PPTService
 				return;
 			}
 			_board = new AnnotationBoard();
-			MainWindow main = Toolbar;
-			if (main != null)
-			{
-				main.SetAnnotationLayer(_board.InkBoard);
-			}
+			// 这里不再负责挂层：挂层统一放到 SetEnabled()，因为它依赖 Toolbar，
+			// 而 Toolbar 可能晚于 Board 出现（见下方 SetEnabled 的说明）。
 			// 把用户当前选择的颜色 / 粗细应用到新建的 Board
 			// （Board 构造里用的是默认红色与默认粗细）。
 			_board.SetInkColor(_color);
@@ -125,6 +122,18 @@ namespace PPTService
 			EnsureBoard();
 			if (_board != null)
 			{
+				// 每次 SetEnabled 都确保 Board 挂到当前工具栏窗口（幂等）。
+				// 关键场景：/settingmode 冷启动时没有 PPT、也就没有工具栏，
+				// 但打开设置仍会走 ApplyCurrent → SetEnabled(true) 创建 Board，
+				// 那时 Toolbar=null 无法挂层，Board 悬空。之后放映创建工具栏再
+				// SetEnabled(true) 时 EnsureBoard 因 _board 已存在直接返回，若挂层
+				// 还留在 EnsureBoard 里就永远不会补挂，表现为笔和橡皮完全写不出。
+				// 现在把挂层移到这里，放映时必定重新挂到新的 MainWindow。
+				MainWindow main = Toolbar;
+				if (main != null)
+				{
+					main.SetAnnotationLayer(_board.InkBoard);
+				}
 				_board.InkBoard.Visibility = Visibility.Visible;
 				_board.GoToSlide(_currentPageIndex - 1);
 				_lastFocusMode = null;
