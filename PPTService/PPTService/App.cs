@@ -165,7 +165,14 @@ namespace PPTService
 		[GeneratedCode("PresentationBuildTasks", "4.0.0.0")]
 		public static void Main()
 		{
-			new App().Run();
+			// 本程序是常驻后台服务：平时没有任何窗口，工具栏/设置窗口只是临时 UI。
+			// 若不显式指定，WPF 默认 OnLastWindowClose，关闭「唯一窗口」（如 /settingmode
+			// 冷启动时打开的设置窗口）就会触发 Shutdown → OnExit → StopAndKill 杀掉守护进程
+			// 并退出整个服务。改为 OnExplicitShutdown：窗口关闭不再结束进程，退出只走
+			// Environment.Exit / 看门狗 / 安装器等显式路径（OnExit 仍会在真正 Shutdown 时触发）。
+			App app = new App();
+			app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+			app.Run();
 		}
 	}
 }
