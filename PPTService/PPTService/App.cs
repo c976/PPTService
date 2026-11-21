@@ -24,10 +24,27 @@ namespace PPTService
 
 		private static Mutex _mutex;
 
+		// 崩溃退出标记：OnExit 据此保留守护进程，由它拉起唯一的新实例。
+		private static volatile bool _crashExiting;
+
 		protected override void OnStartup(StartupEventArgs args)
 		{
 			// /debug：无需 Office/WPS，直接模拟放映状态下的界面（工具栏 + 翻页 + 批注）。
 			DebugMode.Enable(args.Args);
+			// 单实例判定尽早执行：原来在 StartProcess() 之后才创建互斥体，
+			// 重复启动的实例会先跑完主题/配置/COM 初始化才退出；提前后直接退出，
+			// 也不会与守护进程拉起的实例交错形成两个 PPTService.exe。
+			bool createdNew;
+			_mutex = new Mutex(true, AppMutex, out createdNew);
+			// 调试模式允许与正式实例并存，方便对照测试；
+			// Restart 参数用于取消加载后的主动重启（旧实例随后 Environment.Exit）。
+			bool allowSecondInstance = DebugMode.IsEnabled ||
+				(args.Args.Any() && args.Args.First() == AppRestart);
+			if (!createdNew && !allowSecondInstance)
+			{
+				Environment.Exit(0);
+				return;
+			}
 			base.OnStartup(args);
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -41,15 +58,6 @@ namespace PPTService
 					FridayReporter.ReportEventDelayed(EventID.StartTime, eventValue);
 				});
 			});
-			bool createdNew;
-			_mutex = new Mutex(true, AppMutex, out createdNew);
-			// 调试模式允许与正式实例并存，方便对照测试。
-			bool allowSecondInstance = DebugMode.IsEnabled ||
-				(args.Args.Any() && args.Args.First() == AppRestart);
-			if (!createdNew && !allowSecondInstance)
-			{
-				Environment.Exit(0);
-			}
 			// 启动互守护：主程序每 1s 看护守护进程（2s 内拉起），
 			// 守护进程每 0.5s 看护主程序（1s 内拉起）。调试模式不启用。
 			// 卸载/升级时由安装脚本同时结束两个进程。
@@ -60,7 +68,11 @@ namespace PPTService
 		{
 			// 正常退出：不做优雅握手，直接把守护进程一并结束掉，
 			// 否则它会在 0.5s 内把主程序重新拉起。
-			DefenderGuardian.StopAndKill();
+			// 崩溃退出例外：保留守护进程，由它拉起唯一的新实例。
+			if (!_crashExiting)
+			{
+				DefenderGuardian.StopAndKill();
+			}
 			base.OnExit(e);
 		}
 
@@ -116,10 +128,9 @@ namespace PPTService
 		private void PostErrorAndShutdown(UnhandledExceptionEventArgs args)
 		{
 			Log.WriteError(args.ExceptionObject.ToString());
-			if (ConfigHelper.Instance.IsComOk)
-			{
-				Restart.PPTService();
-			}
+			// 崩溃后不再自己 Process.Start 新实例：由守护进程（每 0.5s 巡检）
+			// 拉起唯一的新实例，避免与自己拉起的实例竞争出现两个 PPTService.exe。
+			_crashExiting = true;
 			Environment.Exit(0);
 		}
 
