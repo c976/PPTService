@@ -664,7 +664,9 @@ namespace PPTService
 
 		private void UpdateGestureAndMouseLineTrackState()
 		{
-			if (IsTransparent || ViewHelper.MainWindow.IsLeftSlideManagerViewShowed || ViewHelper.MainWindow.IsRightSlideManagerViewShowed || ViewHelper.BottomArea.IsNeedStopMouseLineTrack)
+			// 设置窗口打开期间：全屏半透明遮罩下用户仍可能左右滑动，必须持续停掉手势，
+			// 否则横滑被识别成翻页（无论自身 Gesture 还是 PowerPoint 原生手势）。
+			if (ViewHelper.SettingsWindowOpen || IsTransparent || ViewHelper.MainWindow.IsLeftSlideManagerViewShowed || ViewHelper.MainWindow.IsRightSlideManagerViewShowed || ViewHelper.BottomArea.IsNeedStopMouseLineTrack)
 			{
 				MouseHelper.Instance.Stop();
 			}

@@ -23,6 +23,14 @@ namespace PPTService
 
 		public static MainWindow MainWindow { get; private set; }
 
+		/// <summary>
+		/// 设置窗口是否正在显示。设置窗口是全屏半透明遮罩，打开期间必须彻底停掉
+		/// 横滑翻页手势：单纯 Stop() 一次会被 MainWindow 的 300ms 跟随定时器重新 Start()，
+		/// 而且 PowerPoint 原生手势按触点命中窗口投递、抢焦点并不可靠。这里用一个
+		/// UI 线程读写的标志，让定时器和 Gesture 翻页判断都据此持续抑制。
+		/// </summary>
+		public static bool SettingsWindowOpen { get; private set; }
+
 		public static InnerBoardWindow InnerBoardWindow
 		{
 			get
@@ -105,6 +113,9 @@ namespace PPTService
 		{
 			MainWindow mainWindow = MainWindow;
 			bool wasHitTestVisible = mainWindow != null && mainWindow.IsHitTestVisible;
+			// 置位标志：即使 300ms 定时器重新走到 UpdateGestureAndMouseLineTrackState，
+			// 也会因该标志保持 MouseHelper 停止；Gesture 翻页判断同样据此跳过。
+			SettingsWindowOpen = true;
 			// 仅在放映中（工具栏已创建）才干预鼠标手势与主界面输入；
 			// settingmode 冷启动时 MainWindow 为 null，不做任何句柄级操作。
 			if (mainWindow != null)
@@ -139,6 +150,8 @@ namespace PPTService
 			}
 			finally
 			{
+				// 无论是否放映中都要复位，避免设置窗口关闭后手势永久停摆。
+				SettingsWindowOpen = false;
 				if (mainWindow != null)
 				{
 					mainWindow.IsHitTestVisible = wasHitTestVisible;

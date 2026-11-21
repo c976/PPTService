@@ -136,7 +136,7 @@ namespace PPTService
 		{
 			SyntacticSugar.TryCatchAction(() =>
 			{
-				if (!ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))
+				if (!ViewHelper.SettingsWindowOpen && !ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))
 				{
 					PptOperator.Instance.PreviousPage();
 					FridayReporter.ReportEventImmediately(EventID.GesturePreviousPage);
@@ -148,7 +148,7 @@ namespace PPTService
 		{
 			SyntacticSugar.TryCatchAction(() =>
 			{
-				if (!ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))
+				if (!ViewHelper.SettingsWindowOpen && !ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))
 				{
 					PptOperator.Instance.NextPage();
 					FridayReporter.ReportEventImmediately(EventID.GestureNextPage);
