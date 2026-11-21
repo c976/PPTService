@@ -690,6 +690,9 @@ Function CreateShortcuts
   CreateDirectory "$SMPROGRAMS\$(STR_AppName)"
   CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk" \
       "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+  ; 设置快捷方式：带 /settingmode 启动，已有实例会通过命名管道在自身打开设置窗口。
+  CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName)设置.lnk" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe" "/settingmode"
 FunctionEnd
 
 ; =============================================================================
@@ -714,6 +717,7 @@ Section "Uninstall"
   Pop $0
 
   Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk"
+  Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName)设置.lnk"
   RMDir "$SMPROGRAMS\$(STR_AppName)"
 
   DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_EXE_NAME}"
