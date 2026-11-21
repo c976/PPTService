@@ -132,6 +132,7 @@ jobs:
 
         # 确保本地 tag 列表与远端同步，便于后面识别残留 tag。
         git fetch --tags --force
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         # --cleanup-tag 会同时删掉远端 Release 和它对应的 tag。
         $null = gh release view $tag --json tagName 2>$null
@@ -155,6 +156,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         }
         Write-Host "Tag $tag is now free for a fresh release."
+
+        # 关键：pwsh 在脚本结束后会把最后一个原生命令的 $LASTEXITCODE 作为步骤退出码。
+        # 上面的 git show-ref 在「tag 不存在」时正常返回 1，被 if 跳过后仍残留为 1，
+        # 导致本步骤明明全部成功却报 exit code 1。这里显式归零。
+        exit 0
 
     # Release 正文：自「上一次发布的 Release」以来的所有提交，每行 "- 提交信息"。
     # git 的 %s 只取 subject（首行），多行提交信息天然只保留第一行。
