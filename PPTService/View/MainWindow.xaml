@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Window x:Class="PPTService.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:pptService="clr-namespace:PPTService" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" Opacity="0" WindowStartupLocation="Manual" Style="{DynamicResource Style.Window}" Width="1" Height="1"
         Topmost="False" ShowActivated="False"
+        Focusable="True"
         TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType">
   <FrameworkElement.Resources>
     <ResourceDictionary>

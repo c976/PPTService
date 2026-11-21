@@ -132,8 +132,20 @@ namespace PPTService
 			return true;
 		}
 
+		/// <summary>
+		/// 横滑 / 竖滑翻页总开关：关闭，避免放映时左右滑动误翻页。
+		/// 翻页统一交给翻页键 / 翻页笔（MainWindow_KeyDown → PPT COM）与左右翻页按钮。
+		/// 保留手势检测与事件订阅代码，方便以后需要时改回 true。
+		/// </summary>
+		// 用 static readonly 而非 const：const false 会让编译器把下面的翻页调用判成不可达代码（CS0162）。
+		private static readonly bool EnableSwipePaging = false;
+
 		private void PreviousPage()
 		{
+			if (!EnableSwipePaging)
+			{
+				return;
+			}
 			SyntacticSugar.TryCatchAction(() =>
 			{
 				if (!ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))
@@ -146,6 +158,10 @@ namespace PPTService
 
 		private void NextPage()
 		{
+			if (!EnableSwipePaging)
+			{
+				return;
+			}
 			SyntacticSugar.TryCatchAction(() =>
 			{
 				if (!ViewHelper.BottomArea.IsNeedStopMouseLineTrack && !ViewHelper.MainWindow.IsLeftSlideManagerViewShowed && !ViewHelper.MainWindow.IsRightSlideManagerViewShowed && !(Math.Abs(ViewHelper.MainWindow.Opacity) < 0.1))

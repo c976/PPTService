@@ -201,11 +201,12 @@ namespace PPTService
 		}
 
 		/// <summary>
-		/// 让前台焦点跟随批注模式，解决「附着模式下手写横滑误触发 PowerPoint 翻页」：
-		/// PowerPoint 只在自己是前台活动窗口时才响应左右滑动翻页手势。
-		/// 笔 / 橡皮模式必须让批注窗口持有焦点，PPT 失焦后手写横滑就不会被它当成翻页；
-		/// 鼠标模式把焦点还给 PPT，保留 PowerPoint 原生翻页（方向键 / 翻页笔 / 触屏滑动），
-		/// 与全局置顶模式的表现一致。仅在模式真正变化时设一次，不每 tick 抢焦点。
+		/// 自实现批注下让工具栏窗口持有前台 + 键盘焦点（三种模式统一）：
+		///  - PPT 失焦 → PowerPoint 原生「左右滑动翻页」手势不再响应，杜绝误翻页；
+		///  - 工具栏持有键盘焦点 → slide 键 / 翻页笔按下的方向键由 MainWindow_KeyDown
+		///    捕获并转发到 PPT COM，翻页照常可用（自实现批注下不能再依赖 PPT 原生处理）。
+		/// 之前只有笔 / 橡皮抢焦点、鼠标模式还焦给 PPT，导致「鼠标模式横滑误翻、
+		/// 笔模式翻页笔失效」两个问题。仅在模式真正变化时设一次，不每 tick 抢焦点。
 		/// debug 模拟放映没有真实 PPT 窗口，跳过。
 		/// </summary>
 		private static void ApplyFocusForMode(Mode mode)
@@ -222,35 +223,26 @@ namespace PPTService
 			try
 			{
 				IntPtr hwnd = new WindowInteropHelper(_toolbarWindow).Handle;
-				if (mode == Mode.Mouse)
+				if (hwnd == IntPtr.Zero)
 				{
-					// 鼠标模式：焦点还给 PPT，PowerPoint 原生翻页照常。
-					IntPtr ppt = PptOperator.Instance.SlideShowWindowIntPtr;
-					if (ppt != IntPtr.Zero)
+					return;
+				}
+				WindowsApi.SetForegroundWindow(hwnd);
+				// SetForegroundWindow 只设「前台窗口」，不保证键盘焦点落在 WPF 窗口上；
+				// MainWindow 样式里 Focusable=False 时 Focus() 会静默失败，已在 XAML 里
+				// 覆盖为 True。这里在 UI 线程显式设键盘焦点，确保 PreviewKeyDown 收到翻页键。
+				System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					try
 					{
-						WindowsApi.SetForegroundWindow(ppt);
+						_toolbarWindow.Focus();
+						System.Windows.Input.Keyboard.Focus(_toolbarWindow);
 					}
-				}
-				else if (hwnd != IntPtr.Zero)
-				{
-					// 笔 / 橡皮：批注窗口持有焦点，PPT 失焦 → 手写横滑不被识别成翻页手势。
-					WindowsApi.SetForegroundWindow(hwnd);
-					// SetForegroundWindow 只设「前台窗口」，不保证键盘焦点落在 WPF 窗口上。
-					// 若键盘焦点不在 MainWindow，MainWindow_KeyDown 收不到翻页键，
-					// 自实现批注下翻页笔/键盘翻页就失效（鼠标模式焦点在 PPT、走原生翻页故正常）。
-					// 显式在 UI 线程把键盘焦点给工具栏，让翻页键能被捕获并转发到 PPT COM。
-					System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+					catch
 					{
-						try
-						{
-							_toolbarWindow.Focus();
-						}
-						catch
-						{
-							// 焦点设置失败不影响批注本身。
-						}
-					}));
-				}
+						// 焦点设置失败不影响批注本身。
+					}
+				}));
 			}
 			catch (Exception)
 			{
