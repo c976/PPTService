@@ -42,9 +42,9 @@
 
 ### 插件化
 
-- **希沃触控 / 智能笔**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，提供原始触控与智能笔压感能力。
-- **希沃 MCU**：`PPTService.Hardware.dll` 承载 USB/HID MCU 检测与安卓笔禁用/恢复命令；主程序只保留 `McuService` 调用门面，通过反射调用，插件缺失时安全降级为「不操作」。
-- **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
+- **智能笔**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，提供原始触控与智能笔压感能力。
+- **MCU**：`PPTService.Hardware.dll` 承载 USB/HID MCU 检测与安卓笔禁用/恢复命令；主程序只保留 `McuService` 调用门面，通过反射调用，插件缺失时安全降级为「不操作」。
+- **二维码分享**：`PPTService.NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
 
 ### 修复的问题
 
@@ -57,6 +57,8 @@
 - 完整的深色浅色主题，以及界面微调
 - 占用体积小，程序仅~2MB。
 - 基本上实现了SIA的所有功能（除了投屏）
+- 自实现批注比SIA的稳定
+- 一些功能实现插件化
 
 ## 许可协议
 
