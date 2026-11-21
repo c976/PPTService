@@ -233,7 +233,7 @@ namespace PPTService.Defender
 			// 回退：注册表 ExePath（与 PPTService.Restart 一致）
 			try
 			{
-				using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Seewo\PPTService"))
+				using (var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\PPTServiceUltra"))
 				{
 					if (key != null)
 					{

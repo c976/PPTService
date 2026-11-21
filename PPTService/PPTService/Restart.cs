@@ -20,14 +20,14 @@ namespace PPTService
 		private static string GetPPTServicePath()
 		{
 			string text = null;
-			RegistryKey registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Seewo\\PPTService", false);
+			RegistryKey registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\PPTServiceUltra", false);
 			if (registryKey != null)
 			{
 				text = registryKey.GetValue("ExePath").ToString();
 			}
 			if (string.IsNullOrEmpty(text))
 			{
-				RegistryKey registryKey2 = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\Seewo\\PPTService", false);
+				RegistryKey registryKey2 = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\PPTServiceUltra", false);
 				if (registryKey2 != null)
 				{
 					text = registryKey2.GetValue("ExePath").ToString();

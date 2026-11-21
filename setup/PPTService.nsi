@@ -44,7 +44,7 @@ SetCompressorDictSize 32
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_UNINST_KEY    "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_GUID}"
 !define PRODUCT_DIR_REGKEY    "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_EXE_NAME}.exe"
-!define APP_REGKEY            "SOFTWARE\Seewo\PPTService"
+!define APP_REGKEY            "SOFTWARE\PPTServiceUltra"
 !define SUPPORT_DIR           "Main\SupportFiles"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
