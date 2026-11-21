@@ -531,20 +531,23 @@
                 </ObjectKeyFrame.Value>
               </DiscreteObjectKeyFrame>
             </ObjectAnimationUsingKeyFrames>
-            <!-- 拉起按钮：4K 100% 下缩放=1，DIP=物理像素。默认 50×25 在 4K 下只有 50×25
-                 物理像素，比参考（1920@125% 的 62×29）偏小；此档放大到 62×29 物理，
-                 箭头按同比例 15×7.5，保持箭头占框约 24% 的比例不变。 -->
+            <!-- 拉起按钮：4K 100% 下缩放=1，DIP=物理像素。恢复最初加入隐藏功能时验证过的
+                 整体大小 100×50；箭头按当前确认过的比例（约占框宽 24%）放大到 24×12，
+                 线条同比加粗到 3，避免只剩一根细线。 -->
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="62" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupBorder" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="29" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="50" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Width)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="15" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="24" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="(FrameworkElement.Height)">
-              <EasingDoubleKeyFrame KeyTime="0" Value="7.5" />
+              <EasingDoubleKeyFrame KeyTime="0" Value="12" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PullupChevron" Storyboard.TargetProperty="StrokeThickness">
+              <EasingDoubleKeyFrame KeyTime="0" Value="3" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LeftSlideManagerViewGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
               <EasingDoubleKeyFrame KeyTime="0" Value="310" />
@@ -609,9 +612,8 @@
     <!-- 工具栏收起后的拉起按钮：必须放在无 Margin、无行列的 WindowRootGrid 里，
          并显式指定 Grid.Row/Column 之外不要落在 RootGrid 的 Row0/Column0（否则会贴到
          翻页按钮上方、第一列居中的错误位置）。这里相对整个窗口贴底边、水平居中。
-         尺寸所有分辨率统一：按钮框 PullupBorder 固定 50×25 DIP、箭头固定 12×10 DIP（Data 是 2:1，
-         Stretch=Uniform 后实际 12×6），与 1920×1080@125% 的参考效果一致；不在 Adaptive 档里按
-         分辨率放大。之前的档位放大（4K 100×50）和撑满 Grid 的箭头都偏大，已移除。 -->
+         默认（≤1920）按钮框 50×25 DIP、箭头 12×10 DIP（Data 是 2:1，Stretch=Uniform 后实际 12×6）；
+         4K 档在 Adaptive3800 里整体放大到 100×50、箭头 24×12，保持同样的比例。 -->
     <Button Name="PullupButton" Visibility="Collapsed" Opacity="0"
             Template="{StaticResource ToolbarPullupButtonTemplate}" Panel.ZIndex="10"
             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0" Padding="0"
