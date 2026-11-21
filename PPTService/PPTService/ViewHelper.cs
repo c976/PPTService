@@ -1,4 +1,6 @@
 using System;
+using System.Windows;
+using System.Windows.Interop;
 using PPTService.Core.Windows;
 
 namespace PPTService
@@ -116,6 +118,23 @@ namespace PPTService
 				{
 					Owner = mainWindow
 				};
+				// 放映中打开设置：设置窗口是全屏半透明遮罩，若 PPT 放映窗口仍是前台，
+				// 用户在遮罩上的左右滑动会被 PowerPoint 当成原生翻页手势而误翻页。
+				// 这里显式把前台焦点夺到设置窗口，让 PPT 失焦；关闭后再按批注模式恢复。
+				if (mainWindow != null)
+				{
+					settingsWindow.Loaded += delegate
+					{
+						SyntacticSugar.TryCatchAction(() =>
+						{
+							IntPtr handle = new WindowInteropHelper(settingsWindow).Handle;
+							if (handle != IntPtr.Zero)
+							{
+								WindowsApi.SetForegroundWindow(handle);
+							}
+						});
+					};
+				}
 				settingsWindow.ShowDialog();
 			}
 			finally
@@ -123,6 +142,9 @@ namespace PPTService
 				if (mainWindow != null)
 				{
 					mainWindow.IsHitTestVisible = wasHitTestVisible;
+					// 关闭设置后恢复焦点：鼠标模式下交还 PPT 走原生翻页；
+					// 自实现批注下交还工具栏，由 MainWindow_KeyDown 转发翻页键。
+					RestoreFocusAfterSettings();
 					// 只有当前没有其它弹窗需要停手势时才恢复；跟随定时器未停，
 					// 下次 tick 的 UpdateGestureAndMouseLineTrackState 也会按状态重新校准。
 					if (BottomArea == null || !BottomArea.IsNeedStopMouseLineTrack)
@@ -131,6 +153,33 @@ namespace PPTService
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// 设置窗口关闭后恢复前台焦点：
+		///  - 自实现批注开启：交还工具栏（BAML 已设 Focusable=True），翻页键由 MainWindow_KeyDown 转发 COM；
+		///  - 关闭自实现批注 / 未放映：交还 PPT 放映窗口，保留 PowerPoint 原生翻页。
+		/// 设置窗口刚关闭时焦点可能仍在已关闭窗口上，必须显式重设，否则两边都收不到翻页键。
+		/// </summary>
+		private static void RestoreFocusAfterSettings()
+		{
+			SyntacticSugar.TryCatchAction(() =>
+			{
+				bool selfAnnotation = UserConfigManager.Load().UseSelfAnnotation;
+				IntPtr target = IntPtr.Zero;
+				if (selfAnnotation && MainWindow != null)
+				{
+					target = new WindowInteropHelper(MainWindow).Handle;
+				}
+				if (target == IntPtr.Zero && PptOperator.Instance != null)
+				{
+					target = PptOperator.Instance.SlideShowWindowIntPtr;
+				}
+				if (target != IntPtr.Zero)
+				{
+					WindowsApi.SetForegroundWindow(target);
+				}
+			});
 		}
 	}
 }

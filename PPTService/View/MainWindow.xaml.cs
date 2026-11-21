@@ -308,18 +308,13 @@ namespace PPTService
 					// ——表现为「放 PPT 后工具栏不显示，右键一下（COM 通了）才出现」。
 					IsExiting = false;
 					Opacity = 1.0;
-					// 不再 Activate() 抢前台：z 序改由 Owner 关系保证「只在 PPT 之上」。
-					// 焦点归属分两种：
-					//  - 关闭自实现批注：焦点留给 PPT，翻页笔 / 方向键由 PowerPoint 原生处理，
-					//    也不会把用户刚打开的第三方窗口焦点顶掉。
-					//  - 开启自实现批注：不能把焦点给 PPT，否则左右滑动会触发原生翻页误翻；
-					//    焦点由下面 SetEnabled → ApplyFocusForMode 交给工具栏，翻页键走
-					//    MainWindow_KeyDown 转发 COM（见 AnnotationController）。
+					// 不再 Activate() 抢前台：把焦点留给 PPT 放映窗口，翻页笔 / 方向键
+					// 由 PowerPoint 原生处理（debug 由模拟放映窗口处理），也不会把用户
+					// 刚打开的第三方窗口焦点顶掉。z 序改由 Owner 关系保证「只在 PPT 之上」。
+					// 注：笔 / 橡皮模式下 SetEnabled → ApplyFocusForMode 会把焦点夺回工具栏，
+					// 翻页键改由 MainWindow_KeyDown 转发 COM（见 AnnotationController）。
 					WindowStateHelper.MakeAppAbovePpt(this);
-					if (!UserConfigManager.Load().UseSelfAnnotation)
-					{
-						WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
-					}
+					WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 					AdjustFontSizeAndStyle();
 					ViewHelper.BottomArea?.InitializeBottomArea();
 					// 批注层状态同步不依赖任何 COM 调用，必须先做且不受后面 COM 失败影响：

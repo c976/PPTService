@@ -5,7 +5,7 @@
         Title="设置" WindowStyle="None" AllowsTransparency="True"
         Background="{DynamicResource Theme.MaskBackground}"
         Foreground="{DynamicResource Theme.SettingsForeground}"
-        WindowState="Maximized" Topmost="True" ResizeMode="NoResize"
+        WindowState="Maximized" Topmost="True" ResizeMode="NoResize" Focusable="True"
         FontFamily="微软雅黑">
   <!-- 原生按钮 / 下拉框 / 复选框的背景与边框保持系统默认配色；
        只把文字前景接到主题，保证深色下可读。所有改动即时生效，无需确定 / 应用。 -->
