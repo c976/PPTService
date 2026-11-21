@@ -409,6 +409,9 @@
     <Resource Include="Images_\eraserthumb.png">
       <LogicalName>images_/eraserthumb.png</LogicalName>
     </Resource>
+    <Resource Include="Images_\eraserthumbdark.png">
+      <LogicalName>images_/eraserthumbdark.png</LogicalName>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

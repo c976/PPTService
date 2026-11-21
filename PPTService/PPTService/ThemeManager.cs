@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace PPTService
@@ -57,6 +58,9 @@ namespace PPTService
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
 			"Theme.IconBrush"               // 工具栏矢量图标：浅色深灰 / 深色浅灰
 		};
+
+		// 橡皮「滑动清屏」的拇指图标：深色主题改用 eraserthumbdark.png。
+		private const string EraserThumbKey = "Theme.EraserThumb";
 
 		private static ResourceDictionary _backgroundBrushes;
 		private static ResourceDictionary _contentBrushes;
@@ -196,6 +200,9 @@ namespace PPTService
 					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
 					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				}
+				// 橡皮拇指图标：深色主题用深色版，避免浅色图标在深色滑杆轨道上突兀。
+				_contentBrushes[EraserThumbKey] = CreateEraserThumb(dark);
+
 				// 替换画刷对象后重挂字典，触发 ResourcesChanged（仅主题 / 高对比模式切换时）。
 				app.Resources.MergedDictionaries.Remove(_contentBrushes);
 				app.Resources.MergedDictionaries.Add(_contentBrushes);
@@ -238,6 +245,7 @@ namespace PPTService
 					_contentBrushes[key] = new SolidColorBrush(Colors.White);
 				}
 				_contentBrushes["Theme.IconColor"] = Color.FromRgb(0x66, 0x66, 0x66);
+				_contentBrushes[EraserThumbKey] = CreateEraserThumb(false);
 				app.Resources.MergedDictionaries.Add(_contentBrushes);
 			}
 		}
@@ -269,6 +277,15 @@ namespace PPTService
 				? _backgroundBrushes
 				: _contentBrushes;
 			dict[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+		}
+
+		/// <summary>按明暗主题取橡皮清屏滑杆的拇指位图（资源随主程序一起打包）。</summary>
+		private static BitmapImage CreateEraserThumb(bool dark)
+		{
+			string file = dark ? "eraserthumbdark.png" : "eraserthumb.png";
+			return new BitmapImage(new Uri(
+				"pack://application:,,,/PPTService;component/Images_/" + file,
+				UriKind.Absolute));
 		}
 
 		/// <summary>当前生效的明暗（跟随系统时读注册表，读取失败按浅色处理）。</summary>
