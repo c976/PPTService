@@ -196,8 +196,7 @@
     <Compile Include="PPTService\HidpCaps.cs" />
     <Compile Include="PPTService\ImageButton.cs" />
     <Compile Include="PPTService\ImageConvertExtensions.cs" />
-    <Compile Include="PPTService\IniSetting.cs" />
-    <Compile Include="PPTService\IniUtility.cs" />
+    <Compile Include="PPTService\JsonSetting.cs" />
     <Compile Include="PPTService\InteropExtension.cs" />
     <Compile Include="PPTService\Loading.cs" />
     <Compile Include="PPTService\Log.cs" />

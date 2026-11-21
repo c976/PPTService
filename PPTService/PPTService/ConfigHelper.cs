@@ -10,9 +10,10 @@ namespace PPTService
 		//private static readonly string CheckedTrue = "ChceckedTrue";
 		//private static readonly string CheckedFalse = "ChceckedFalse";
 
-		private static readonly string AppConfigFileName = "app.config";
+		// 运行时状态已从 INI 格式的 app.config 迁移到 JSON（见 JsonSetting）。
+		private static readonly string RuntimeConfigFileName = "RuntimeConfig.json";
 
-		private static readonly ConfigController ConfigController = new ConfigController(Path.Combine(AppPath.RootPath(), AppConfigFileName), Section);
+		private static readonly ConfigController ConfigController = new ConfigController(Path.Combine(AppPath.RootPath(), RuntimeConfigFileName), Section);
 
 		public static ConfigHelper Instance { get; set; }
 

@@ -2,7 +2,7 @@ using System.IO;
 
 namespace PPTService
 {
-	internal class ConfigController : IniSetting
+	internal class ConfigController : JsonSetting
 	{
 		private static readonly string IsComOkKey = "IsComOk";
 
