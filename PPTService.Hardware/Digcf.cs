@@ -1,6 +1,6 @@
 using System;
 
-namespace PPTService.Core.Mcu
+namespace PPTService.Hardware
 {
 	[Flags]
 	public enum Digcf

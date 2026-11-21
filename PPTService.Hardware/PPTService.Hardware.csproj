@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{50A1F480-742F-470E-A237-61F55393193D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>PPTService.Hardware</RootNamespace>
+    <AssemblyName>PPTService.Hardware</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <LangVersion>6</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- 与主程序同源的版本号；插件 dll 必须随主程序每次构建同步更新 -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Version\AssemblyInfo.Shared.cs" />
+    <!-- 本 AssemblyInfo 只放本项目专有属性；公共元数据/版本见 AssemblyInfo.Shared.cs 与 Version.targets -->
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- 由 Version.targets 每次构建生成，仓库不保存 -->
+    <Compile Include="Properties\GitVersionInfo.g.cs" />
+    <Compile Include="Analyzer.cs" />
+    <Compile Include="Digcf.cs" />
+    <Compile Include="HiddAttributes.cs" />
+    <Compile Include="HidpCaps.cs" />
+    <Compile Include="Mcu.cs" />
+    <Compile Include="McuCommand.cs" />
+    <Compile Include="Usb.cs" />
+    <Compile Include="WindowsApi.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\Version\Version.targets" />
+</Project>

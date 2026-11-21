@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace PPTService.Core.Mcu
+namespace PPTService.Hardware
 {
 	public struct HidpCaps
 	{

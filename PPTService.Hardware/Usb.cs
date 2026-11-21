@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace PPTService.Core.Mcu
+namespace PPTService.Hardware
 {
 	internal class Usb
 	{

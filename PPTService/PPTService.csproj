@@ -114,6 +114,13 @@
       <Name>PPTService.Ink.Hardware</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <!-- 希沃 MCU 硬件实现也是可选插件：主程序只保留 McuService 门面并反射调用它，
+         删除 PPTService.Hardware.dll 后硬件命令全部安全降级为 false / 不操作。 -->
+    <ProjectReference Include="..\PPTService.Hardware\PPTService.Hardware.csproj">
+      <Project>{50A1F480-742F-470E-A237-61F55393193D}</Project>
+      <Name>PPTService.Hardware</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\PPTService.Ink.Core\PPTService.Ink.Core.csproj">
       <Project>{9A1401FC-6DAC-41E9-9889-7AB80C17D7BA}</Project>
       <Name>PPTService.Ink.Core</Name>
@@ -428,6 +435,9 @@
     <Copy SourceFiles="..\PPTService.NetShared\bin\$(Configuration)\PPTService.NetShared.dll"
           DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true"
           Condition="Exists('..\PPTService.NetShared\bin\$(Configuration)\PPTService.NetShared.dll')" />
+    <Copy SourceFiles="..\PPTService.Hardware\bin\$(Configuration)\PPTService.Hardware.dll"
+          DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true"
+          Condition="Exists('..\PPTService.Hardware\bin\$(Configuration)\PPTService.Hardware.dll')" />
   </Target>
   <Import Project="..\Version\Version.targets" />
 </Project>

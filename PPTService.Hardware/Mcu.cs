@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PPTService.Core.Mcu
+namespace PPTService.Hardware
 {
 	public static class Mcu
 	{

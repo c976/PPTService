@@ -18,8 +18,9 @@
 ├── PPTService.Defender\            守护进程
 ├── PPTService.Ink\                 批注实现库
 ├── PPTService.Ink.Core\            批注核心层
-├── PPTService.Ink.Hardware\        希沃硬件插件（可选）
-├── PPTService.Ink.Hardware.Core\   硬件插件依赖（可选）
+├── PPTService.Ink.Hardware\        希沃触控 / 智能笔插件（可选）
+├── PPTService.Ink.Hardware.Core\   触控插件依赖（可选）
+├── PPTService.Hardware\            USB/HID MCU 硬件插件（可选）
 ├── PPTService.NetShared\           二维码分享插件（可选）
 ├── setup\                          NSIS 安装程序
 └── .github\workflows\              Github Action build.yml（编译）/ release.yml（发布）
@@ -41,7 +42,8 @@
 
 ### 插件化
 
-- **希沃硬件**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，希沃硬件优化。
+- **希沃触控 / 智能笔**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，提供原始触控与智能笔压感能力。
+- **希沃 MCU**：`PPTService.Hardware.dll` 承载 USB/HID MCU 检测与安卓笔禁用/恢复命令；主程序只保留 `McuService` 调用门面，通过反射调用，插件缺失时安全降级为「不操作」。
 - **二维码分享**：`NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
 
 ### 修复的问题

@@ -68,14 +68,6 @@
     <Compile Include="Core\NdpInfo.cs" />
     <Compile Include="Diagnostics.Annotations\CanBeNullAttribute.cs" />
     <Compile Include="Diagnostics.Annotations\NotNullAttribute.cs" />
-    <Compile Include="Mcu\Analyzer.cs" />
-    <Compile Include="Mcu\Digcf.cs" />
-    <Compile Include="Mcu\HiddAttributes.cs" />
-    <Compile Include="Mcu\HidpCaps.cs" />
-    <Compile Include="Mcu\Mcu.cs" />
-    <Compile Include="Mcu\McuCommand.cs" />
-    <Compile Include="Mcu\Usb.cs" />
-    <Compile Include="Mcu\WindowsApi.cs" />
     <Compile Include="Net.Exceptions\FileNotConsistentException.cs" />
     <Compile Include="Net.FileExtension.MimeType\DefaultFileExtensionMimeTypeBuilder.cs" />
     <Compile Include="Net.FileExtension.MimeType\FileMimeTypeBuilder.cs" />

@@ -1,4 +1,4 @@
-namespace PPTService.Core.Mcu
+namespace PPTService.Hardware
 {
 	public struct HiddAttributes
 	{
