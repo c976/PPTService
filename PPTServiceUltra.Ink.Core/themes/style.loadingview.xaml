@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:wc="clr-namespace:PPTServiceUltra.Ink.Core.Windows.Controls">
+  <Style x:Key="{x:Type wc:LoadingView}" TargetType="{x:Type wc:LoadingView}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type wc:LoadingView}">
+          <FrameworkTemplate.Resources>
+            <ResourceDictionary>
+              <Storyboard x:Key="Storyboard.EnterLoading">
+                <DoubleAnimation Storyboard.TargetName="Target" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3" />
+                <DoubleAnimation Storyboard.TargetName="Target" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:0.75" RepeatBehavior="Forever" />
+              </Storyboard>
+              <Storyboard x:Key="Storyboard.ExitLoading">
+                <DoubleAnimation Storyboard.TargetName="Target" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.6" />
+                <DoubleAnimation Storyboard.TargetName="Target" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" By="360" Duration="0:0:0.75" />
+              </Storyboard>
+            </ResourceDictionary>
+          </FrameworkTemplate.Resources>
+          <Ellipse Name="Target" Width="48" Height="48" Stroke="#dde3ed" StrokeThickness="8" StrokeDashArray="10" StrokeDashCap="Round" RenderTransformOrigin="0.5 0.5">
+            <UIElement.RenderTransform>
+              <RotateTransform />
+            </UIElement.RenderTransform>
+          </Ellipse>
+          <ControlTemplate.Triggers>
+            <Trigger Property="wc:LoadingView.IsLoading" Value="True">
+              <TriggerBase.EnterActions>
+                <BeginStoryboard Name="BeginLoading" Storyboard="{StaticResource Storyboard.EnterLoading}" />
+              </TriggerBase.EnterActions>
+              <TriggerBase.ExitActions>
+                <StopStoryboard BeginStoryboardName="BeginLoading" />
+                <BeginStoryboard Storyboard="{StaticResource Storyboard.ExitLoading}" />
+              </TriggerBase.ExitActions>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

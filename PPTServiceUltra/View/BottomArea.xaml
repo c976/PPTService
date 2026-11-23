@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl x:Class="PPTServiceUltra.BottomArea" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:pptService="clr-namespace:PPTServiceUltra" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/PPTServiceUltra;component/Images/Images.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTServiceUltra;component/Style/ButtonStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTServiceUltra;component/Style/CheckBoxStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/PPTServiceUltra;component/Style/RadioButtonStyle.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <Storyboard x:Key="ShowColorDiskStoryBoard">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" Storyboard.TargetName="ColorDiskStoryBoardGrid">
+          <EasingDoubleKeyFrame KeyTime="0" Value="0" />
+          <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="1">
+            <EasingDoubleKeyFrame.EasingFunction>
+              <BackEase Amplitude="0.2" />
+            </EasingDoubleKeyFrame.EasingFunction>
+          </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" Storyboard.TargetName="ColorDiskStoryBoardGrid">
+          <EasingDoubleKeyFrame KeyTime="0" Value="0" />
+          <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="1">
+            <EasingDoubleKeyFrame.EasingFunction>
+              <BackEase Amplitude="0.2" />
+            </EasingDoubleKeyFrame.EasingFunction>
+          </EasingDoubleKeyFrame>
+        </DoubleAnimationUsingKeyFrames>
+      </Storyboard>
+      <!-- 橡皮「滑动清屏」滑杆（1:1 移植自桌面批注 DesktopEraserPopupBorder）：
+           拖动到底（≥0.8）才清当前页，避免误触；松手后自动回弹。 -->
+      <Style x:Key="Style.Slider.Eraser" TargetType="{x:Type Slider}">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Slider}">
+              <Border Name="RootBorder" CornerRadius="30" Width="196" Height="60" Background="{DynamicResource Theme.SliderBackground}">
+                <Grid Name="ThumbGrid" Margin="6 5">
+                  <TextBlock Name="HintText" Margin="0 0 10 0" FontSize="15" Foreground="{DynamicResource Theme.HintText}" HorizontalAlignment="Right" VerticalAlignment="Center" Text="滑动清除笔迹" />
+                  <Track Name="PART_Track">
+                    <Track.Thumb>
+                      <Thumb Name="Thumb" Focusable="False">
+                        <Control.Template>
+                          <ControlTemplate TargetType="{x:Type Thumb}">
+                            <Image Name="Image" Height="50" Width="50" Stretch="UniformToFill" SnapsToDevicePixels="True" Source="{DynamicResource Theme.EraserThumb}" />
+                          </ControlTemplate>
+                        </Control.Template>
+                      </Thumb>
+                    </Track.Thumb>
+                  </Track>
+                </Grid>
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid Name="RootGrid" Height="50">
+    <UIElement.RenderTransform>
+      <TranslateTransform Y="0" />
+    </UIElement.RenderTransform>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name="AdaptiveStates">
+        <VisualState x:Name="Adaptive0">
+          <Storyboard>
+            <!-- 1366x768 等 <1440 分辨率：工具栏按钮格子统一缩到 30x30，
+                 与两侧翻页按钮（LeftArea/RightArea 的 RootGrid 在 Adaptive0 也是 30 宽）
+                 保持同样大小。此前只把高度改回 50、列宽仍 50，导致工具栏相对翻页按钮过大。
+                 高度与所有列宽一起改，格子仍是正方形，图标用 Stretch=Uniform 不会拉扁。 -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="30" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="2" />
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ExitPanelBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>3</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>3</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LeftBackgroundBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>3</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <!-- 颜色盘弹窗尺寸不再随分辨率缩放：Popup 与内层 PenPopupRootBorder
+                 都固定为 280x192，早期 210x144 会把右侧/底部内容裁掉（1366 下显示不全）。 -->
+          </Storyboard>
+        </VisualState>
+        <VisualState x:Name="Adaptive1440" />
+        <VisualState x:Name="Adaptive3800">
+          <Storyboard>
+            <!-- 4K 100% 缩放：列宽必须与格子高度(100)、ExitGrid(100) 一起放大到 100。
+                 此前列宽停在 50，而按钮样式在 Adaptive3800 把图标 Margin 设为 25，
+                 图标可用空间 = 50 - 25*2 = 0，导致设置/笔等图标完全不显示；
+                 翻页按钮与退出按钮因格子本身放大到 100 才正常。 -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="(FrameworkElement.Height)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="100" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderGrid" Storyboard.TargetProperty="(FrameworkElement.Width)">
+              <EasingDoubleKeyFrame KeyTime="0" Value="8" />
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ExitPanelBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>12</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>12</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LeftBackgroundBorder" Storyboard.TargetProperty="CornerRadius">
+              <DiscreteObjectKeyFrame KeyTime="0">
+                <ObjectKeyFrame.Value>
+                  <CornerRadius>12</CornerRadius>
+                </ObjectKeyFrame.Value>
+              </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+            <!-- 颜色盘保持 280x192，不随分辨率放大，避免 Popup 与内容尺寸不一致。 -->
+          </Storyboard>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
+    <i:Interaction.Triggers>
+      <pptService:AdaptiveTrigger MinWindowWidth="0">
+        <core:GoToStateAction xmlns:core="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" StateName="Adaptive0" />
+      </pptService:AdaptiveTrigger>
+      <pptService:AdaptiveTrigger MinWindowWidth="1440">
+        <GoToStateAction StateName="Adaptive1440" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
+      </pptService:AdaptiveTrigger>
+      <pptService:AdaptiveTrigger MinWindowWidth="3800">
+        <GoToStateAction StateName="Adaptive3800" xmlns="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions" />
+      </pptService:AdaptiveTrigger>
+    </i:Interaction.Triggers>
+    <Grid Name="ShareGrid" Column="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition x:Name="ShareCol0" Width="50" />
+        <ColumnDefinition x:Name="ShareCol1" Width="50" />
+      </Grid.ColumnDefinitions>
+      <Border Name="LeftBackgroundBorder" Grid.ColumnSpan="2" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
+      <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.SettingsNormal}" PressedSource="{StaticResource ImageSource.SettingsPressed}" />
+      <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
+    </Grid>
+    <Grid Column="1" Width="4" />
+    <Grid Name="BottomCenterButtonGrid" Column="2" Background="#00FFFFFF" Focusable="False" HorizontalAlignment="Center">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition x:Name="ToolCol0" Width="50" />
+        <ColumnDefinition x:Name="ToolCol1" Width="50" />
+        <ColumnDefinition x:Name="ToolCol2" Width="50" />
+        <ColumnDefinition x:Name="ToolCol3" Width="50" />
+        <ColumnDefinition x:Name="ToolCol4" Width="50" />
+      </Grid.ColumnDefinitions>
+      <Border Name="BackgroundBorder" Grid.ColumnSpan="6" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
+      <CheckBox Name="SelectCheckBox" Grid.Column="0" IsChecked="True" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.SelectNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.SelectSelected}" Click="Select_OnClick" />
+      <Button Name="PenButton" Grid.Column="1" Style="{StaticResource NormalButtonStyle}" Click="Pen_OnClick" PreviewMouseDown="PenButton_PreviewMouseDown">
+        <ContentControl.Content>
+          <Grid>
+            <Image Name="PenImage" Source="{StaticResource ImageSource.GrayPenNormal}" />
+            <Image Name="SelectedPenImage" Visibility="Collapsed">
+              <Image.Source>
+                <DrawingImage>
+                  <DrawingImage.Drawing>
+                    <DrawingGroup>
+                      <DrawingGroup.Children>
+                        <GeometryDrawing>
+                          <GeometryDrawing.Brush>
+                            <SolidColorBrush Color="#FFD8D8D8" Opacity="0" />
+                          </GeometryDrawing.Brush>
+                          <GeometryDrawing.Geometry>
+                            <PathGeometry FillRule="Nonzero" Figures="M31,31L32,31 32,32 31,32 31,31z M0,0L1,0 1,1 0,1 0,0z" />
+                          </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                        <DrawingGroup Transform="0.707106781186547,0.707106781186548,-0.707106781186548,0.707106781186547,24.1629511554251,2.51522862093623E-07">
+                          <DrawingGroup.Children>
+                            <DrawingGroup>
+                              <DrawingGroup.Children>
+                                <GeometryDrawing Brush="{Binding PenBrush}">
+                                  <GeometryDrawing.Geometry>
+                                    <PathGeometry FillRule="Nonzero" Figures="M10.4,23L10.4,23 10.4,31.9 5.5,36.9 0.5,31.9 0.5,23z" />
+                                  </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                                <DrawingGroup Opacity="0.4">
+                                  <DrawingGroup.Children>
+                                    <GeometryDrawing Brush="#FF000000">
+                                      <GeometryDrawing.Geometry>
+                                        <PathGeometry FillRule="Nonzero" Figures="M2.5,25L8.4,25 8.4,31.1 5.5,34 2.5,31 2.5,25 M0.5,23L0.6,31.9 5.5,36.8 10.4,31.9 10.4,23 0.5,23 0.5,23z" />
+                                      </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                  </DrawingGroup.Children>
+                                </DrawingGroup>
+                              </DrawingGroup.Children>
+                            </DrawingGroup>
+                            <DrawingGroup>
+                              <DrawingGroup.Children>
+                                <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
+                                  <GeometryDrawing.Geometry>
+                                    <PathGeometry FillRule="Nonzero" Figures="M1.4,20L1.3,3.7C1.3,3.2 1.5,2.7 1.9,2.3 2.3,1.9 2.8,1.7 3.3,1.7L7.3,1.7C8.4,1.7,9.3,2.6,9.3,3.7L9.4,20 1.4,20z" />
+                                  </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                                <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
+                                  <GeometryDrawing.Geometry>
+                                    <PathGeometry FillRule="Nonzero" Figures="M2.6,3C2.7,2.9,2.9,2.7,3.3,2.7L7.3,2.7C7.9,2.7,8.3,3.1,8.3,3.7L8.4,19 2.5,19 2.3,3.7C2.3,3.3,2.5,3.1,2.6,3 M1.2,1.6C0.6,2.1,0.3,2.9,0.3,3.7L0.4,21 10.3,21 10.3,3.7C10.3,2,8.9,0.7,7.3,0.7L3.3,0.7C2.4,0.7,1.7,1,1.2,1.6L1.2,1.6z" />
+                                  </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                              </DrawingGroup.Children>
+                            </DrawingGroup>
+                          </DrawingGroup.Children>
+                        </DrawingGroup>
+                      </DrawingGroup.Children>
+                    </DrawingGroup>
+                  </DrawingImage.Drawing>
+                </DrawingImage>
+              </Image.Source>
+            </Image>
+          </Grid>
+        </ContentControl.Content>
+      </Button>
+      <CheckBox Name="RubberCheckBox" Grid.Column="2" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.RubberNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.RubberSelected}" Click="Rubber_OnClick" />
+      <pptService:ImageButton x:Name="MagnifierButton" Click="Magnifier_Click" Grid.Column="3" NormalSource="{StaticResource ImageSource.MagnifierNormal}" PressedSource="{StaticResource ImageSource.MagnifierSelected}" />
+      <CheckBox Name="InnerBoardCheckBox" Grid.Column="4" IsChecked="False" Style="{StaticResource CheckBoxStyle}" pptService:ControlHelper.NormalImage="{StaticResource ImageSource.PlateNormal}" pptService:ControlHelper.CheckedImage="{StaticResource ImageSource.PlateSelected}" Click="InnerBoard_Click" />
+      <!-- 笔设置面板（1:1 移植自桌面批注 DesktopPenPopupBorder）：
+           左侧 3 档粗细（笔形图标），右侧 3x3 颜色块。 -->
+      <Popup Name="ColorDiskPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="280" Height="192" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="ColorDiskPopup_OnOpened">
+        <Grid Background="#00FFFFFF">
+          <Grid Name="ColorDiskStoryBoardGrid" RenderTransformOrigin="0.5,1">
+            <UIElement.RenderTransform>
+              <TransformGroup>
+                <ScaleTransform ScaleX="0" ScaleY="0" />
+              </TransformGroup>
+            </UIElement.RenderTransform>
+            <Border Name="PenPopupRootBorder" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4" Height="192" Width="280">
+              <StackPanel Name="PenPopupStackPanel" Orientation="Horizontal">
+                <UniformGrid Name="ThicknessGrid" Rows="3" Columns="1" VerticalAlignment="Center" Margin="32 0" RadioButton.Click="ThicknessRadioButton_OnClick">
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenThickness}" pptService:ControlHelper.Geometry="{StaticResource Geometry.PenThickness.Light}" Tag="{x:Static pptService:PenSettings.PenLightWeight}" IsChecked="True" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenThickness}" pptService:ControlHelper.Geometry="{StaticResource Geometry.PenThickness}" Tag="{x:Static pptService:PenSettings.PenWeight}" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenThickness}" pptService:ControlHelper.Geometry="{StaticResource Geometry.PenThickness.Bold}" Tag="{x:Static pptService:PenSettings.PenBoldWeight}" />
+                </UniformGrid>
+                <UniformGrid Name="ColorGrid" Rows="3" Columns="3" Margin="-12 4 0 0" VerticalAlignment="Center" RadioButton.Click="RadioButton_OnClick">
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFFF1200" IsChecked="True" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#ff8b00" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#331eb5" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#306ed9" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#306c01" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#66d552" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#ffffff" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#000000" />
+                </UniformGrid>
+              </StackPanel>
+              <UIElement.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
+              </UIElement.Effect>
+            </Border>
+          </Grid>
+        </Grid>
+      </Popup>
+      <!-- 橡皮已选中时再次点击橡皮弹出（1:1 移植自桌面批注 DesktopEraserPopupBorder）：
+           水平滑杆，拇指为 eraserthumb 图标，滑到底（≥0.8）清当前页。 -->
+      <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
+        <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4">
+          <Slider Name="EraserSlide" Maximum="1" Style="{StaticResource Style.Slider.Eraser}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
+          <UIElement.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
+          </UIElement.Effect>
+        </Border>
+      </Popup>
+    </Grid>
+    <Grid Name="PlaceholderGrid" Column="3" Width="4" />
+    <!-- 结束放映 + 收起工具栏共用同一块面板，不再分成两个独立方块。 -->
+    <Grid Name="ExitGrid" Column="4" Width="100">
+      <Border Name="ExitPanelBorder" CornerRadius="6" Background="{DynamicResource Theme.PanelBackground}" BorderThickness="1" BorderBrush="{DynamicResource Theme.BorderBrush}" />
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition x:Name="ExitButtonCol" />
+          <ColumnDefinition x:Name="CollapseButtonCol" />
+        </Grid.ColumnDefinitions>
+        <pptService:ImageButton Grid.Column="0" Click="Exit_OnClick" Background="#00FFFFFF" BorderThickness="0" NormalSource="{StaticResource ImageSource.ExitNormal}" PressedSource="{StaticResource ImageSource.ExitSelected}" />
+        <pptService:ImageButton x:Name="CollapseButton" Grid.Column="1" Click="CollapseToolbar_OnClick" ToolTip="收起工具栏" Background="#00FFFFFF" BorderThickness="0" NormalSource="{StaticResource ImageSource.CollapseToolbarNormal}" PressedSource="{StaticResource ImageSource.CollapseToolbarSelected}" />
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

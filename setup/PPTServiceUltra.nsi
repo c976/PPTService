@@ -1,0 +1,773 @@
+﻿; =============================================================================
+;  PPT小工具安装程序
+;
+;  安装界面：nsSkinEngine 自定义皮肤
+;  卸载界面：MUI 现代界面（1.67 以上兼容）
+;
+;  默认不启用、但以注释形式完整保留的功能：
+;    - Addon 目录内附加文件的打包与写入
+;    - 更新组件与静默更新服务的安装（资源需自行放入 Addon 目录）
+;    - Microsoft .NET Framework 4.5 检测 / 安装 / 重启
+;    - 安装目录体积统计（EstimatedSize）
+;  需要启用时，取消对应注释即可。
+; =============================================================================
+
+Unicode true
+SetCompressor /SOLID lzma
+SetCompressorDictSize 32
+
+!include "MUI.nsh"
+!include "WinMessages.nsh"
+!include "LogicLib.nsh"
+!include "WinVer.nsh"
+!include "FileFunc.nsh"
+
+; 皮肤引擎插件使用随包提供的版本，其导出 API 与 NSIS 自带版本不同
+!addplugindir "${__FILEDIR__}\Plugins\x86-unicode"
+
+; -----------------------------------------------------------------------------
+;  产品定义
+; -----------------------------------------------------------------------------
+!define PRODUCT_NAME          "PPT小工具增强版"
+; 项目名称（英文），用于版本信息产品名、皮肤窗体标题等展示用途
+!define PRODUCT_NAME_EN       "PPTServiceUltra"
+; 实际 exe 文件名（不含扩展名），快捷方式/自启动/进程互守护/App Paths 等由此引用
+!define PRODUCT_EXE_NAME       "PPTServiceUltra"
+; 全局版本号由 Version\build.ver 驱动，编译时由 MSBuild 生成 Version\Version.nsh
+!include "${__FILEDIR__}\..\Version\Version.nsh"
+!define PRODUCT_PUBLISHER     "The PPTServiceUltra Project"
+!define PRODUCT_WEB_SITE      "https://github.com/c976/PPTServiceUltra"
+!define PRODUCT_GUID          "{FED7F3E7-97BC-4A64-9903-A783762634B3}"
+; 旧 Seewo 版沿用的卸载 GUID：本项目改用新 GUID 后，
+; 安装前仍需按此旧 ID 卸载原 Seewo 路径版，故单独保留。
+!define LEGACY_GUID           "{958764e5-bbb2-43c1-1234-8d454abd130a}"
+!define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define PRODUCT_UNINST_KEY    "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_GUID}"
+!define PRODUCT_DIR_REGKEY    "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_EXE_NAME}.exe"
+!define APP_REGKEY            "SOFTWARE\PPTServiceUltra"
+!define SUPPORT_DIR           "Main\SupportFiles"
+
+Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
+UninstallCaption "$(STR_AppName) 卸载"
+BrandingText "${PRODUCT_PUBLISHER}"
+; 输出文件名带产品版本号，便于区分每次构建（PRODUCT_VERSION 来自 Version.nsh）
+OutFile "${__FILEDIR__}\PPTServiceUltraSetup_${PRODUCT_VERSION}.exe"
+Icon "${__FILEDIR__}\Skin\Icons\Install.ico"
+UninstallIcon "${__FILEDIR__}\Skin\Icons\Uninstall.ico"
+
+InstallDir "$PROGRAMFILES\PPTServiceUltra"
+
+ShowInstDetails show
+ShowUnInstDetails show
+RequestExecutionLevel admin
+
+VIProductVersion "${PRODUCT_VERSION}"
+VIAddVersionKey /LANG=2052 "ProductName"      "${PRODUCT_NAME_EN}"
+VIAddVersionKey /LANG=2052 "CompanyName"      "${PRODUCT_PUBLISHER}"
+VIAddVersionKey /LANG=2052 "FileDescription"  "${PRODUCT_NAME} 安装程序"
+VIAddVersionKey /LANG=2052 "FileVersion"      "${PRODUCT_VERSION}"
+VIAddVersionKey /LANG=2052 "ProductVersion"   "${PRODUCT_VERSION}"
+VIAddVersionKey /LANG=2052 "LegalCopyright"   "Copyright (C) The PPTServiceUltra Project."
+VIAddVersionKey /LANG=2052 "LegalTrademarks"  "${PRODUCT_PUBLISHER}"
+VIAddVersionKey /LANG=2052 "OriginalFilename" "PPTServiceUltraSetup_${PRODUCT_VERSION}.exe"
+
+; -----------------------------------------------------------------------------
+;  MUI 现代界面（卸载部分使用）
+; -----------------------------------------------------------------------------
+!define MUI_ICON   "${__FILEDIR__}\Skin\Icons\Install.ico"
+!define MUI_UNICON "${__FILEDIR__}\Skin\Icons\Uninstall.ico"
+
+; 皮肤页面自行处理退出确认，这里不启用 MUI_ABORTWARNING，避免重复弹框。
+; MUI 会接管 .onGUIInit / .onUserAbort，皮肤侧的初始化通过下面的挂接点调用。
+!define MUI_CUSTOMFUNCTION_GUIINIT SkinGUIInit
+
+Function SkinGUIInit
+  ; 内页控件字体与配色（皮肤窗口背后的 NSIS 主窗口）
+  GetDlgItem $0 $HWNDPARENT 1037
+  CreateFont $1 "宋体" "9" 700
+  SendMessage $0 ${WM_SETFONT} $1 0
+  SetCtlColors $0 "" 0xFFFFFF
+  GetDlgItem $0 $HWNDPARENT 1028
+  SetCtlColors $0 /BRANDING ""
+  GetDlgItem $0 $HWNDPARENT 1256
+  SetCtlColors $0 /BRANDING ""
+  SendMessage $0 ${WM_SETTEXT} 0 "STR:${PRODUCT_PUBLISHER} "
+FunctionEnd
+
+; 卸载进度窗口：隐藏 MUI 头部条（标题/副标题文字与白色背景条）
+!define MUI_CUSTOMFUNCTION_UNGUIINIT un.HideUnHeader
+
+Function un.HideUnHeader
+  ; 1037/1038：头部条标题与副标题文字
+  GetDlgItem $0 $HWNDPARENT 1037
+  ShowWindow $0 0
+  GetDlgItem $0 $HWNDPARENT 1038
+  ShowWindow $0 0
+  ; 1034：头部条白色背景，隐藏后露出窗口底色
+  GetDlgItem $0 $HWNDPARENT 1034
+  ShowWindow $0 0
+  ; 1035/1045：底部 Seewo 品牌文字下方的灰色刻蚀线（两条重叠，需同时隐藏）
+  GetDlgItem $0 $HWNDPARENT 1035
+  ShowWindow $0 0
+  GetDlgItem $0 $HWNDPARENT 1045
+  ShowWindow $0 0
+FunctionEnd
+
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_LANGUAGE "SimpChinese"
+
+; 新版安装页面序列（可选）。默认使用自定义皮肤页面，若改用下列页面，
+; 请把下方 Page custom / Page instfiles 两行注释掉，并取消这里的注释。
+/*
+; !define MUI_ABORTWARNING
+; !define MUI_FINISHPAGE_RUN "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+; !insertmacro MUI_PAGE_WELCOME
+; !insertmacro MUI_PAGE_DIRECTORY
+; !insertmacro MUI_PAGE_INSTFILES
+; !insertmacro MUI_PAGE_FINISH
+*/
+
+; -----------------------------------------------------------------------------
+;  文案（简体中文 2052）
+; -----------------------------------------------------------------------------
+LangString STR_AppName          2052 "PPT小工具增强版"
+LangString STR_SelectDir        2052 "选择要安装 PPT小工具增强版 的文件夹位置: "
+LangString STR_ExitConfirm      2052 "你真的要退出安装吗？"
+LangString STR_MutexInstaller   2052 "本产品已经有一个安裝向导正在运行！"
+LangString STR_MutexUninstaller 2052 "本产品已经有一个卸载向导正在运行！"
+LangString STR_Win7Required     2052 "抱歉，本程序只对 Windows7 或者以上版本的系统提供支持。"
+LangString STR_NeedAdmin        2052 "请使用管理员权限执行本程序。"
+LangString STR_RootPath         2052 "不能将软件安装在驱动器根路径。"
+LangString STR_ProcessBusy      2052 "检测到安装路径下有进程尚未退出，忽略此问题可能导致安装异常。$\n是否重试关闭这些进程？"
+LangString STR_UninstallConfirm 2052 "你确定要卸载本产品吗？"
+LangString STR_AskDeleteData   2052 "是否同时删除数据文件夹（如果你正在更新应用，则不需要删除）？$\n此操作不可恢复。"
+LangString STR_UninstallDone    2052 "$(STR_AppName) 已成功地从你的计算机移除。"
+LangString STR_InstallingOld    2052 "正在卸载旧版本……"
+LangString STR_FrameworkBusy    2052 "正在安装 Microsoft .Net Framework，预计需要五分钟..."
+LangString STR_FrameworkOK      2052 "Microsoft .NET Framework 安装成功..."
+LangString STR_FrameworkReboot  2052 "Microsoft .NET Framework 安装成功，请重启你的电脑..."
+LangString STR_FrameworkFail    2052 "警告：Microsoft .NET Framework 安装失败，你可能需要重新安装..."
+LangString STR_FrameworkSkip    2052 "检测到你已安装 Microsoft .NET Framework V$R5，无需再次安装..."
+LangString STR_RebootAsk        2052 "需要重启你的电脑以确保程序正常运行，是否立即重启？"
+LangString STR_InternalError    2052 "安装包存在一个内部错误。请下载最新版本并重新安装。"
+
+; -----------------------------------------------------------------------------
+;  变量
+; -----------------------------------------------------------------------------
+Var SkinDir          ; $TEMP\PPTServiceUltra
+Var SkinPage         ; $SkinDir\2052
+Var SkinHandle       ; 皮肤窗口句柄
+Var OldInstallDir    ; 上一版本的安装目录
+Var DeleteDataFolder  ; 卸载时用户是否选择删除数据文件夹（1=删除）
+; 启用 .NET 4.5 检测 / 安装 / 重启流程时，需同时取消下面两行声明的注释
+; Var FrameworkVersion ; .NET 版本
+; Var NeedReboot       ; 是否需要重启
+
+; -----------------------------------------------------------------------------
+;  安装日志：$INSTDIR\install.log（与卸载程序同一目录）
+;  LogSet / LogText 需要 NSIS_CONFIG_LOG 日志构建的 NSIS（编译器与 Stubs 配套），
+;  日志由引擎自动逐指令写入（File / CreateDirectory / Exec / WriteRegStr 等）。
+; -----------------------------------------------------------------------------
+!macro NSISLog TEXT
+  LogText '${TEXT}'
+!macroend
+
+; -----------------------------------------------------------------------------
+;  页面：安装使用自定义皮肤，卸载使用 MUI 页面
+; -----------------------------------------------------------------------------
+Page custom SkinPage_Create "" /ENABLECANCEL
+Page instfiles "" InstFiles_Show ""
+
+; =============================================================================
+;  .onInit —— 环境检查 + 释放皮肤资源
+; =============================================================================
+Function .onInit
+  ; DPI 感知
+  System::Call "SHCore::SetProcessDpiAwareness(i 2)i.R0"
+  Pop $R0
+
+  SetShellVarContext all
+
+  ; 双 Mutex 防重（Local + Global）
+  System::Call 'kernel32::CreateMutex(i 0, i 0, t "Local\PPTServiceUltra_Installer") i .R7 ?e'
+  Pop $0
+  ${If} $0 != 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(STR_MutexInstaller)" /SD IDOK
+    Abort
+  ${EndIf}
+  System::Call 'kernel32::CreateMutex(i 0, i 0, t "Global\PPTServiceUltra_Installer_Global") i .R7 ?e'
+  Pop $0
+  ${If} $0 != 0
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(STR_MutexUninstaller)" /SD IDOK
+    Abort
+  ${EndIf}
+
+  ; Windows 7 及以上
+  ${IfNot} ${AtLeastWin7}
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(STR_Win7Required)" /SD IDOK
+    Abort
+  ${EndIf}
+
+  ; 管理员权限
+  UserInfo::GetAccountType
+  Pop $0
+  ${If} $0 != "Admin"
+    MessageBox MB_OK|MB_TOPMOST "$(STR_NeedAdmin)" /SD IDOK
+    Abort
+  ${EndIf}
+
+  InitPluginsDir
+
+  ; 释放皮肤资源到 $TEMP\PPTServiceUltra\2052 与 \Icons
+  ; SetOutPath 使用字面路径，安装程序内记录的目标目录才是完整路径
+  StrCpy $SkinDir "$TEMP\PPTServiceUltra"
+  StrCpy $SkinPage "$SkinDir\2052"
+  SetOutPath "$TEMP\PPTServiceUltra\2052"
+  SetOverwrite on
+  AllowSkipFiles off
+  File "${__FILEDIR__}\Skin\2052\*.*"
+  SetOutPath "$TEMP\PPTServiceUltra\Icons"
+  File "${__FILEDIR__}\Skin\Icons\*.*"
+  AllowSkipFiles on
+FunctionEnd
+
+; =============================================================================
+;  皮肤页面
+; =============================================================================
+!macro BindSkinControl CTRL FUNC
+  nsSkinEngine::FindControl /NOUNLOAD "${CTRL}"
+  Pop $0
+  ${If} $0 == 0
+    GetFunctionAddress $1 ${FUNC}
+    nsSkinEngine::OnControlBindNSISScript /NOUNLOAD "${CTRL}" $1
+  ${EndIf}
+!macroend
+
+Function SkinPage_Create
+  nsSkinEngine::InitNSISSkinEngine /NOUNLOAD "$SkinPage" "Installer.xml" "tab_Page" "false" \
+      "${PRODUCT_NAME_EN}" "$SkinDir\Icons\Install.ico" "false"
+  Pop $SkinHandle
+
+  nsSkinEngine::InitNSISMessageBox /NOUNLOAD "ExitConfirm.xml" "pnl_ExitConfirm" \
+      "lbl_Tip" "btn_Close" "btn_Yes" "btn_No"
+
+  !insertmacro BindSkinControl "btn_QuickInstall"  OnQuickInstall
+  !insertmacro BindSkinControl "btn_Setting"       OnSettings
+  !insertmacro BindSkinControl "btn_StartInstall"  OnQuickInstall
+  !insertmacro BindSkinControl "btn_ChangePath"    OnChangePath
+  !insertmacro BindSkinControl "btn_Back"          OnBack
+  !insertmacro BindSkinControl "btn_Finish"        OnFinish
+  !insertmacro BindSkinControl "btn_Min"           OnMinimize
+  !insertmacro BindSkinControl "btn_Close"         OnClose
+
+  nsSkinEngine::SetControlData /NOUNLOAD "edt_Dir" "$INSTDIR" "Text"
+  nsSkinEngine::RunNSISSkinEngine /NOUNLOAD
+FunctionEnd
+
+Function InstFiles_Show
+  nsSkinEngine::FindControl /NOUNLOAD "progress_Install"
+  Pop $0
+  ${If} $0 == 0
+    nsSkinEngine::NSISBindingProgress /NOUNLOAD "progress_Install" "lbl_ProgressPercent"
+  ${EndIf}
+FunctionEnd
+
+; -----------------------------------------------------------------------------
+;  皮肤按钮回调
+; -----------------------------------------------------------------------------
+Function AdvanceToInstall
+  nsSkinEngine::SetControlData /NOUNLOAD "btn_Close" "false" "Visible"
+  nsSkinEngine::NSISSendMessage /NOUNLOAD $SkinHandle "WM_NSISNEXT"
+  nsSkinEngine::NSISStopMsgLoop /NOUNLOAD
+FunctionEnd
+
+Function OnQuickInstall
+  nsSkinEngine::GetControlData /NOUNLOAD "edt_Dir" "Text"
+  Pop $R0
+  ${If} $R0 == ""
+    StrCpy $R0 "$INSTDIR"
+  ${EndIf}
+  ; 去掉尾部反斜杠（盘符根路径除外）
+  StrCpy $1 $R0 "" -1
+  ${If} $1 == "\"
+    StrCpy $R2 $R0 "" -1
+    StrCpy $1 $R2 "" -1
+    ${If} $1 != ":"
+      StrCpy $R0 $R2
+    ${EndIf}
+  ${EndIf}
+  ; 不允许安装到驱动器根路径
+  StrCpy $1 $R0 1 1
+  StrCpy $2 $R0 2
+  ${If} $1 == ":"
+  ${AndIf} $2 == "$R0"
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(STR_RootPath)" /SD IDOK
+    Return
+  ${EndIf}
+  StrCpy $INSTDIR $R0
+  Call AdvanceToInstall
+FunctionEnd
+
+Function OnSettings
+  nsSkinEngine::SetControlData /NOUNLOAD "pnl_Default" "false" "Visible"
+  nsSkinEngine::SetControlData /NOUNLOAD "pnl_Setting" "true"  "Visible"
+FunctionEnd
+
+Function OnBack
+  nsSkinEngine::SetControlData /NOUNLOAD "pnl_Default" "true"  "Visible"
+  nsSkinEngine::SetControlData /NOUNLOAD "pnl_Setting" "false" "Visible"
+FunctionEnd
+
+Function OnChangePath
+  nsSkinEngine::SelectFolderDialog /NOUNLOAD "$(STR_SelectDir)" "$INSTDIR"
+  Pop $R0
+  ${If} $R0 == "-1"
+    Return
+  ${EndIf}
+  ; 末级不是 PPTServiceUltra 时自动追加
+  StrLen $1 $R0
+  IntOp $1 $1 - 11
+  ${If} $1 >= 0
+    StrCpy $2 $R0 11 $1
+  ${Else}
+    StrCpy $2 ""
+  ${EndIf}
+  StrCpy $3 "1"
+  ${If} $R0 == "${PRODUCT_EXE_NAME}"
+    StrCpy $3 "0"
+  ${ElseIf} $2 == "\${PRODUCT_EXE_NAME}"
+    StrCpy $3 "0"
+  ${EndIf}
+  ${If} $3 == "1"
+    StrCpy $R0 "$R0\${PRODUCT_EXE_NAME}"
+  ${EndIf}
+  StrCpy $INSTDIR $R0
+  nsSkinEngine::SetControlData /NOUNLOAD "edt_Dir" "$INSTDIR" "Text"
+FunctionEnd
+
+Function OnFinish
+  ; 主程序已在安装完成时自动启动，这里只负责关闭安装界面。
+  SendMessage $HWNDPARENT 0x0111 1 0
+  nsSkinEngine::HideNSISSkinEngine
+FunctionEnd
+
+Function OnMinimize
+  nsSkinEngine::MinNSISSkinEngine /NOUNLOAD
+FunctionEnd
+
+Function OnClose
+  nsSkinEngine::ShowNSISMessageBox /NOUNLOAD "" "$(STR_ExitConfirm)"
+  Pop $0
+  ${If} $0 == 1
+    nsSkinEngine::ExitNSISSkinEngine "True"
+  ${EndIf}
+FunctionEnd
+
+; =============================================================================
+;  安装前准备：升级流程 + 进程重试循环
+; =============================================================================
+
+; 用系统自带 taskkill 结束主程序与守护进程，替代 Cvte.ProcessKiller 插件。
+; 主程序与守护进程互守护，必须先结束守护进程；再结束主程序。
+; 栈顶返回：0 = 复查时两个进程都已不存在，1 = 仍有进程（外层按需重试 / 提示）。
+; taskkill 返回 0 表示确实结束过进程，1 表示未找到进程；复查时用这个判断是否已清干净。
+; 做成宏，安装器与卸载器各生成一份函数（NSIS 卸载段只能 Call un.* 函数）。
+!macro KillProductProcessesCore
+  ; 第一遍：直接结束，不关心结果
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.Defender.exe"'
+  Pop $R0
+  Pop $R1
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.exe"'
+  Pop $R0
+  Pop $R1
+
+  ; 第二遍：覆盖互守护在两次结束之间重新拉起的实例，同时作为是否清干净的依据
+  StrCpy $R2 0
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.Defender.exe"'
+  Pop $R0
+  Pop $R1
+  ${If} $R0 == 0
+    StrCpy $R2 1
+  ${EndIf}
+  nsExec::ExecToStack '"$SYSDIR\taskkill.exe" /F /IM "${PRODUCT_EXE_NAME}.exe"'
+  Pop $R0
+  Pop $R1
+  ${If} $R0 == 0
+    StrCpy $R2 1
+  ${EndIf}
+  Push $R2
+!macroend
+
+Function KillProductProcesses
+  !insertmacro KillProductProcessesCore
+FunctionEnd
+
+Function un.KillProductProcesses
+  !insertmacro KillProductProcessesCore
+FunctionEnd
+
+Function PrepareInstall
+  DetailPrint "正在进行安装前的准备工作……"
+
+  ; 卸载所有已安装的旧版本（无论此前装在 Seewo 路径还是当前路径），再继续安装。
+  Call UninstallOldVersions
+
+  ; 主程序 / 守护进程仍在运行时循环重试（不重复执行旧版本卸载）
+PI_Retry:
+  Call KillProductProcesses
+  Pop $0
+  ${If} $0 == 0
+    Return
+  ${EndIf}
+  Sleep 1000
+  Call KillProductProcesses
+  Pop $0
+  ${If} $0 == 0
+    Return
+  ${EndIf}
+  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(STR_ProcessBusy)" /SD IDCANCEL \
+      IDRETRY PI_Retry IDCANCEL PI_Done
+PI_Done:
+FunctionEnd
+
+; -----------------------------------------------------------------------------
+;  卸载旧版本：本项目已改用新 GUID，但原 Seewo 路径版仍使用旧 GUID，
+;  故安装前需分别读取「旧 GUID」与「本 GUID」两个固定卸载项并各静默卸载一次，
+;  两个安装路径（Seewo\PPTServiceUltra 与 PPTServiceUltra）都会被清理，无需枚举。
+; -----------------------------------------------------------------------------
+Function UninstallOldVersions
+  ; 旧 Seewo 版（沿用原 GUID）
+  ReadRegStr $4 ${PRODUCT_UNINST_ROOT_KEY} "Software\Microsoft\Windows\CurrentVersion\Uninstall\${LEGACY_GUID}" "UninstallString"
+  ${If} $4 != ""
+    Call DoUninstallOld
+  ${EndIf}
+  ; 本项目旧版本（当前 GUID）
+  ReadRegStr $4 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString"
+  ${If} $4 != ""
+    Call DoUninstallOld
+  ${EndIf}
+FunctionEnd
+
+; 输入：$4 = 卸载程序路径（可能带引号）；静默卸载并清理其安装目录。
+Function DoUninstallOld
+  ; 清洗首尾引号（若有）
+  StrCpy $2 $4 1
+  ${If} $2 == '"'
+    StrCpy $4 $4 "" 1
+  ${EndIf}
+  StrCpy $2 $4 1 -1
+  ${If} $2 == '"'
+    StrCpy $4 $4 -1
+  ${EndIf}
+  ${GetParent} "$4" $OldInstallDir
+  ${If} $OldInstallDir != ""
+  ${AndIf} ${FileExists} "$OldInstallDir\*.*"
+    DetailPrint "$(STR_InstallingOld) ($OldInstallDir)"
+    nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "$(STR_InstallingOld)" "text"
+    Call KillProductProcesses
+    Pop $0
+    ExecWait '"$4" /S _?=$OldInstallDir' $R1
+    RMDir /r "$OldInstallDir"
+  ${EndIf}
+  StrCpy $4 ""
+FunctionEnd
+
+; =============================================================================
+;  安装主体
+; =============================================================================
+Section "MainSection" SEC01
+  CreateDirectory "$INSTDIR"
+  Delete "$INSTDIR\install.log"
+  LogSet on
+  !insertmacro NSISLog 'NSISSetup: "BeforeInstall" Entered...'
+  Call PrepareInstall
+  !insertmacro NSISLog 'NSISSetup: "BeforeInstall" Left...'
+  !insertmacro NSISLog 'NSISSetup: Files Entered...'
+
+  DetailPrint "正在解压文件……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在解压文件……" "text"
+
+  ; --- 根目录：配置文件 ---
+  !insertmacro NSISLog 'NSISSetup: 安装程序文件...'
+  SetOutPath "$INSTDIR"
+  SetOverwrite on
+  File "${__FILEDIR__}\Config.ini"
+
+  ; ---------------------------------------------------------------------------
+  ;  附加文件（默认不启用）
+  ;  把 Addon 目录内的全部文件与子目录按原有结构打包进安装程序，
+  ;  安装时写入 $INSTDIR，不包含 Addon 这一层目录名。
+  ;  需要启用时，取消下面两行注释（.keep 只是目录占位符，不写入）。
+  ; ---------------------------------------------------------------------------
+  ; SetOutPath "$INSTDIR"
+  ; File /r /x ".keep" "${__FILEDIR__}\Addon\*.*"
+
+  ; ---------------------------------------------------------------------------
+  ;  更新组件（默认不安装；需要时取消注释）
+  ;  资源位于 Addon\ 目录，默认不提供，需要时自行放入。
+  ; ---------------------------------------------------------------------------
+  ; File "${__FILEDIR__}\Addon\LibEasiUpdate.dll"
+  ; File "${__FILEDIR__}\Addon\Myou.dll"
+  ; File "${__FILEDIR__}\Addon\Update.config"
+  ; File "${__FILEDIR__}\Addon\Updater.exe"
+  ; File "${__FILEDIR__}\Addon\app-package.json"
+  ; File "${__FILEDIR__}\Addon\msvcp120.dll"
+  ; File "${__FILEDIR__}\Addon\msvcr120.dll"
+
+  ; --- Main：解决方案 Release 编译产物（排除 pdb） ---
+  SetOutPath "$INSTDIR\Main"
+  File /x "*.pdb" "${__FILEDIR__}\..\PPTServiceUltra\bin\Release\*.*"
+
+  ; ---------------------------------------------------------------------------
+  ;  随包分发的支持文件（默认不安装；需要时取消注释）
+  ; ---------------------------------------------------------------------------
+  ; SetOutPath "$INSTDIR\${SUPPORT_DIR}"
+  ; File "${__FILEDIR__}\Addon\Main\SupportFiles\EasiUpdateSetup.exe"
+  ; File "${__FILEDIR__}\Addon\Main\SupportFiles\dotnetfx45_full_x86_x64.exe"
+
+  ; ---------------------------------------------------------------------------
+  ;  Microsoft .NET Framework 4.5 检测 / 安装 / 重启（默认不启用）
+  ;  启用时还需：取消上方 SupportFiles 的 File 注释，以及变量区
+  ;  FrameworkVersion / NeedReboot 两行 Var 声明的注释。
+  ; ---------------------------------------------------------------------------
+  ; !insertmacro NSISLog 'NSISSetup: ThirdPackages Entered...'
+  ; !insertmacro NSISLog 'NSISSetup: 安装 Microsoft .Net 4.5 ...'
+  ;
+  ;
+  ; nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在安装 .Net Framework 4.5，预计需要五分钟..." "text"
+  ; StrCpy $NeedReboot "false"
+  ;
+  ; ; 读取已安装的 .NET 版本
+  ; ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Install"
+  ; ${If} $0 == 1
+  ;   ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
+  ;   ${If}   $0 >= 394802
+  ;     StrCpy $FrameworkVersion "4.6.2"
+  ;   ${ElseIf} $0 >= 394254
+  ;     StrCpy $FrameworkVersion "4.6.1"
+  ;   ${ElseIf} $0 >= 393295
+  ;     StrCpy $FrameworkVersion "4.6.0"
+  ;   ${ElseIf} $0 >= 379893
+  ;     StrCpy $FrameworkVersion "4.5.2"
+  ;   ${ElseIf} $0 >= 378675
+  ;     StrCpy $FrameworkVersion "4.5.1"
+  ;   ${ElseIf} $0 >= 378389
+  ;     StrCpy $FrameworkVersion "4.5.0"
+  ;   ${Else}
+  ;     StrCpy $FrameworkVersion "0.0.0"
+  ;   ${EndIf}
+  ; ${Else}
+  ;   ; 依次回退检查 v3.5 / v3.0 / v2.0 / v1.1 / v1.0
+  ;   ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5" "Install"
+  ;   StrCpy $FrameworkVersion "3.5"
+  ;   ${If} $0 != 1
+  ;     ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.0\Setup" "InstallSuccess"
+  ;     StrCpy $FrameworkVersion "3.0"
+  ;     ${If} $0 != 1
+  ;       ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727" "Install"
+  ;       StrCpy $FrameworkVersion "2.0.50727.832"
+  ;       ${If} $0 != 1
+  ;         ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v1.1.4322" "Install"
+  ;         StrCpy $FrameworkVersion "1.1.4322.573"
+  ;         ${If} $0 != 1
+  ;           ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\.NETFramework\policy\v1.0" "Install"
+  ;           StrCpy $FrameworkVersion "1.0.3705.0"
+  ;           ${If} $0 != 1
+  ;             StrCpy $FrameworkVersion "0.0.0"
+  ;           ${EndIf}
+  ;         ${EndIf}
+  ;       ${EndIf}
+  ;     ${EndIf}
+  ;   ${EndIf}
+  ; ${EndIf}
+  ;
+  ; ${If} $FrameworkVersion == "0.0.0"
+  ;   DetailPrint "$(STR_FrameworkBusy)"
+  ;   ExecWait '"$INSTDIR\${SUPPORT_DIR}\dotnetfx45_full_x86_x64.exe" /q /norestart' $0
+  ;   ${If} $0 == 0
+  ;     DetailPrint "$(STR_FrameworkOK)"
+  ;   ${ElseIf} $0 == 3010
+  ;     DetailPrint "$(STR_FrameworkReboot)"
+  ;     StrCpy $NeedReboot "true"
+  ;   ${Else}
+  ;     DetailPrint "$(STR_FrameworkFail)"
+  ;     MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(STR_FrameworkFail)" /SD IDOK
+  ;   ${EndIf}
+  ; ${Else}
+  ;   StrCpy $R5 "$FrameworkVersion"
+  ;   DetailPrint "$(STR_FrameworkSkip)"
+  ; ${EndIf}
+  ;
+  ; ${If} $NeedReboot == "true"
+  ;   MessageBox MB_YESNO|MB_ICONQUESTION|MB_TOPMOST "$(STR_RebootAsk)" /SD IDNO IDNO SkipReboot
+  ;   Reboot
+  ; SkipReboot:
+  ; ${EndIf}
+  ;
+  ; ---------------------------------------------------------------------------
+  ;  静默更新服务（默认不安装；需要时取消注释）
+  ; ---------------------------------------------------------------------------
+  ; !insertmacro NSISLog 'NSISSetup: 安装静默更新服务...'
+  ; SetOutPath "$INSTDIR\${SUPPORT_DIR}"
+  ; ExecWait '"$INSTDIR\${SUPPORT_DIR}\EasiUpdateSetup.exe" /S' $0
+  ; ${If} $0 == 2
+  ;   MessageBox MB_OK "$(STR_InternalError)"
+  ; ${EndIf}
+  ; !insertmacro NSISLog 'NSISSetup: ThirdPackages Left...'
+
+  !insertmacro NSISLog 'NSISSetup: Files Left...'
+
+  ; --- 快捷方式 / 注册表 ---
+  !insertmacro NSISLog 'NSISSetup: "ShortCuts" Entered...'
+  Call CreateShortcuts
+  !insertmacro NSISLog 'NSISSetup: "ShortCuts" Left...'
+  !insertmacro NSISLog 'NSISSetup: "Registry" Entered...'
+  Call WriteRegistry
+  !insertmacro NSISLog 'NSISSetup: "Registry" Left...'
+
+  ; --- 卸载程序 ---
+  !insertmacro NSISLog 'NSISSetup: "AfterInstall" Entered...'
+  DetailPrint "正在生成卸载程序……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成卸载程序……" "text"
+  CreateDirectory "$INSTDIR"
+  !insertmacro NSISLog 'NSISSetup: 发布卸载程序...'
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)"
+
+  DetailPrint "正在进行最后的安装步骤……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在进行最后的安装步骤……" "text"
+  !insertmacro NSISLog 'NSISSetup: "AfterInstall" Left...'
+
+  ; 安装完成即启动主程序，不再依赖完成页的「立刻体验」按钮；静默安装不启动。
+  IfSilent +2 0
+  Exec 'explorer "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"'
+  LogSet off
+SectionEnd
+
+; -----------------------------------------------------------------------------
+;  注册表
+; -----------------------------------------------------------------------------
+Function WriteRegistry
+  DetailPrint "正在写注册表……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在写注册表……" "text"
+
+  ; 卸载信息（App Paths 与控制面板）
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_DIR_REGKEY}" "" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName"     "$(STR_AppName)"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion"  "${PRODUCT_VERSION}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher"       "${PRODUCT_PUBLISHER}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout"    "${PRODUCT_WEB_SITE}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon"     "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+
+  ; ---------------------------------------------------------------------------
+  ;  安装目录体积统计（EstimatedSize，单位 KB）——默认不写入；需要时取消注释
+  ; ---------------------------------------------------------------------------
+  ; ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  ; WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "EstimatedSize" "$0"
+
+  WriteRegStr HKLM "${APP_REGKEY}" "type"    "1"
+  WriteRegStr HKLM "${APP_REGKEY}" "path"    "$INSTDIR"
+  WriteRegStr HKLM "${APP_REGKEY}" "version" "${PRODUCT_VERSION}"
+  WriteRegStr HKLM "${APP_REGKEY}" "code"    "${PRODUCT_GUID}"
+  WriteRegStr HKLM "${APP_REGKEY}" "ExePath" "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+  WriteRegStr HKLM "${APP_REGKEY}" "admin"   "0"
+
+  ; 开机自启
+  WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_EXE_NAME}" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+FunctionEnd
+
+; -----------------------------------------------------------------------------
+;  快捷方式
+; -----------------------------------------------------------------------------
+Function CreateShortcuts
+  DetailPrint "正在生成快捷方式……"
+  nsSkinEngine::SetControlData /NOUNLOAD "lbl_Detail" "正在生成快捷方式……" "text"
+  SetShellVarContext all
+  SetOutPath "$INSTDIR"
+  CreateDirectory "$SMPROGRAMS\$(STR_AppName)"
+  CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe"
+  ; 设置快捷方式：带 /settingmode 启动，已有实例会通过命名管道在自身打开设置窗口。
+  CreateShortCut "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName)设置.lnk" \
+      "$INSTDIR\Main\${PRODUCT_EXE_NAME}.exe" "/settingmode"
+FunctionEnd
+
+; =============================================================================
+;  卸载（MUI 现代界面）
+; =============================================================================
+Section "Uninstall"
+  SetShellVarContext all
+  ; 详细日志：引擎逐指令写入窗口详情区与 $INSTDIR\install.log
+  LogSet on
+
+  ; 卸载前同时结束「主程序 + 守护进程」两个进程（不在界面与日志中输出）。
+  ; 两者互守护，只结束一个会被另一个拉回，所以每轮都按名字结束两者（先守护进程）。
+  ; 按进程名而不是目录结束，避免升级流程以 /S _?= 调用时误杀 $INSTDIR 内的卸载器自身。
+  ; 每轮内部已做两遍 taskkill 复查，三轮之间留 200ms 覆盖互守护的重新拉起。
+  Call un.KillProductProcesses
+  Pop $0
+  Sleep 200
+  Call un.KillProductProcesses
+  Pop $0
+  Sleep 200
+  Call un.KillProductProcesses
+  Pop $0
+
+  Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName).lnk"
+  Delete "$SMPROGRAMS\$(STR_AppName)\$(STR_AppName)设置.lnk"
+  RMDir "$SMPROGRAMS\$(STR_AppName)"
+
+  DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "${PRODUCT_EXE_NAME}"
+  DeleteRegKey HKLM "${APP_REGKEY}"
+  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
+  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_DIR_REGKEY}"
+
+  Delete "$INSTDIR\Uninstall.exe"
+  Delete "$INSTDIR\Config.ini"
+  RMDir /r "$INSTDIR\Main"
+  RMDir /r "$INSTDIR\${SUPPORT_DIR}"
+  RMDir /r "$INSTDIR"
+
+  ; 结束日志并删除 install.log，最后移除安装目录
+  LogSet off
+  Delete "$INSTDIR\install.log"
+  RMDir "$INSTDIR"
+
+  ; 用户选择删除数据文件夹时，清理 %APPDATA%\PPTServiceUltra（Roaming，配置/日志等用户数据）。
+  ; 程序自 v808 起把数据目录从 Local 迁到 Roaming（AppPath.LocalRoot 用
+  ; Environment.SpecialFolder.ApplicationData），卸载必须删同一个位置。
+  ; 卸载段前面是 SetShellVarContext all，$APPDATA 会指向「所有用户」的 Roaming（ProgramData）；
+  ; 这里临时切回 current 才是当前登录用户的 %APPDATA%，删完再恢复 all。
+  ${If} $DeleteDataFolder == "1"
+    SetShellVarContext current
+    RMDir /r "$APPDATA\PPTServiceUltra"
+    SetShellVarContext all
+  ${EndIf}
+
+  ; 停留在卸载窗口，用户点「关闭」后才弹出完成提示
+  SetAutoClose false
+SectionEnd
+
+Function un.onInit
+  StrCpy $DeleteDataFolder "0"
+  ; 升级流程以 /S 调用卸载器：跳过确认框与数据询问，静默完成卸载（默认保留数据）
+  IfSilent SilentUninstall 0
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_UninstallConfirm)" IDYES +2
+  Abort
+  ; 是否删除数据文件夹（%APPDATA%\PPTServiceUltra，Roaming）；默认按钮为「否」，不主动删数据
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "$(STR_AskDeleteData)" IDYES +2
+  Goto SkipDeleteData
+  StrCpy $DeleteDataFolder "1"
+  SkipDeleteData:
+  SilentUninstall:
+FunctionEnd
+
+Function un.onUninstSuccess
+  IfSilent SilentDone 0
+  HideWindow
+  MessageBox MB_ICONINFORMATION|MB_OK "$(STR_UninstallDone)"
+  SilentDone:
+FunctionEnd

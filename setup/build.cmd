@@ -1,1 +1,1 @@
-makensis.exe "%~dp0PPTService.nsi"
+makensis.exe "%~dp0PPTServiceUltra.nsi"

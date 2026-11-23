@@ -1,0 +1,9 @@
+﻿namespace PPTServiceUltra.Ink.Core.Windows.Mathematics.Geometries
+{
+	public enum RectVerticalAlignment
+	{
+		Top,
+		Bottom,
+		Center
+	}
+}

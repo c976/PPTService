@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-// 全部项目共用的程序集元数据，统一以主程序 PPTService 的信息为标准。
+// 全部项目共用的程序集元数据，统一以主程序 PPTServiceUltra 的信息为标准。
 // 各项目通过 <Compile Include="..\AssemblyInfo.Shared.cs" /> 引入本文件；
 // 仅有的特殊差异（ThemeInfo / Guid / InternalsVisibleTo / XmlnsDefinition 等）
 // 保留在各自项目的 AssemblyInfo.cs 中。
@@ -14,9 +14,9 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 版本号与 git 短 hash 由 Version/Version.targets 在每次构建时写入各项目自己的
-// Properties\GitVersionInfo.g.cs（namespace 统一为 PPTService），所有项目完全同源。
+// Properties\GitVersionInfo.g.cs（namespace 统一为 PPTServiceUltra），所有项目完全同源。
 // 非 git 仓库 / 无 commit / git 不可用时 hash 为 "unknown"。
-[assembly: AssemblyVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyFileVersion(PPTService.GitVersionInfo.ProductVersion)]
-[assembly: AssemblyInformationalVersion(PPTService.GitVersionInfo.InformationalVersion)]
-[assembly: AssemblyMetadata("CommitHash", PPTService.GitVersionInfo.Hash)]
+[assembly: AssemblyVersion(PPTServiceUltra.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyFileVersion(PPTServiceUltra.GitVersionInfo.ProductVersion)]
+[assembly: AssemblyInformationalVersion(PPTServiceUltra.GitVersionInfo.InformationalVersion)]
+[assembly: AssemblyMetadata("CommitHash", PPTServiceUltra.GitVersionInfo.Hash)]

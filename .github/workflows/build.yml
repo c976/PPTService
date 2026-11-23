@@ -1,4 +1,4 @@
-name: Build PPTService
+name: Build PPTServiceUltra
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
     - name: Build solution (Release)
       # 串行构建：Defender 等共享输出目录的项目并行时会争抢 obj 下的 TemporaryGeneratedFile_*.cs，
       # 首次编译（无 obj）易出现 CS2001「找不到源文件」。去掉 /m 稳定优先。
-      run: msbuild PPTService.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /verbosity:minimal
+      run: msbuild PPTServiceUltra.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.5 /verbosity:minimal
 
     # 安装 NSIS 3.11 完整版，并覆盖 log 补丁包（makensis.exe / zlib1.dll / Stubs 均为 log 构建）
     # 注意：SourceForge 下载必须用 curl.exe（Invoke-WebRequest 会拿到 HTML 而非 zip）
@@ -78,13 +78,13 @@ jobs:
         call build.cmd
 
     # 读取本次构建实际使用的产品版本号，用于 artifact 命名。
-    # MSBuild 生成的 Version\Version.nsh；缺失时回退到 PPTService.nsi 里的 !define。
+    # MSBuild 生成的 Version\Version.nsh；缺失时回退到 PPTServiceUltra.nsi 里的 !define。
     - name: Read product version
       id: product_version
       shell: pwsh
       run: |
         $versionFile = './Version/Version.nsh'
-        if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTService.nsi' }
+        if (-not (Test-Path $versionFile)) { $versionFile = './setup/PPTServiceUltra.nsi' }
         $content = Get-Content -Path $versionFile -Raw
         if ($content -match '(?m)^\s*!define\s+PRODUCT_VERSION\s+"([^"]+)"') {
           $version = $Matches[1]

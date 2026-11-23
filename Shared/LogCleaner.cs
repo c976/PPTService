@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
-namespace PPTService.Shared
+namespace PPTServiceUltra.Shared
 {
 	/// <summary>
 	/// 按日期命名日志（yyyy-MM-dd.log）的自动清理：仅处理传入目录内、文件名是合法日期的 .log，

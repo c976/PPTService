@@ -1,0 +1,9 @@
+﻿namespace PPTServiceUltra.Ink.Core.Storage
+{
+	internal enum DeltaAction
+	{
+		Add,
+		Delete,
+		Update
+	}
+}

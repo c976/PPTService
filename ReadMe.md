@@ -1,6 +1,6 @@
 # PPTServiceUltra
 
-基于 PPTService 1.0.0.795 二次开发增强版本
+基于 PPTServiceUltra 1.0.0.795 二次开发增强版本
 
 目标框架 Visual Studio 2015 .Net Framework 4.5
 
@@ -8,20 +8,20 @@
 
 ```
 \
-├── PPTService.sln                  解决方案
+├── PPTServiceUltra.sln                  解决方案
 ├── Version\                        公共文件（版本与程序集信息：Version.targets / build.ver / AssemblyInfo.Shared.cs 等）
 ├── ReadMe.md
 ├── lib\                            第三方依赖 DLL
-├── PPTService\                     主程序
-├── PPTService.Core\                核心库
-├── PPTService.Collection\          数据集合与访问
-├── PPTService.Defender\            守护进程
-├── PPTService.Ink\                 批注实现库
-├── PPTService.Ink.Core\            批注核心层
-├── PPTService.Ink.Hardware\        希沃触控 / 智能笔插件（可选）
-├── PPTService.Ink.Hardware.Core\   触控插件依赖（可选）
-├── PPTService.Hardware\            USB/HID MCU 硬件插件（可选）
-├── PPTService.NetShared\           二维码分享插件（可选）
+├── PPTServiceUltra\                     主程序
+├── PPTServiceUltra.Core\                核心库
+├── PPTServiceUltra.Collection\          数据集合与访问
+├── PPTServiceUltra.Defender\            守护进程
+├── PPTServiceUltra.Ink\                 批注实现库
+├── PPTServiceUltra.Ink.Core\            批注核心层
+├── PPTServiceUltra.Ink.Hardware\        希沃触控 / 智能笔插件（可选）
+├── PPTServiceUltra.Ink.Hardware.Core\   触控插件依赖（可选）
+├── PPTServiceUltra.Hardware\            USB/HID MCU 硬件插件（可选）
+├── PPTServiceUltra.NetShared\           二维码分享插件（可选）
 ├── setup\                          NSIS 安装程序
 └── .github\workflows\              Github Action build.yml（编译）/ release.yml（发布）
 ```
@@ -42,9 +42,9 @@
 
 ### 插件化
 
-- **智能笔**：`PPTService.Ink.Hardware.dll`、`PPTService.Ink.Hardware.Core.dll` 为可选插件，提供原始触控与智能笔压感能力。
-- **MCU**：`PPTService.Hardware.dll` 承载 USB/HID MCU 检测与安卓笔禁用/恢复命令；主程序只保留 `McuService` 调用门面，通过反射调用，插件缺失时安全降级为「不操作」。
-- **二维码分享**：`PPTService.NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
+- **智能笔**：`PPTServiceUltra.Ink.Hardware.dll`、`PPTServiceUltra.Ink.Hardware.Core.dll` 为可选插件，提供原始触控与智能笔压感能力。
+- **MCU**：`PPTServiceUltra.Hardware.dll` 承载 USB/HID MCU 检测与安卓笔禁用/恢复命令；主程序只保留 `McuService` 调用门面，通过反射调用，插件缺失时安全降级为「不操作」。
+- **二维码分享**：`PPTServiceUltra.NetShared.dll` 承载二维码分享所需的网络能力，主程序通过插件方式调用。
 
 ### 修复的问题
 
