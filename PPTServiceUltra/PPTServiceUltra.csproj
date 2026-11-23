@@ -212,7 +212,10 @@
     <Compile Include="PPTServiceUltra\PointExtensions.cs" />
     <Compile Include="PPTServiceUltra\PointUtils.cs" />
     <Compile Include="PPTServiceUltra\PptAnalyzer.cs" />
+    <Compile Include="PPTServiceUltra\ComPptDriver.cs" />
+    <Compile Include="PPTServiceUltra\IPptDriver.cs" />
     <Compile Include="PPTServiceUltra\PptOperator.cs" />
+    <Compile Include="PPTServiceUltra\RotPptDriver.cs" />
     <Compile Include="PPTServiceUltra\PptSharer.cs" />
     <Compile Include="PPTServiceUltra\ProcessHelper.cs" />
     <Compile Include="PPTServiceUltra\PropertyChangeNotifier.cs" />

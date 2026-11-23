@@ -94,6 +94,22 @@ namespace PPTServiceUltra
 		/// </summary>
 		public bool LegacyTopmostWindow { get; set; }
 
+		/// <summary>
+		/// PPT 调用方法：Auto（默认，COM 失败时自动切兼容通道）/
+		/// Com（只用注册表 COM 通道）/ Rot（只用 ROT + 后期绑定兼容通道）。
+		/// </summary>
+		public string PptInvokeMode { get; set; }
+
+		public const string InvokeModeAuto = "Auto";
+		public const string InvokeModeCom = "Com";
+		public const string InvokeModeRot = "Rot";
+
+		/// <summary>旧配置缺字段或值非法时回落到 Auto。</summary>
+		public static string NormalizeInvokeMode(string value)
+		{
+			return (value == InvokeModeCom || value == InvokeModeRot) ? value : InvokeModeAuto;
+		}
+
         /// <summary>把配置里的透明度规范到 20–100；旧配置缺字段或值非法时回落到默认 70。</summary>
         public static int NormalizeToolbarOpacity(int value)
         {
@@ -122,6 +138,7 @@ namespace PPTServiceUltra
 			AutoFadePageButtons = true;
 			ToolbarOpacity = DefaultToolbarOpacity;
 			LegacyTopmostWindow = false;
+			PptInvokeMode = InvokeModeAuto;
 		}
     }
 
@@ -180,6 +197,8 @@ namespace PPTServiceUltra
 			cfg.Theme = ThemeManager.Normalize(cfg.Theme);
 			// 旧配置文件没有透明度字段时保持构造函数里的 70；越界值回落到 70。
 			cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
+			// 旧配置文件没有调用方式字段时按 Auto 处理。
+			cfg.PptInvokeMode = UserConfig.NormalizeInvokeMode(cfg.PptInvokeMode);
                 // /debug 模式默认在内存中启用自实现批注，启动即可测试压感笔迹与手势橡皮；
                 // 不写回 UserConfig.json，不影响正常启动。用户在设置里改过后以用户选择为准。
                 if (DebugMode.IsEnabled && !_annotationUserOverride)
@@ -212,7 +231,8 @@ namespace PPTServiceUltra
 			HideFunctionBar = false,
 			AutoFadePageButtons = true,
 			ToolbarOpacity = UserConfig.DefaultToolbarOpacity,
-			LegacyTopmostWindow = false
+			LegacyTopmostWindow = false,
+			PptInvokeMode = UserConfig.InvokeModeAuto
 		};
         }
 
@@ -283,6 +303,8 @@ namespace PPTServiceUltra
             // 窗口层级兼容开关：即时切换「附属 PPT 放映窗口」/「旧版全局置顶」。
             // 内部幂等，放映未开始时仅记录状态，等 ShowBegin 再按此层级挂接。
             WindowStateHelper.ApplyWindowLayerMode(ViewHelper.MainWindow);
+            // PPT 调用方式（自动 / COM / ROT）改动即时生效；放映中忽略切换，下一场放映再按新方式。
+            PptOperator.Instance?.ApplyInvokeMode(cfg.PptInvokeMode);
         }
 
 		/// <summary>

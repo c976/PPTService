@@ -31,6 +31,10 @@ namespace PPTServiceUltra
         // 上偶发匹配不到、导致保存时把用户设置重置成默认值。
         private static readonly string[] ThemeValues = { "Light", "Dark", "System" };
         private static readonly string[] PagePosValues = { "Default", "Bottom", "Both", "None" };
+        private static readonly string[] InvokeModeValues =
+        {
+            UserConfig.InvokeModeAuto, UserConfig.InvokeModeCom, UserConfig.InvokeModeRot
+        };
 
         private static int ValueIndex(string[] values, string value)
         {
@@ -197,6 +201,7 @@ namespace PPTServiceUltra
             // 开关文案是「批注窗口附着PPT放映窗口」：勾选=附着(LegacyTopmostWindow=false)，
             // 取消勾选=全局置顶(true)。配置字段语义不变，仅在 UI 层反转。
             LegacyTopmostWindowCheckBox.IsChecked = !cfg.LegacyTopmostWindow;
+            PptInvokeModeComboBox.SelectedIndex = ValueIndex(InvokeModeValues, cfg.PptInvokeMode);
             ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, cfg.Theme);
             PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, cfg.PageTurningPosition);
             ToolbarOpacitySlider.Value = UserConfig.NormalizeToolbarOpacity(cfg.ToolbarOpacity);
@@ -408,6 +413,7 @@ namespace PPTServiceUltra
             cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
             // 勾选「附着PPT放映窗口」= 旧置顶开关关闭；取消勾选才启用全局置顶。
             cfg.LegacyTopmostWindow = LegacyTopmostWindowCheckBox.IsChecked != true;
+            cfg.PptInvokeMode = ValueAt(InvokeModeValues, PptInvokeModeComboBox.SelectedIndex, UserConfig.InvokeModeAuto);
             cfg.Theme = ValueAt(ThemeValues, ThemeComboBox.SelectedIndex, ThemeManager.ThemeLight);
             cfg.PageTurningPosition = ValueAt(PagePosValues, PageTurningPositionComboBox.SelectedIndex, "Default");
             cfg.ToolbarOpacity = UserConfig.NormalizeToolbarOpacity(
@@ -433,6 +439,7 @@ namespace PPTServiceUltra
                 HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
                 AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
                 LegacyTopmostWindowCheckBox.IsChecked = !def.LegacyTopmostWindow;
+                PptInvokeModeComboBox.SelectedIndex = ValueIndex(InvokeModeValues, def.PptInvokeMode);
                 ThemeComboBox.SelectedIndex = ValueIndex(ThemeValues, def.Theme);
                 PageTurningPositionComboBox.SelectedIndex = ValueIndex(PagePosValues, def.PageTurningPosition);
                 ToolbarOpacitySlider.Value = def.ToolbarOpacity;
@@ -453,10 +460,10 @@ namespace PPTServiceUltra
         {
             Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog
             {
-                Title = "生成事件收集日志",
+                Title = "生成事件诊断信息",
                 Filter = "日志文件 (*.log)|*.log",
                 DefaultExt = "log",
-                FileName = "PPTServiceUltra-事件收集-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log"
+                FileName = "PPTServiceUltra-诊断信息-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log"
             };
             if (dialog.ShowDialog() != true)
             {
@@ -466,13 +473,13 @@ namespace PPTServiceUltra
             bool ok = FridayReporter.TryExportEvents(dialog.FileName, out count);
             if (ok)
             {
-                MessageBox.Show("已生成事件收集日志（" + count + " 条事件）：\n" + dialog.FileName,
-                    "生成事件收集日志", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("已生成诊断信息（" + count + " 条事件）：\n" + dialog.FileName,
+                    "生成事件诊断信息", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
                 MessageBox.Show("生成失败，请检查目标路径是否可写。",
-                    "生成事件收集日志", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "生成事件诊断信息", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
