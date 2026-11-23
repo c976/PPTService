@@ -1,41 +1,27 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace PPTServiceUltra.Collection
 {
 	/// <summary>
-	/// 埋点收集门面：保留原有的事件收集语义（立即 / 延迟缓存），但不再向服务器发送任何数据。
-	/// 收集到的事件写入 %APPDATA%\PPTServiceUltra\Logs\Events\yyyy-MM-dd.log，
-	/// 并按 7 天 / 总量 30MB 自动清理（从最早的开始），不会长期占用磁盘。
+	/// 埋点收集门面：保留原有的事件收集语义（立即 / 延迟缓存），但事件只缓存在内存中，
+	/// 不会自动写盘，也不会联网。只有用户在「设置 → 生成事件收集日志」里手动导出时，
+	/// 才把当前缓存写入其指定的文件。
 	/// </summary>
 	public static class FridayReporter
 	{
-		private const int KeepDays = 7;
-		private const long MaxTotalBytes = 30L * 1024 * 1024;
-		private const string DateFormat = "yyyy-MM-dd";
+		// 环形缓存上限：避免长期运行占用内存；超出后丢弃最早的事件。
+		private const int MaxBufferedEvents = 2000;
 
 		public static bool IsInitialize;
 
 		public static readonly object InitializeLocker = new object();
 
-		private static readonly ConcurrentDictionary<string, string> EventCache = new ConcurrentDictionary<string, string>();
+		private static readonly object BufferLocker = new object();
 
-		private static readonly object WriteLocker = new object();
-
-		private static DateTime _lastClean = DateTime.MinValue;
-
-		private static string EventsDirectory
-		{
-			get
-			{
-				return Path.Combine(
-					Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-					"PPTServiceUltra", "Logs", "Events");
-			}
-		}
+		private static readonly Queue<string> EventBuffer = new Queue<string>();
 
 		public static bool IsReportEnabled
 		{
@@ -46,41 +32,33 @@ namespace PPTServiceUltra.Collection
 		{
 			lock (InitializeLocker)
 			{
-				if (IsInitialize)
-				{
-					return;
-				}
+				// 不再构造 EventReporter（它会产生网络上报），也不再写事件文件。
+				// 保留调用以维持初始化语义；后续事件直接进内存缓存。
 				IsInitialize = true;
-				// 不再构造 EventReporter（它会产生网络上报）。保留调用以维持初始化语义。
-				foreach (KeyValuePair<string, string> item in EventCache)
-				{
-					WriteEvent(item.Key, item.Value);
-				}
-				EventCache.Clear();
 			}
 		}
 
 		public static void ReportEventImmediately(string eventId)
 		{
-			WriteEvent(eventId, null);
+			BufferEvent(eventId, null);
 		}
 
 		public static void ReportEventImmediately(string eventId, string eventValue)
 		{
-			WriteEvent(eventId, eventValue);
+			BufferEvent(eventId, eventValue);
 		}
 
 		public static void ReportEventDelayed(string eventId)
 		{
-			ReportEventImmediately(eventId);
+			BufferEvent(eventId, null);
 		}
 
 		public static void ReportEventDelayed(string eventId, string eventValue)
 		{
-			ReportEventImmediately(eventId, eventValue);
+			BufferEvent(eventId, eventValue);
 		}
 
-		private static void WriteEvent(string eventId, string eventValue)
+		private static void BufferEvent(string eventId, string eventValue)
 		{
 			if (string.IsNullOrWhiteSpace(eventId))
 			{
@@ -88,23 +66,18 @@ namespace PPTServiceUltra.Collection
 			}
 			try
 			{
-				lock (WriteLocker)
+				string line = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + eventId.Trim();
+				if (!string.IsNullOrEmpty(eventValue))
 				{
-					string directory = EventsDirectory;
-					if (!Directory.Exists(directory))
+					line += " : " + eventValue;
+				}
+				lock (BufferLocker)
+				{
+					EventBuffer.Enqueue(line);
+					while (EventBuffer.Count > MaxBufferedEvents)
 					{
-						Directory.CreateDirectory(directory);
+						EventBuffer.Dequeue();
 					}
-					DateTime now = DateTime.Now;
-					string line = "[" + now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + eventId.Trim();
-					if (!string.IsNullOrEmpty(eventValue))
-					{
-						line += " : " + eventValue;
-					}
-					File.AppendAllText(
-						Path.Combine(directory, now.ToString(DateFormat, CultureInfo.InvariantCulture) + ".log"),
-						line + Environment.NewLine);
-					Clean(directory, now);
 				}
 			}
 			catch
@@ -113,61 +86,47 @@ namespace PPTServiceUltra.Collection
 			}
 		}
 
-		/// <summary>清理过期的事件日志：保留 7 天，或总量超 30MB 时从最早开始删；当天文件始终保留。</summary>
-		private static void Clean(string directory, DateTime now)
+		/// <summary>
+		/// 手动导出：由设置窗口的按钮触发，把当前内存缓存一次性写入用户指定的文件。
+		/// 不传路径时不写任何文件，也不会在后台自动创建目录。
+		/// </summary>
+		public static bool TryExportEvents(string filePath, out int eventCount)
 		{
+			eventCount = 0;
+			if (string.IsNullOrWhiteSpace(filePath))
+			{
+				return false;
+			}
+			string[] lines;
+			lock (BufferLocker)
+			{
+				lines = EventBuffer.ToArray();
+			}
 			try
 			{
-				if (_lastClean != DateTime.MinValue && (now - _lastClean).TotalMinutes < 1.0)
+				string directory = Path.GetDirectoryName(filePath);
+				if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 				{
-					return;
+					Directory.CreateDirectory(directory);
 				}
-				_lastClean = now;
-
-				List<FileInfo> files = new List<FileInfo>();
-				DateTime oldest = now.Date.AddDays(-(KeepDays - 1));
-				long total = 0L;
-				foreach (string path in Directory.GetFiles(directory, "????-??-??.log", SearchOption.TopDirectoryOnly))
+				using (StreamWriter writer = new StreamWriter(filePath, false, new UTF8Encoding(true)))
 				{
-					DateTime date;
-					if (!DateTime.TryParseExact(Path.GetFileNameWithoutExtension(path), DateFormat,
-						CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+					writer.WriteLine("# PPTServiceUltra 事件收集日志");
+					writer.WriteLine("# 生成时间: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+					writer.WriteLine("# 内容: 事件名称、发生时间和可选结果值；不含 PPT 内容、文件路径或设备标识，不联网发送。");
+					writer.WriteLine("# 本次导出事件数: " + lines.Length + "（仅保留最近 " + MaxBufferedEvents + " 条）");
+					writer.WriteLine();
+					foreach (string line in lines)
 					{
-						continue;
-					}
-					FileInfo info = new FileInfo(path);
-					files.Add(info);
-					total += info.Length;
-				}
-				files.Sort(delegate(FileInfo a, FileInfo b) { return a.CreationTime.CompareTo(b.CreationTime); });
-
-				foreach (FileInfo info in files)
-				{
-					DateTime date;
-					if (!DateTime.TryParseExact(Path.GetFileNameWithoutExtension(info.FullName), DateFormat,
-						CultureInfo.InvariantCulture, DateTimeStyles.None, out date) || date >= now.Date)
-					{
-						continue; // 当天文件始终保留
-					}
-					if (date >= oldest && total <= MaxTotalBytes)
-					{
-						break;
-					}
-					try
-					{
-						long length = info.Length;
-						info.Delete();
-						total -= length;
-					}
-					catch
-					{
-						// 单个文件删除失败不影响其它文件。
+						writer.WriteLine(line);
 					}
 				}
+				eventCount = lines.Length;
+				return true;
 			}
 			catch
 			{
-				// 清理失败不影响事件收集。
+				return false;
 			}
 		}
 	}

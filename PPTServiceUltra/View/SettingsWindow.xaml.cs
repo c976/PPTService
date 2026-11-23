@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using PPTServiceUltra.Collection;
 
 namespace PPTServiceUltra
 {
@@ -442,6 +443,37 @@ namespace PPTServiceUltra
                 _loading = false;
             }
             SaveAndApply();
+        }
+
+        /// <summary>
+        /// 手动收集入口：让用户自己选择保存位置，只有此时才把内存中的事件缓存写成文件。
+        /// 事件收集不改变任何设置，也不参与 SaveAndApply。
+        /// </summary>
+        private void ExportEvents_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "生成事件收集日志",
+                Filter = "日志文件 (*.log)|*.log",
+                DefaultExt = "log",
+                FileName = "PPTServiceUltra-事件收集-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log"
+            };
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+            int count;
+            bool ok = FridayReporter.TryExportEvents(dialog.FileName, out count);
+            if (ok)
+            {
+                MessageBox.Show("已生成事件收集日志（" + count + " 条事件）：\n" + dialog.FileName,
+                    "生成事件收集日志", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("生成失败，请检查目标路径是否可写。",
+                    "生成事件收集日志", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)

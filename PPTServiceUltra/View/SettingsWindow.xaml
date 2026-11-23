@@ -22,6 +22,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,6">
@@ -153,7 +154,17 @@
           </Grid>
         </GroupBox>
 
-        <Grid Grid.Row="5" Margin="0,0,0,0">
+        <GroupBox Grid.Row="5" Header="诊断信息" Margin="0,0,0,6"
+                  Foreground="{DynamicResource Theme.SettingsForeground}">
+          <StackPanel Margin="4">
+            <TextBlock Text="事件只在内存中暂存，不会自动写盘或联网。手动生成时保存：按钮点击等事件名称与时间、启动耗时、二维码分享结果；不包含 PPT 内容、文件路径或设备标识。"
+                       Margin="2" FontSize="11" Foreground="{DynamicResource Theme.SettingsMutedText}" TextWrapping="Wrap" />
+            <Button Name="ExportEventsButton" Content="生成事件收集日志…" Width="160" Height="26"
+                    Margin="2,6,2,2" HorizontalAlignment="Left" Click="ExportEvents_Click" />
+          </StackPanel>
+        </GroupBox>
+
+        <Grid Grid.Row="6" Margin="0,0,0,0">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
