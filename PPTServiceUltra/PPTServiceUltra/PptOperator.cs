@@ -418,7 +418,9 @@ namespace PPTServiceUltra
 			}
 			catch (COMException ex) when (SyntacticSugar.IsTransientComException(ex))
 			{
-				// PPT 正忙（RPC_E_CALL_REJECTED 等）：保留已挂接的 _app，下轮快速重试。
+				// PPT 正忙（RPC_E_CALL_REJECTED 等）：下轮快速重试。
+				// 必须记录一次，否则「工具栏一直不出现」时用户和开发者都看不到任何线索。
+				Log.WriteError("PPT COM busy (transient), will retry: " + ex.Message);
 			}
 			catch (Exception)
 			{
@@ -502,12 +504,18 @@ namespace PPTServiceUltra
 				new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").RemoveEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
 				new ComAwareEventInfo(typeof(EApplication_Event), "PresentationCloseFinal").RemoveEventHandler(_app, new EApplication_PresentationCloseFinalEventHandler(AppOnPresentationCloseFinal));
 			}
-			_app = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-			PptVersionManager.UpdatePptApplicationInfo(_app.Path, _app.Version);
-			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(_app, new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
-			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(_app, new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
-			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
-			new ComAwareEventInfo(typeof(EApplication_Event), "PresentationCloseFinal").AddEventHandler(_app, new EApplication_PresentationCloseFinalEventHandler(AppOnPresentationCloseFinal));
+			// 先挂到局部变量：任何一个 AddEventHandler 被 PPT 忙拒绝时，
+			// 字段 _app 必须保持 null，下一轮探测才能重新挂全部事件。
+			// 旧逻辑先赋 _app 再逐个订阅，中途失败会永久留下「部分订阅」状态，
+			// 之后放映事件再也收不到、且被空 catch 吞掉无任何日志。
+			Microsoft.Office.Interop.PowerPoint.Application app =
+				(Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+			PptVersionManager.UpdatePptApplicationInfo(app.Path, app.Version);
+			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(app, new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
+			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(app, new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
+			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
+			new ComAwareEventInfo(typeof(EApplication_Event), "PresentationCloseFinal").AddEventHandler(app, new EApplication_PresentationCloseFinalEventHandler(AppOnPresentationCloseFinal));
+			_app = app;
 			ConfigHelper.Instance.IsInitApplicationSuccessful = true;
 			Log.WriteDebug("PPTApplicationInitialized");
 		}
@@ -562,6 +570,16 @@ namespace PPTServiceUltra
 		private void AppSlideShowBegin(SlideShowWindow wn)
 		{
 			// COM 事件与启动轮询可能并发/重入；IsShowing 之前的准备工作也要挡住。
+			// 自愈：若标记显示仍在放映、但当前已无放映窗口（上一场 ShowEnd 事件丢失，
+			// 或初始化异常导致标记卡住），必须清掉，否则此后每场放映都会在这里静默 return，
+			// 工具栏永久不出现且无任何日志。
+			if (IsShowing && wn == null)
+			{
+				Log.WriteError("ShowBegin self-heal: IsShowing stuck true without live window, resetting.");
+				IsShowing = false;
+				ConfigHelper.Instance.IsShowing = false;
+				_isShowTypeSpeaker = false;
+			}
 			if (IsShowing || _isHandlingShowBegin)
 			{
 				return;
@@ -635,6 +653,7 @@ namespace PPTServiceUltra
 			}
 			if (_showBeginRetryCount >= ShowBeginMaxRetryCount)
 			{
+				Log.WriteError("ShowBegin retry limit reached (" + ShowBeginMaxRetryCount + "), giving up this show.");
 				return;
 			}
 			_showBeginRetryCount++;
@@ -674,18 +693,27 @@ namespace PPTServiceUltra
 			SetSlideAdvanceOnClickProperty(MsoTriState.msoTrue);
 			SyntacticSugar.TryCatchAction(() =>
 			{
+				// IsShowing 必须无条件复位：只按 _isShowTypeSpeaker 判断会在放映类型
+				// 误判时留下卡死的 true，导致后续放映全被 AppSlideShowBegin 静默挡掉。
+				bool wasShowing = IsShowing;
+				IsShowing = false;
+				ConfigHelper.Instance.IsShowing = false;
 				if (_isShowTypeSpeaker)
 				{
-					IsShowing = false;
 					PptAnalyzer.StopAnalyzeAllAsyn();
 					SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 					{
 						_stopwatch.Stop();
 					});
-					ConfigHelper.Instance.IsShowing = IsShowing;
 					_isShowTypeSpeaker = false;
 					OnShowEnd();
 					Log.WriteDebug("PPTShowEnd");
+				}
+				else if (wasShowing)
+				{
+					// 非演讲者放映也要通知 UI 收起工具栏，避免状态残留。
+					OnShowEnd();
+					Log.WriteDebug("PPTShowEnd (non-speaker)");
 				}
 			});
 		}

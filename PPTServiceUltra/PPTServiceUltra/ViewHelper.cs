@@ -64,10 +64,10 @@ namespace PPTServiceUltra
 
 		private void Instance_ShowBegin(object sender, EventArgs e)
 		{
-			// ShowBegin 可能在同一场放映里被 COM 事件与进程轮询重复触发（机器上有多个
-			// powerpnt.exe 时更容易遇到）。必须在创建窗口之前退订：否则重入的第二次回调
-			// 仍拿着旧的事件快照，会再 new 一个 MainWindow，出现两个工具栏互相抢状态。
-			PptOperator.Instance.ShowBegin -= Instance_ShowBegin;
+			// 不再退订事件：旧逻辑在第一次 ShowBegin 就退订，若这次创建窗口的过程中
+			// 抛异常（LoadingScreen / LeftArea 构造失败等），MainWindow 保持 null 但 handler
+			// 已消失，此后每场放映都没有人能创建工具栏，必须重启进程才能恢复。
+			// 改为常驻订阅 + 下面的「窗口已存在只刷新」判重，既能防重复创建，也能自愈重试。
 			SyntacticSugar.CurrentDispatcherInvoke(() =>
 			{
 				// 防御性兜底：窗口已存在时只刷新它，绝不创建第二份工具栏实例。
