@@ -615,6 +615,7 @@ namespace PPTServiceUltra
 		{
 			// Office 原生批注不支持修改笔迹粗细：只隐藏三个粗细选项，颜色选择保留。
 			bool showThickness = UserConfigManager.Load().UseSelfAnnotation;
+			ApplyPenPalette(showThickness);
 			ThicknessGrid.Visibility = showThickness ? Visibility.Visible : Visibility.Collapsed;
 			ColorGrid.Margin = showThickness ? new Thickness(-12.0, 4.0, 0.0, 0.0) : new Thickness(0.0, 4.0, 0.0, 0.0);
 			// 只显示颜色时把 3x3 色块居中，避免左侧留白。
@@ -642,6 +643,33 @@ namespace PPTServiceUltra
 				? new WindowInteropHelper(ViewHelper.InnerBoardWindow).Handle
 				: PptOperator.Instance.SlideShowWindowIntPtr;
 			WindowsApi.SetForegroundWindow(hwnd);
+		}
+
+		/// <summary>
+		/// 按批注模式切换颜色盘：自实现批注用参考图 9 色；Office 原生批注保留原 8 色（第 9 格隐藏）。
+		/// </summary>
+		private void ApplyPenPalette(bool selfAnnotation)
+		{
+			string[] palette = selfAnnotation
+				? new string[] { "#FFF14527", "#FFFF810C", "#FFFFC045", "#FF1DDF2E", "#FF01FEFF", "#FF016FE6", "#FFE252FF", "#FFFFFFFF", "#FF010101" }
+				: new string[] { "#FFFF1200", "#FFFF8B00", "#FF331EB5", "#FF306ED9", "#FF306C01", "#FF66D552", "#FFFFFFFF", "#FF000000" };
+			for (int i = 0; i < ColorGrid.Children.Count; i++)
+			{
+				RadioButton radioButton = ColorGrid.Children[i] as RadioButton;
+				if (radioButton == null)
+				{
+					continue;
+				}
+				if (i < palette.Length)
+				{
+					radioButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(palette[i]));
+					radioButton.Visibility = Visibility.Visible;
+				}
+				else
+				{
+					radioButton.Visibility = Visibility.Collapsed;
+				}
+			}
 		}
 
 		/// <summary>按真值源同步颜色盘 / 粗细三档的勾选态。</summary>

@@ -258,14 +258,15 @@
                   <RadioButton Style="{StaticResource Style.ToggleButton.PenThickness}" pptService:ControlHelper.Geometry="{StaticResource Geometry.PenThickness.Bold}" Tag="{x:Static pptService:PenSettings.PenBoldWeight}" />
                 </UniformGrid>
                 <UniformGrid Name="ColorGrid" Rows="3" Columns="3" Margin="-12 4 0 0" VerticalAlignment="Center" RadioButton.Click="RadioButton_OnClick">
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFFF1200" IsChecked="True" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#ff8b00" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#331eb5" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#306ed9" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#306c01" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#66d552" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#ffffff" />
-                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#000000" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFF14527" IsChecked="True" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFFF810C" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFFFC045" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FF1DDF2E" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FF01FEFF" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FF016FE6" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFE252FF" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" Background="#FFFFFFFF" />
+                  <RadioButton Style="{StaticResource Style.ToggleButton.PenColor}" x:Name="PenColor9" Background="#FF010101" />
                 </UniformGrid>
               </StackPanel>
               <UIElement.Effect>
