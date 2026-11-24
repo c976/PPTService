@@ -326,7 +326,9 @@ namespace PPTServiceUltra
 		/// </summary>
 		public static void ResetPenSettings()
 		{
-			_color = PenSettings.DefaultColor;
+			// 色盘首色随批注模式切换：自实现 9 色板首色 #FFF14527，Office 原生仍是旧红。
+			// 复位勾选态时要用当前模式的首色，否则 Office 模式下会对不上任何一项。
+			_color = PenSettings.GetDefaultColor(UserConfigManager.Load().UseSelfAnnotation);
 			_thickness = PenSettings.PenWeight;
 			if (PptOperator.Instance != null)
 			{

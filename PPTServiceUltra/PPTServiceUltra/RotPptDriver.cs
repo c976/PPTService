@@ -303,17 +303,24 @@ namespace PPTServiceUltra
 			_slidesCount = GetSlidesCount(_presentation);
 			_currentPage = GetCurrentPage(_slideShowWindow);
 			_hwnd = ResolveShowWindowHandle();
-			if (_slidesCount <= 0 || _hwnd == IntPtr.Zero)
+			if (_slidesCount <= 0)
 			{
-				// 页数或窗口都拿不到时先不认这场放映，下个 tick 再试，
-				// 避免弹一个残缺的工具栏。
-				Log.WriteDebug("RotPptDriver BeginShow deferred: pages=" + _slidesCount + " hwnd=" + _hwnd);
+				// 连页数都拿不到，说明这不是一场真正可用的放映，下个 tick 再试。
+				Log.WriteDebug("RotPptDriver BeginShow deferred: pages=" + _slidesCount);
 				return;
+			}
+			// 只要确认在放映（页数有效）就发 ShowBegin 让工具栏出现，不再以 HWND 为硬门槛。
+			// 用户本机 COM/ROT 都可能拿不到放映窗口句柄；此前 HWND=0 时直接 return，
+			// 导致工具栏永远不显示、也没法翻页。工具栏的置顶由 Owner 关系维持，HWND 只用于
+			// 焦点交还和定位，缺失时后续 tick 会在 ResolveShowWindowHandle 里继续补。
+			if (_hwnd == IntPtr.Zero)
+			{
+				Log.WriteDebug("RotPptDriver ShowBegin without HWND (will keep resolving).");
 			}
 			_isShowing = true;
 			_lastActivity = DateTime.Now;
 			ShowBegin?.Invoke(this, EventArgs.Empty);
-			Log.WriteDebug("RotPptDriver ShowBegin pages=" + _slidesCount);
+			Log.WriteDebug("RotPptDriver ShowBegin pages=" + _slidesCount + " hwnd=" + _hwnd);
 		}
 
 		private void RaiseShowEndIfNeeded()

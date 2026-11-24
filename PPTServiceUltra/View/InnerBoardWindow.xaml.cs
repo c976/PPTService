@@ -50,6 +50,33 @@ namespace PPTServiceUltra
 				HiddenWindow();
 				FridayReporter.ReportEventImmediately(EventID.InnerBoardExit);
 			};
+			// 与 PPT 主批注层一致：颜色盘/清屏滑杆打开时，点击板中板绘图区的第一击
+			// 要关掉弹窗并继续落到本窗口 Board 上落笔/擦除。MainWindow 的
+			// PreviewMouseDown 只认主批注 Board，板中板是独立窗口收不到，故在此补一份。
+			// 只关弹窗、不设 e.Handled，让点击继续路由到 Board。
+			PreviewMouseDown += InnerBoardWindow_PreviewMouseDown;
+		}
+
+		private void InnerBoardWindow_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		{
+			BottomArea area = ViewHelper.BottomArea;
+			if (area == null || !area.HasOpenToolPopup)
+			{
+				return;
+			}
+			// 只有落在板中板自己的批注 Board 上才关弹窗；页码按钮、关闭按钮、
+			// 板中板空白区都不关，避免误触打断弹窗操作。
+			System.Windows.Media.Visual board = _board == null ? null : _board.InkBoard;
+			DependencyObject dep = e.OriginalSource as DependencyObject;
+			while (dep != null)
+			{
+				if (ReferenceEquals(dep, board))
+				{
+					area.CloseToolPopups();
+					return;
+				}
+				dep = System.Windows.Media.VisualTreeHelper.GetParent(dep);
+			}
 		}
 
 		private void InnerBoardWindow_Loaded(object sender, RoutedEventArgs e)

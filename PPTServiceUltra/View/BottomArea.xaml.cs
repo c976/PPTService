@@ -708,8 +708,11 @@ namespace PPTServiceUltra
 			EraserSliderPopup.IsOpen = false;
 			EraserSlide.BeginAnimation(RangeBase.ValueProperty, null);
 			EraserSlide.Value = 0.0;
-			PenBrush = new SolidColorBrush(PenSettings.DefaultColor);
-			SyncPenSelectionStates(PenSettings.DefaultColor);
+			// 用复位后的真值源同步，而不是固定的 PenSettings.DefaultColor：
+			// 色盘背景色随批注模式切换（自实现 9 色 / Office 8 色），固定首色会错位。
+			Color resetColor = AnnotationController.CurrentColor;
+			PenBrush = new SolidColorBrush(resetColor);
+			SyncPenSelectionStates(resetColor);
 			_modeBeforeInnerBoard = AnnotationController.Mode.Mouse;
 		}
 

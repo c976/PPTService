@@ -26,10 +26,8 @@ namespace PPTServiceUltra
 
 		private void Thumbnail_Click(object sender, RoutedEventArgs e)
 		{
-			if (PptVersionManager.IsWps)
-			{
-				return;
-			}
+			// WPS 下也允许打开缩略图面板：缩略图导出已改为各通道后期绑定，
+			// 不再依赖 WPS 不兼容的早期绑定 Slide 接口。
 			FridayReporter.ReportEventImmediately(EventID.LeftRegionThumbnail);
 			int count = ViewHelper.MainWindow.LeftSlideListBox.Items.Count;
 			if (count <= 0 || count != PptOperator.Instance.SlidesCount)

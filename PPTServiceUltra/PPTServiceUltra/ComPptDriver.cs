@@ -466,6 +466,15 @@ namespace PPTServiceUltra
 					_clearEmptyPowerPointTimer.Stop();
 				}
 			}
+			catch (COMException ex) when (ex.HResult == unchecked((int)0x80048010))
+			{
+				// 0x80048010「对象不存在」是确定性通道失效（放映结束关闭文件后，
+				// 原 Application RCW 变僵尸），不是"忙"，重试再多也不会恢复。
+				// 立即断开绑定，让看门狗切 ROT 或下一轮重新 GetActiveObject。
+				Log.WriteError("PPT COM object no longer exists, dropping binding: " + ex.Message);
+				TryCleanComObject();
+				_consecutiveComFailures = 0;
+			}
 			catch (COMException ex) when (SyntacticSugar.IsTransientComException(ex))
 			{
 				// PPT 正忙（RPC_E_CALL_REJECTED 等）：下轮快速重试。
@@ -509,8 +518,13 @@ namespace PPTServiceUltra
 			}
 			catch (COMException ex)
 			{
-				if (ex.HResult == -2147023174)
+				// -2147023174=RPC 服务器不可用；-2146827280=0x80048010 对象不存在。
+				// 两者都说明 COM 通道已经失效（放映结束关闭文件后常见），必须断开重监听，
+				// 否则僵尸 _app 会让看门狗误判"仍绑定"，既不重连也不切 ROT。
+				if (ex.HResult == -2147023174 || ex.HResult == unchecked((int)0x80048010))
 				{
+					Log.WriteError("PPT COM object gone during idle check, resetting binding: 0x" +
+						unchecked((uint)ex.HResult).ToString("X8"));
 					CleanAndListen();
 				}
 			}
@@ -608,23 +622,52 @@ namespace PPTServiceUltra
 
 		private void TryCleanComObject()
 		{
+			Microsoft.Office.Interop.PowerPoint.Application doomed = _app;
+			if (doomed == null)
+			{
+				return;
+			}
+			// 先把字段置空再逐个退订/释放：僵尸 COM 对象在 RemoveEventHandler 或
+			// ReleaseComObject 时抛「对象不存在」(0x80048010)，旧逻辑在 finally 之前
+			// 置 _app=null，异常一抛就永远执行不到，导致失效对象被永久当成"已绑定"，
+			// 看门狗不切换、工具栏消失只能重启。这里用 finally 兜底保证字段一定清空。
+			_app = null;
 			try
 			{
-				if (_app != null)
-				{
-					GC.Collect();
-					GC.WaitForPendingFinalizers();
-					new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").RemoveEventHandler(_app, new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
-					new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").RemoveEventHandler(_app, new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
-					new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").RemoveEventHandler(_app, new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
-					Marshal.ReleaseComObject(_app);
-					Marshal.ReleaseComObject(_app);
-					_app = null;
-				}
+				GC.Collect();
+				GC.WaitForPendingFinalizers();
+				// 逐个退订并单独吞异常：僵尸对象上任何一个 RemoveEventHandler 抛
+				// 「对象不存在」都不应阻断其余退订和 Release。
+				UnhookOne(doomed, "SlideShowBegin", new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
+				UnhookOne(doomed, "SlideShowEnd", new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
+				UnhookOne(doomed, "SlideShowNextSlide", new EApplication_SlideShowNextSlideEventHandler(OnSlideShowNextSlide));
+				UnhookOne(doomed, "PresentationCloseFinal", new EApplication_PresentationCloseFinalEventHandler(AppOnPresentationCloseFinal));
+				try { Marshal.ReleaseComObject(doomed); } catch { }
+				try { Marshal.ReleaseComObject(doomed); } catch { }
 			}
 			catch (Exception ex)
 			{
-				Log.WriteError(ex.Message);
+				Log.WriteError("TryCleanComObject: " + ex.Message);
+			}
+			finally
+			{
+				// 无论退订/释放是否抛异常，都必须清空字段和放映态，
+				// 否则看门狗会一直认为 COM 已绑定，永不切 ROT。
+				_app = null;
+				_slideShowWindow = null;
+				ConfigHelper.Instance.IsInitApplicationSuccessful = false;
+			}
+		}
+
+		private static void UnhookOne(Microsoft.Office.Interop.PowerPoint.Application app, string name, Delegate handler)
+		{
+			try
+			{
+				new ComAwareEventInfo(typeof(EApplication_Event), name).RemoveEventHandler(app, handler);
+			}
+			catch
+			{
+				// 僵尸对象退订必然抛异常，逐个吞掉以保证其余退订继续。
 			}
 		}
 

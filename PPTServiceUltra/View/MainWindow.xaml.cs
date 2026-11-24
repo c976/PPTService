@@ -298,6 +298,11 @@ namespace PPTServiceUltra
 					// 必须在 UI 线程执行。放映开始事件来自 COM 后台线程，直接调用会抛
 					// InvalidOperationException（调用线程无法访问此对象），异常被 TryCatchAction
 					// 吞掉后 Show()/Opacity=1 都不会执行 —— 表现为重新放映后工具栏不显示。
+					// 每场放映都按当前演示程序重排翻页按钮：Office/WPS 切换时
+					// PptVersionManager 会变（Office2016+ 底部，其余两侧），但工具栏窗口
+					// 是同一个、不会重建，此前只在构造/改设置时排一次，导致换软件后按钮
+					// 停留在上次的位置（或要等 3~5s 某处触发才跳过去）。
+					ApplyPageTurningLayout();
 					ResetToolbarCollapsedState();
 					_releaseTimer?.Stop();
 					Show();
