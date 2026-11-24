@@ -38,5 +38,12 @@ namespace PPTServiceUltra
 		void UpdatePointerColor();
 		void ResetPointerColor();
 		void SetDebugSlideWindowHandle(IntPtr hwnd);
+
+		/// <summary>
+		/// 把指定页导出为缩略图。让各通道用自己的 COM 对象后期绑定完成，
+		/// 避免 ROT 对象无法强转成早期绑定 Slide 接口时导出失败。
+		/// 返回成功与否；不支持的通道可返回 false 让调用方走原路径。
+		/// </summary>
+		bool ExportThumbnail(int slideIndex, string filePath, int width, int height);
 	}
 }

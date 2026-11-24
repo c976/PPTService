@@ -351,5 +351,15 @@ namespace PPTServiceUltra
 		{
 			_com.SetDebugSlideWindowHandle(hwnd);
 		}
+
+		/// <summary>缩略图导出交给当前通道；返回 false 时调用方回退到原 Slide 列表路径。</summary>
+		public bool ExportThumbnail(int slideIndex, string filePath, int width, int height)
+		{
+			if (DebugMode.IsEnabled)
+			{
+				return false;
+			}
+			return Active.ExportThumbnail(slideIndex, filePath, width, height);
+		}
 	}
 }

@@ -63,6 +63,9 @@ namespace PPTServiceUltra
 		private object _app;
 		private object _presentation;
 		private object _slideShowWindow;
+		// 后期绑定拿到的 Slides 集合；ROT 对象强转成早期绑定 Slides 会失败，
+		// 缩略图导出必须直接对这个对象调用 Export。
+		private object _slidesObject;
 		private List<Slide> _slides = new List<Slide>();
 		private IntPtr _hwnd;
 		private int _slidesCount;
@@ -295,6 +298,7 @@ namespace PPTServiceUltra
 		private void BeginShow()
 		{
 			_pptFilePath = GetStringProperty(_presentation, "FullName");
+			_slidesObject = GetProperty(_presentation, "Slides");
 			_slides = LoadSlides(_presentation);
 			_slidesCount = GetSlidesCount(_presentation);
 			_currentPage = GetCurrentPage(_slideShowWindow);
@@ -997,6 +1001,39 @@ namespace PPTServiceUltra
 			// 兼容调用通道不参与 /debug 模拟放映。
 		}
 
+		/// <summary>
+		/// 用后期绑定从缓存的 Slides 集合取指定页并导出 JPG。ROT 对象无法转成
+		/// 早期绑定 Slide 接口，Export 必须直接对 COM 对象调用。
+		/// </summary>
+		public bool ExportThumbnail(int slideIndex, string filePath, int width, int height)
+		{
+			if (_slidesObject == null)
+			{
+				return false;
+			}
+			object slide = null;
+			try
+			{
+				slide = GetIndexedProperty(_slidesObject, "Item", slideIndex);
+				if (slide == null)
+				{
+					return false;
+				}
+				slide.GetType().InvokeMember("Export", BindingFlags.InvokeMethod, null, slide,
+					new object[] { filePath, "jpg", width, height });
+				return File.Exists(filePath);
+			}
+			catch (Exception ex)
+			{
+				Log.WriteDebug("RotPptDriver export thumbnail failed at " + slideIndex + ": " + ex.Message);
+				return false;
+			}
+			finally
+			{
+				SafeRelease(slide);
+			}
+		}
+
 		private void InvokeView(string methodName)
 		{
 			object view = GetProperty(_slideShowWindow, "View");
@@ -1049,6 +1086,8 @@ namespace PPTServiceUltra
 			_slideShowWindow = null;
 			_presentation = null;
 			_app = null;
+			SafeRelease(_slidesObject);
+			_slidesObject = null;
 			_slides = new List<Slide>();
 			_hwnd = IntPtr.Zero;
 			_slidesCount = 0;

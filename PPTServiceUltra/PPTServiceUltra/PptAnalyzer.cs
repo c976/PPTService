@@ -200,23 +200,29 @@ namespace PPTServiceUltra
 				StopAnalyzeAllAsyn();
 				try
 				{
-					foreach (Slide slide in PptOperator.Instance.Slides)
+					// ROT 通道拿不到强类型 Slide 列表，按页数逐页走通道自身的后期绑定导出。
+					IList<Slide> availableSlides = PptOperator.Instance.Slides;
+					int total = PptOperator.Instance.SlidesCount;
+					for (int index = 1; index <= total; index++)
 					{
 						if (IsBreakExport)
 						{
 							break;
 						}
-						int slideIndex = slide.SlideIndex;
-						if (AnalyzedIndexAndThumbnailFilePathDictionary.ContainsKey(slideIndex))
+						if (AnalyzedIndexAndThumbnailFilePathDictionary.ContainsKey(index))
 						{
-							imageFiles.Add(AnalyzedIndexAndThumbnailFilePathDictionary.FirstOrDefault((KeyValuePair<int, string> i) => i.Key == slideIndex).Value);
+							imageFiles.Add(AnalyzedIndexAndThumbnailFilePathDictionary[index]);
 							continue;
 						}
-						string text = Path.Combine(ThumbnailFilePath, slideIndex + JpgSuffix);
-						slide.Export(text, JpgSuffix, _thumbnailWidth, _thumbnailHeight);
-						imageFiles.Add(text);
-						AnalyzedIndexAndThumbnailFilePathDictionary.Add(slideIndex, text);
-						exportProgress?.Invoke((double)slide.SlideIndex / ((double)PptOperator.Instance.SlidesCount * 1.0));
+						string text = Path.Combine(ThumbnailFilePath, index + JpgSuffix);
+						string usedPath;
+						if (!ExportOneThumbnail(index, text, out usedPath))
+						{
+							continue;
+						}
+						imageFiles.Add(usedPath);
+						AnalyzedIndexAndThumbnailFilePathDictionary.Add(index, usedPath);
+						exportProgress?.Invoke((double)index / (double)total);
 					}
 					UpdateListBoxItem();
 					if (IsBreakExport)
@@ -272,17 +278,19 @@ namespace PPTServiceUltra
 				}
 				try
 				{
-					for (int i = num - 1; i < num2; i++)
+					for (int slideIndex = num; slideIndex <= num2; slideIndex++)
 					{
-						Slide slide = PptOperator.Instance.Slides[i];
-						int slideIndex = slide.SlideIndex;
-						if (!AnalyzedIndexAndThumbnailFilePathDictionary.ContainsKey(slideIndex))
+						if (AnalyzedIndexAndThumbnailFilePathDictionary.ContainsKey(slideIndex))
 						{
-							string text = Path.Combine(ThumbnailFilePath, slideIndex + JpgSuffix);
-							slide.Export(text, JpgSuffix, _thumbnailWidth, _thumbnailHeight);
-							AnalyzedIndexAndThumbnailFilePathDictionary.Add(slideIndex, text);
-							exportProgress?.Invoke((double)(i - num + 1) / ((double)(num2 - num + 1) * 1.0));
+							continue;
 						}
+						string text = Path.Combine(ThumbnailFilePath, slideIndex + JpgSuffix);
+						string usedPath;
+						if (ExportOneThumbnail(slideIndex, text, out usedPath))
+						{
+							AnalyzedIndexAndThumbnailFilePathDictionary.Add(slideIndex, usedPath);
+						}
+						exportProgress?.Invoke((double)(slideIndex - num + 1) / ((double)(num2 - num + 1)));
 					}
 					AddInfoToDictionary(pptFilePath);
 					exportProgress?.Invoke(1.0);
@@ -296,6 +304,34 @@ namespace PPTServiceUltra
 					GarbageCollection.Collect();
 				}
 				return true;
+			}
+		}
+
+		/// <summary>
+		/// 导出单页缩略图：优先走当前通道的后期绑定导出（ROT 通道的 COM 对象
+		/// 无法强转成 Slide 接口），失败再回退到强类型 Slide.Export。
+		/// </summary>
+		private static bool ExportOneThumbnail(int slideIndex, string filePath, out string usedPath)
+		{
+			usedPath = filePath;
+			if (PptOperator.Instance.ExportThumbnail(slideIndex, filePath, _thumbnailWidth, _thumbnailHeight))
+			{
+				return true;
+			}
+			IList<Slide> slides = PptOperator.Instance.Slides;
+			int position = slideIndex - 1;
+			if (slides == null || position < 0 || position >= slides.Count || slides[position] == null)
+			{
+				return false;
+			}
+			try
+			{
+				slides[position].Export(filePath, JpgSuffix, _thumbnailWidth, _thumbnailHeight);
+				return File.Exists(filePath);
+			}
+			catch
+			{
+				return false;
 			}
 		}
 

@@ -21,6 +21,12 @@ namespace PPTServiceUltra
 	{
 		private int _times;
 
+		// COM 服务器持续不可用（RPC_E_SERVER_UNAVAILABLE 等）时，若一直只记日志重试，
+		// 通道会永远卡死在失效的 _app 上。累计到阈值即断开绑定，让调度层的自动回退
+		// 有机会切到 ROT 通道；任一次探测成功即清零。
+		private const int MaxConsecutiveComFailures = 6;
+		private int _consecutiveComFailures;
+
 		private Microsoft.Office.Interop.PowerPoint.Application _app;
 
 		private Stopwatch _stopwatch;
@@ -244,6 +250,12 @@ namespace PPTServiceUltra
 			SlideShowWindowIntPtr = hwnd;
 		}
 
+		/// <summary>COM 通道缩略图导出：返回 false，沿用 PptAnalyzer 原有的强类型 Slide 路径。</summary>
+		public bool ExportThumbnail(int slideIndex, string filePath, int width, int height)
+		{
+			return false;
+		}
+
 		private void DebugSetPage(int index)
 		{
 			if (index < 1)
@@ -434,6 +446,8 @@ namespace PPTServiceUltra
 				{
 					CreatePowerPointApplication();
 				}
+				// 走到这里说明本轮 COM 探测成功，清零连续失败计数。
+				_consecutiveComFailures = 0;
 				InitializeControl();
 				if (IsShowing)
 				{
@@ -455,12 +469,23 @@ namespace PPTServiceUltra
 			catch (COMException ex) when (SyntacticSugar.IsTransientComException(ex))
 			{
 				// PPT 正忙（RPC_E_CALL_REJECTED 等）：下轮快速重试。
-				// 必须记录一次，否则「工具栏一直不出现」时用户和开发者都看不到任何线索。
+				// 但如果是「RPC 服务器不可用」这类通道级失效，连续多次后必须断开绑定，
+				// 否则 _app 一直非空、自动回退看门狗永远不触发，工具栏永久消失只能重启。
+				_consecutiveComFailures++;
 				Log.WriteError("PPT COM busy (transient), will retry: " + ex.Message);
+				if (_consecutiveComFailures >= MaxConsecutiveComFailures)
+				{
+					Log.WriteError("PPT COM unavailable for " + _consecutiveComFailures +
+						" consecutive checks, dropping binding for fallback.");
+					_app = null;
+					_consecutiveComFailures = 0;
+					ConfigHelper.Instance.IsInitApplicationSuccessful = false;
+				}
 			}
 			catch (Exception)
 			{
 				_app = null;
+				_consecutiveComFailures = 0;
 				ConfigHelper.Instance.IsInitApplicationSuccessful = false;
 			}
 		}
