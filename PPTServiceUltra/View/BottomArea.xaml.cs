@@ -996,21 +996,6 @@ namespace PPTServiceUltra
 			return new Rect(origin, size).Contains(physicalScreenPoint);
 		}
 
-		public void ApplyFunctionBarVisibility(bool hide)
-		{
-			if (BottomCenterButtonGrid == null)
-			{
-				return;
-			}
-			if (hide)
-			{
-				// 收起挂在功能区内的两个弹窗，避免隐藏后残留 IsOpen 状态。
-				ColorDiskPopup.IsOpen = false;
-				EraserSliderPopup.IsOpen = false;
-			}
-			BottomCenterButtonGrid.Visibility = hide ? Visibility.Collapsed : Visibility.Visible;
-		}
-
 		/// <summary>
 		/// 依据用户配置重排/显隐工具栏中央功能按钮（选择/画笔/橡皮/放大镜/板中板），
 		/// 以及左侧「创建二维码（分享）」按钮的显隐。每列宽沿用当前分辨率档位
@@ -1037,7 +1022,15 @@ namespace PPTServiceUltra
 			List<UIElement> leftVisible = new List<UIElement>();
 			if (SettingsButton != null)
 			{
-				leftVisible.Add(SettingsButton);
+				// 设置按钮可独立隐藏（入口仍可在开始菜单快捷方式）。
+				if (config.ShowSettingsButton)
+				{
+					leftVisible.Add(SettingsButton);
+				}
+				else
+				{
+					SettingsButton.Visibility = Visibility.Collapsed;
+				}
 			}
 			if (ShareButton != null)
 			{
@@ -1050,8 +1043,12 @@ namespace PPTServiceUltra
 					ShareButton.Visibility = Visibility.Collapsed;
 				}
 			}
+			// 设置 + 二维码都隐藏时整块左侧区域（含右侧 4px 间隔条）一起收起，
+			// 只 Collapsed 按钮会留下一条空白底板/分割线小条。
+			bool leftHidden = leftVisible.Count == 0;
 			if (ShareGrid != null)
 			{
+				ShareGrid.Visibility = leftHidden ? Visibility.Collapsed : Visibility.Visible;
 				ShareGrid.ColumnDefinitions.Clear();
 				for (int i = 0; i < leftVisible.Count; i++)
 				{
@@ -1059,6 +1056,10 @@ namespace PPTServiceUltra
 					Grid.SetColumn(leftVisible[i], i);
 					leftVisible[i].Visibility = Visibility.Visible;
 				}
+			}
+			if (LeftSpacerGrid != null)
+			{
+				LeftSpacerGrid.Visibility = leftHidden ? Visibility.Collapsed : Visibility.Visible;
 			}
 			if (LeftBackgroundBorder != null)
 			{
@@ -1092,12 +1093,28 @@ namespace PPTServiceUltra
 				}
 			}
 		}
-			BottomCenterButtonGrid.ColumnDefinitions.Clear();
-			for (int i = 0; i < visible.Count; i++)
+			// 笔 / 橡皮 / 放大镜 / 板中板等全部隐藏时，整块功能区连带右侧间隔条
+			// 一起收起（等价于原"隐藏功能栏"，但改为按可见按钮自动判定）。
+			bool centerHidden = visible.Count == 0;
+			if (centerHidden)
 			{
-				BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = columnWidth });
-				Grid.SetColumn(visible[i], i);
-				visible[i].Visibility = Visibility.Visible;
+				ColorDiskPopup.IsOpen = false;
+				EraserSliderPopup.IsOpen = false;
+			}
+			if (BottomCenterButtonGrid != null)
+			{
+				BottomCenterButtonGrid.Visibility = centerHidden ? Visibility.Collapsed : Visibility.Visible;
+				BottomCenterButtonGrid.ColumnDefinitions.Clear();
+				for (int i = 0; i < visible.Count; i++)
+				{
+					BottomCenterButtonGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = columnWidth });
+					Grid.SetColumn(visible[i], i);
+					visible[i].Visibility = Visibility.Visible;
+				}
+			}
+			if (PlaceholderGrid != null)
+			{
+				PlaceholderGrid.Visibility = centerHidden ? Visibility.Collapsed : Visibility.Visible;
 			}
 			BackgroundBorder.SetValue(Grid.ColumnSpanProperty, visible.Count == 0 ? 1 : visible.Count);
 		}

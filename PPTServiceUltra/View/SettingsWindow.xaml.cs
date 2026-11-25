@@ -193,10 +193,10 @@ namespace PPTServiceUltra
             }
             ToolbarListBox.ItemsSource = _items;
             QrCodeCheckBox.IsChecked = cfg.ShowQrCode;
+            ShowSettingsCheckBox.IsChecked = cfg.ShowSettingsButton;
             ShowCollapseButtonCheckBox.IsChecked = cfg.ShowCollapseButton;
             ShowLoadingCheckBox.IsChecked = cfg.ShowLoadingSpinner;
             EnableSelfAnnotationCheckBox.IsChecked = cfg.UseSelfAnnotation;
-            HideFunctionBarCheckBox.IsChecked = cfg.HideFunctionBar;
             AutoFadePageButtonsCheckBox.IsChecked = cfg.AutoFadePageButtons;
             // 开关文案是「批注窗口附着PPT放映窗口」：勾选=附着(LegacyTopmostWindow=false)，
             // 取消勾选=全局置顶(true)。配置字段语义不变，仅在 UI 层反转。
@@ -406,10 +406,10 @@ namespace PPTServiceUltra
                 cfg.ToolbarButtons.Add(new ToolbarButtonSetting { Id = vm.Id, Visible = vm.IsVisible });
             }
             cfg.ShowQrCode = QrCodeCheckBox.IsChecked == true;
+            cfg.ShowSettingsButton = ShowSettingsCheckBox.IsChecked == true;
             cfg.ShowCollapseButton = ShowCollapseButtonCheckBox.IsChecked == true;
             cfg.ShowLoadingSpinner = ShowLoadingCheckBox.IsChecked == true;
             cfg.UseSelfAnnotation = EnableSelfAnnotationCheckBox.IsChecked == true;
-            cfg.HideFunctionBar = HideFunctionBarCheckBox.IsChecked == true;
             cfg.AutoFadePageButtons = AutoFadePageButtonsCheckBox.IsChecked == true;
             // 勾选「附着PPT放映窗口」= 旧置顶开关关闭；取消勾选才启用全局置顶。
             cfg.LegacyTopmostWindow = LegacyTopmostWindowCheckBox.IsChecked != true;
@@ -433,10 +433,10 @@ namespace PPTServiceUltra
                     _items.Add(new ToolbarItemVm { Id = b.Id, Name = ToolbarName(b.Id), IsVisible = b.Visible });
                 }
                 QrCodeCheckBox.IsChecked = def.ShowQrCode;
+                ShowSettingsCheckBox.IsChecked = def.ShowSettingsButton;
                 ShowCollapseButtonCheckBox.IsChecked = def.ShowCollapseButton;
                 ShowLoadingCheckBox.IsChecked = def.ShowLoadingSpinner;
                 EnableSelfAnnotationCheckBox.IsChecked = def.UseSelfAnnotation;
-                HideFunctionBarCheckBox.IsChecked = def.HideFunctionBar;
                 AutoFadePageButtonsCheckBox.IsChecked = def.AutoFadePageButtons;
                 LegacyTopmostWindowCheckBox.IsChecked = !def.LegacyTopmostWindow;
                 PptInvokeModeComboBox.SelectedIndex = ValueIndex(InvokeModeValues, def.PptInvokeMode);

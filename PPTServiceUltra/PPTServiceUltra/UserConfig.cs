@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PPTServiceUltra.Collection;
 
 namespace PPTServiceUltra
@@ -47,6 +48,12 @@ namespace PPTServiceUltra
         /// </summary>
         public bool ShowQrCode { get; set; }
 
+        /// <summary>
+        /// 是否显示「设置」按钮（工具栏左侧 ShareGrid，与二维码同组）。
+        /// 关闭后仍可从开始菜单快捷方式进入设置，不影响配置入口。
+        /// </summary>
+        public bool ShowSettingsButton { get; set; }
+
         /// <summary>是否在结束放映按钮旁显示「收起工具栏」按钮。默认 true。</summary>
         public bool ShowCollapseButton { get; set; }
 
@@ -74,9 +81,6 @@ namespace PPTServiceUltra
 		/// 由 ThemeManager 解析并下发到 Application.Resources 的主题画刷。
 		/// </summary>
 		public string Theme { get; set; }
-
-		/// <summary>是否隐藏整个功能栏（笔 / 橡皮 / 放大镜 / 板中板等按钮区域）。默认 false。</summary>
-		public bool HideFunctionBar { get; set; }
 
 		/// <summary>
 		/// 放映中翻页按钮是否「自动淡化」：一段时间（约 7 秒）没有点击翻页按钮后，
@@ -118,23 +122,17 @@ namespace PPTServiceUltra
                 : value;
         }
 
-        // 兼容旧版配置字段，反序列化时忽略，不再使用。
-        public string PageTurningMode { get; set; }
-        public string WpsPageTurningPosition { get; set; }
-        public string OfficePageTurningPosition { get; set; }
-        public bool PageTurningTranslucent { get; set; }
-
 		public UserConfig()
 		{
 			ToolbarButtons = new List<ToolbarButtonSetting>();
 			ShowQrCode = true;
+			ShowSettingsButton = true;
 			ShowCollapseButton = true;
 			PageTurningPosition = "Default";
 			ShowLoadingSpinner = true;
 			// 默认开启自实现批注（压感软笔 / 手势橡皮 / 板中板）。
 			UseSelfAnnotation = true;
 			Theme = ThemeManager.ThemeLight;
-			HideFunctionBar = false;
 			AutoFadePageButtons = true;
 			ToolbarOpacity = DefaultToolbarOpacity;
 			LegacyTopmostWindow = false;
@@ -176,6 +174,14 @@ namespace PPTServiceUltra
                     if (File.Exists(ConfigFilePath))
                     {
                         string json = File.ReadAllText(ConfigFilePath);
+                        // 配置迁移：剔除废弃键、为旧配置补新增键默认值，并写回文件。
+                        string cleanedJson;
+                        if (MigrateConfigJson(json, out cleanedJson))
+                        {
+                            try { File.WriteAllText(ConfigFilePath, cleanedJson); } catch { }
+                            // 用迁移后的 json 反序列化，确保补上的默认值在内存中生效。
+                            json = cleanedJson;
+                        }
                         cfg = JsonConvert.DeserializeObject<UserConfig>(json);
                     }
                 }
@@ -210,6 +216,47 @@ namespace PPTServiceUltra
             }
         }
 
+        /// <summary>
+        /// 配置 json 迁移：剔除废弃键，并为旧配置补上新增键的默认值。
+        /// 无变化返回 false。只动明确列出的问题键，用户其余设置保持原样。
+        /// </summary>
+        private static bool MigrateConfigJson(string json, out string cleanedJson)
+        {
+            cleanedJson = json;
+            string[] obsolete =
+            {
+                "PageTurningMode", "WpsPageTurningPosition", "OfficePageTurningPosition",
+                "PageTurningTranslucent", "HideFunctionBar"
+            };
+            try
+            {
+                JObject obj = JObject.Parse(json);
+                bool changed = false;
+                foreach (string key in obsolete)
+                {
+                    if (obj.Remove(key))
+                    {
+                        changed = true;
+                    }
+                }
+                // 旧配置没有该键：bool 反序列化会得到 false，但设置按钮默认应显示。
+                if (obj.Property("ShowSettingsButton") == null)
+                {
+                    obj["ShowSettingsButton"] = true;
+                    changed = true;
+                }
+                if (changed)
+                {
+                    cleanedJson = obj.ToString(Formatting.Indented);
+                }
+                return changed;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static UserConfig CreateDefault()
         {
             return new UserConfig
@@ -223,12 +270,12 @@ namespace PPTServiceUltra
                     new ToolbarButtonSetting { Id = "InnerBoard", Visible = true }
                 },
 			ShowQrCode = true,
+			ShowSettingsButton = true,
 			ShowCollapseButton = true,
 			PageTurningPosition = "Default",
 			UseSelfAnnotation = true,
 			ShowLoadingSpinner = true,
 			Theme = ThemeManager.ThemeLight,
-			HideFunctionBar = false,
 			AutoFadePageButtons = true,
 			ToolbarOpacity = UserConfig.DefaultToolbarOpacity,
 			LegacyTopmostWindow = false,
@@ -272,8 +319,9 @@ namespace PPTServiceUltra
             ThemeManager.Apply(cfg);
             if (ViewHelper.BottomArea != null)
             {
+                // 功能区/左侧按钮组的整体显隐统一由 ApplyToolbarConfig 按实际可见项决定：
+                // 全部按钮都隐藏时自动收起对应区域，不再有单独的"隐藏功能栏"开关。
                 ViewHelper.BottomArea.ApplyToolbarConfig(cfg);
-                ViewHelper.BottomArea.ApplyFunctionBarVisibility(cfg.HideFunctionBar);
                 ViewHelper.BottomArea.ApplyCollapseButtonVisibility(cfg.ShowCollapseButton);
             }
             // 只在批注方式真的变化时重建/移除 Board：设置窗口实时生效时每次改动都会

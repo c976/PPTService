@@ -163,7 +163,7 @@
       <pptService:ImageButton x:Name="SettingsButton" Click="Settings_OnClick" Grid.Column="0" ToolTip="设置" NormalSource="{StaticResource ImageSource.SettingsNormal}" PressedSource="{StaticResource ImageSource.SettingsPressed}" />
       <pptService:ImageButton x:Name="ShareButton" Click="Share_OnClick" Grid.Column="1" NormalSource="{StaticResource ImageSource.ShareNormal}" PressedSource="{StaticResource ImageSource.SharePressed}" />
     </Grid>
-    <Grid Column="1" Width="4" />
+    <Grid Name="LeftSpacerGrid" Column="1" Width="4" />
     <Grid Name="BottomCenterButtonGrid" Column="2" Background="#00FFFFFF" Focusable="False" HorizontalAlignment="Center">
       <Grid.ColumnDefinitions>
         <ColumnDefinition x:Name="ToolCol0" Width="50" />

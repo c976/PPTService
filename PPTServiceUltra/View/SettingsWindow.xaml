@@ -90,11 +90,11 @@
           <StackPanel Margin="4">
             <CheckBox Name="QrCodeCheckBox" Content="显示分享（创建二维码）按钮" Margin="2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
+            <CheckBox Name="ShowSettingsCheckBox" Content="显示设置按钮" Margin="2"
+                      Foreground="{DynamicResource Theme.SettingsForeground}" />
             <CheckBox Name="ShowCollapseButtonCheckBox" Content="显示收起工具栏按钮" Margin="2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
             <CheckBox Name="ShowLoadingCheckBox" Content="显示加载进度条界面" Margin="2"
-                      Foreground="{DynamicResource Theme.SettingsForeground}" />
-            <CheckBox Name="HideFunctionBarCheckBox" Content="隐藏功能栏" Margin="2"
                       Foreground="{DynamicResource Theme.SettingsForeground}" />
             <Grid Margin="2,6,2,2">
               <Grid.ColumnDefinitions>
