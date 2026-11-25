@@ -24,6 +24,7 @@ namespace PPTServiceUltra
 		private IPptDriver _active;
 		private string _mode = UserConfig.InvokeModeAuto;
 		private bool _initialized;
+		private bool _switching;
 		private DispatcherTimer _fallbackTimer;
 		private DateTime _comBindDeadline;
 
@@ -125,6 +126,19 @@ namespace PPTServiceUltra
 		private void OnShowEnd(object sender, EventArgs e)
 		{
 			ShowEnd?.Invoke(this, e);
+
+			// 自动模式：一场放映结束后把通道复位回 COM，让下一场（可能换了软件，
+			// 如 WPS→Office）先尝试 COM。此前一旦因 WPS 切到 ROT 就永不回切，
+			// 之后即使用 Office 也强制走 ROT，COM 再也不被尝试。
+			// 只在「本次 ShowEnd 来自活动通道」时复位，忽略切换通道时 Stop() 触发的
+			// ShowEnd，避免递归；只在未放映时切，动画/清理已由 ShowEnd 交给 UI。
+			if (_mode == UserConfig.InvokeModeAuto && !_switching &&
+				_active != null && ReferenceEquals(sender, _active) && !DebugMode.IsEnabled &&
+				!IsShowing)
+			{
+				Log.WriteDebug("Auto mode: show ended on ROT, retry COM for next show.");
+				SwitchChannel(UserConfig.InvokeModeCom);
+			}
 		}
 
 		private void OnNextSlide(object sender, EventArgs e)
@@ -177,10 +191,29 @@ namespace PPTServiceUltra
 
 		private void SwitchChannel(string channel)
 		{
+			// 防止 Stop() 内部触发的 ShowEnd 回调再次进入切换造成递归。
+			if (_switching)
+			{
+				return;
+			}
+			_switching = true;
+			try
+			{
+				SwitchChannelCore(channel);
+			}
+			finally
+			{
+				_switching = false;
+			}
+		}
+
+		private void SwitchChannelCore(string channel)
+		{
 			if (_active != null)
 			{
-				Unhook(_active);
-				_active.Stop();
+				IPptDriver old = _active;
+				Unhook(old);
+				old.Stop();
 				_active = null;
 			}
 			if (channel == UserConfig.InvokeModeRot)

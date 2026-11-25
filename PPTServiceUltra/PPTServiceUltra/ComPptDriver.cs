@@ -407,11 +407,15 @@ namespace PPTServiceUltra
 					new Action(OnShowBegin), DispatcherPriority.Background);
 				return;
 			}
-			_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(CheckPptRetryInterval);
+			// 自动模式下每次放映结束会切回 COM 重新 Initialize；Tick 必须先退再挂，
+			// 否则处理器被重复订阅，每轮探测执行多次、日志刷屏且状态机错乱。
+			_checkPowerPointTimer.Tick -= CheckPowerPointProcess;
 			_checkPowerPointTimer.Tick += CheckPowerPointProcess;
+			_checkPowerPointTimer.Interval = TimeSpan.FromMilliseconds(CheckPptRetryInterval);
 			_checkPowerPointTimer.Start();
-			_clearEmptyPowerPointTimer.Interval = TimeSpan.FromMilliseconds(2500.0);
+			_clearEmptyPowerPointTimer.Tick -= ClearEmptyPowerPointProcess;
 			_clearEmptyPowerPointTimer.Tick += ClearEmptyPowerPointProcess;
+			_clearEmptyPowerPointTimer.Interval = TimeSpan.FromMilliseconds(2500.0);
 			CheckPowerPointProcess();
 		}
 
