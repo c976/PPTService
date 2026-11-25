@@ -305,18 +305,24 @@ namespace PPTServiceUltra
 		/// <summary>
 		/// 放映结束：只把 Office 原生画笔颜色复位为默认色，不改指针类型
 		/// （SetPointerColor 会强制切到画笔，放映结束时调用会把鼠标态弄乱）。
-		/// 放映窗口可能已经释放，COM 异常由 TryCatchAction 吞掉。
+		/// 注意：本方法由 ShowEnd 调用，此时放映已经结束，_slideShowWindow 指向的
+		/// COM 对象正在/已被 PowerPoint 释放。继续往它的 View.PointerColor 写值必然
+		/// 抛 0x80048010（对象不存在）/ 0x80010001（拒绝），旧实现靠 TryComAction
+		/// 吞掉异常，但每场放映结束都会产生一轮 COM 异常，且污染 RCW 引用计数。
+		/// 因此放映已结束时只复位内部缓存值——下次放映 UpdatePointerColor 会重新
+		/// 从COM读取，颜色不会错；只有放映仍在进行时才真正写 COM。
 		/// </summary>
 		public void ResetPointerColor()
 		{
 			PointerColor = PenSettings.DefaultColor;
+			if (!IsShowing || _slideShowWindow == null)
+			{
+				return;
+			}
 			SyntacticSugar.TryComAction(() =>
 			{
-				if (_slideShowWindow != null)
-				{
-					Color c = PenSettings.DefaultColor;
-					_slideShowWindow.View.PointerColor.RGB = (c.B << 16) | (c.G << 8) | c.R;
-				}
+				Color c = PenSettings.DefaultColor;
+				_slideShowWindow.View.PointerColor.RGB = (c.B << 16) | (c.G << 8) | c.R;
 			});
 		}
 

@@ -1020,6 +1020,13 @@ namespace PPTServiceUltra
 		{
 			Color color = PenSettings.DefaultColor;
 			PointerColor = color;
+			// 本方法由 ShowEnd 调用，此时放映已结束、_slideShowWindow 可能已失效；
+			// SetPointerColor 会强制把指针切成画笔并访问放映窗口，既弄乱鼠标态又
+			// 产生无谓的 COM 异常。放映已结束时只复位缓存值，下次放映重新读取。
+			if (!IsShowing || _slideShowWindow == null)
+			{
+				return;
+			}
 			SetPointerColor((color.B << 16) | (color.G << 8) | color.R);
 		}
 
