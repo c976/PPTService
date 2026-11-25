@@ -27,6 +27,10 @@ namespace PPTServiceUltra
 		private bool _switching;
 		private DispatcherTimer _fallbackTimer;
 		private DateTime _comBindDeadline;
+		// 上次看门狗轮询时是否检测到放映进程：进程「从无到有」时给 COM 一段新的
+		// 绑定宽限期，避免开机很久后才开 PPT 时，8 秒旧 deadline 已过、COM 还没
+		// 来得及绑定就被立刻误判失败切到 ROT。
+		private bool _lastPptRunning;
 
 		// /debug 下完全不启动任何 COM/ROT 通道，只维持模拟放映状态。
 		private int _debugPage = 1;
@@ -310,7 +314,17 @@ namespace PPTServiceUltra
 			}
 			// 两种 COM 损坏表现都要回退：① 根本绑定不到 Application；
 			// ② 能绑定并收到放映事件，但 HWND 为 0（本机现象），此时工具栏无法定位/调用。
-			bool bindFailed = !_com.IsApplicationBound && DateTime.Now >= _comBindDeadline;
+			// 关键：①必须同时满足「PPT/WPS 进程确实在运行」——否则开机后没有放映进程时，
+			// 8 秒宽限期一到就会因"绑不到"误切 ROT，并把通道永久锁在 ROT：
+			// 用户重启电脑后即使改用 Office 也一直走 ROT，直到手动切一次 COM 才恢复。
+			bool pptRunning = ProcessHelper.HasPowerPointProcess();
+			if (pptRunning && !_lastPptRunning)
+			{
+				// 放映进程刚出现：给 COM 一段新的绑定宽限期。
+				_comBindDeadline = DateTime.Now.AddSeconds(8.0);
+			}
+			_lastPptRunning = pptRunning;
+			bool bindFailed = pptRunning && !_com.IsApplicationBound && DateTime.Now >= _comBindDeadline;
 			bool hwndMissing = _com.IsShowingWithoutWindow;
 			if (!bindFailed && !hwndMissing)
 			{
