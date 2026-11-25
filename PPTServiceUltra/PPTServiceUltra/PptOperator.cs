@@ -308,15 +308,10 @@ namespace PPTServiceUltra
 		/// </summary>
 		private void FallbackToRotIfNeeded()
 		{
-			if (_mode != UserConfig.InvokeModeAuto || DebugMode.IsEnabled || _active != _com)
+			if (_mode != UserConfig.InvokeModeAuto || DebugMode.IsEnabled)
 			{
 				return;
 			}
-			// 两种 COM 损坏表现都要回退：① 根本绑定不到 Application；
-			// ② 能绑定并收到放映事件，但 HWND 为 0（本机现象），此时工具栏无法定位/调用。
-			// 关键：①必须同时满足「PPT/WPS 进程确实在运行」——否则开机后没有放映进程时，
-			// 8 秒宽限期一到就会因"绑不到"误切 ROT，并把通道永久锁在 ROT：
-			// 用户重启电脑后即使改用 Office 也一直走 ROT，直到手动切一次 COM 才恢复。
 			bool pptRunning = ProcessHelper.HasPowerPointProcess();
 			if (pptRunning && !_lastPptRunning)
 			{
@@ -324,14 +319,39 @@ namespace PPTServiceUltra
 				_comBindDeadline = DateTime.Now.AddSeconds(8.0);
 			}
 			_lastPptRunning = pptRunning;
-			bool bindFailed = pptRunning && !_com.IsApplicationBound && DateTime.Now >= _comBindDeadline;
-			bool hwndMissing = _com.IsShowingWithoutWindow;
-			if (!bindFailed && !hwndMissing)
+
+			// ① 当前在 COM：绑定失败 / HWND 为 0 时切 ROT。
+			// 必须同时满足「放映进程确实在运行」——否则开机后没有放映进程时，
+			// 8 秒宽限期一到就会因"绑不到"误切 ROT 并永久锁死。
+			if (_active == _com)
+			{
+				bool bindFailed = pptRunning && !_com.IsApplicationBound && DateTime.Now >= _comBindDeadline;
+				bool hwndMissing = _com.IsShowingWithoutWindow;
+				if (!bindFailed && !hwndMissing)
+				{
+					return;
+				}
+				Log.WriteDebug("PPT COM unavailable (" + (hwndMissing ? "show HWND is zero" : "bind timeout") + "), switching to ROT channel.");
+				SwitchChannel(UserConfig.InvokeModeRot);
+				return;
+			}
+
+			// ② 当前在 ROT：一场放映结束后回切 COM，让下一场先尝试 COM。
+			// 触发 ROT 的原因只是"这一场 COM 出了异常"，不代表 COM 永久坏了——
+			// 若因此锁死在 ROT，用户重启/换回 Office 后就再也走不到 COM。
+			// 判据用 ROT 轮询观测到的"放映窗口从有到无"边沿：它不像进程退出那样
+			// 被 Office 后台常驻的 POWERPNT 干扰，也不依赖 ShowBegin/ShowEnd 是否走全。
+			if (IsShowing)
 			{
 				return;
 			}
-			Log.WriteDebug("PPT COM unavailable (" + (hwndMissing ? "show HWND is zero" : "bind timeout") + "), switching to ROT channel.");
-			SwitchChannel(UserConfig.InvokeModeRot);
+			bool showWindowGone = _rot != null && _rot.ConsumeShowWindowGone();
+			if (showWindowGone)
+			{
+				// 若 COM 依旧异常，看门狗会在宽限期后再次切回 ROT，不影响这一场的可用性。
+				Log.WriteDebug("Auto mode: show window ended, retry COM for next show.");
+				SwitchChannel(UserConfig.InvokeModeCom);
+			}
 		}
 
 		public void NextPage()

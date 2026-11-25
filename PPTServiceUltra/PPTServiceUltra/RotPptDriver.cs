@@ -76,6 +76,11 @@ namespace PPTServiceUltra
 		private bool _needRebind;
 		private DateTime _lastActivity = DateTime.MinValue;
 		private DispatcherTimer _pollTimer;
+		// 放映窗口"从有到无"的边沿标志：即使本通道从未成功 BeginShow（例如切到 ROT 时
+		// 放映已开始/结束、ShowEnd 未发出），轮询观测到放映窗口消失也置位，供调度层
+		// 在自动模式下据此回切 COM。读取即清除，避免重复触发。
+		private bool _showWindowGone;
+		private bool _hadShowWindow;
 
 		public event EventHandler ShowBegin;
 		public event EventHandler ShowEnd;
@@ -95,6 +100,14 @@ namespace PPTServiceUltra
 		public int SlidesCount
 		{
 			get { return _slidesCount; }
+		}
+
+		/// <summary>读取并清除"放映窗口刚消失"标志（供自动模式回切 COM 用）。</summary>
+		public bool ConsumeShowWindowGone()
+		{
+			bool gone = _showWindowGone;
+			_showWindowGone = false;
+			return gone;
 		}
 
 		public string PptFilePath
@@ -242,10 +255,17 @@ namespace PPTServiceUltra
 			int count = GetSlideShowWindowCount(_app);
 			if (count <= 0)
 			{
+				// 放映窗口消失：若之前观测到过窗口，记录一次边沿供调度层回切 COM。
+				if (_hadShowWindow)
+				{
+					_showWindowGone = true;
+					_hadShowWindow = false;
+				}
 				RaiseShowEndIfNeeded();
 				_slideShowWindow = SafeReplace(_slideShowWindow, null);
 				return;
 			}
+			_hadShowWindow = true;
 
 			object window = GetProperty(_presentation, "SlideShowWindow");
 			if (window == null)
@@ -1099,6 +1119,7 @@ namespace PPTServiceUltra
 			_hwnd = IntPtr.Zero;
 			_slidesCount = 0;
 			_currentPage = 0;
+			_hadShowWindow = false;
 			_lastActivity = DateTime.MinValue;
 
 			GC.Collect();
