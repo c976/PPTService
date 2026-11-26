@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace PPTServiceUltra
@@ -56,11 +55,9 @@ namespace PPTServiceUltra
 			"Theme.SettingsMutedText",      // 说明性文字
 			"Theme.ThumbnailText",          // 缩略图页码（压在不透明设置面板上，只随明暗主题）
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
-			"Theme.IconBrush"               // 工具栏矢量图标：浅色深灰 / 深色浅灰
+			"Theme.IconBrush",              // 工具栏矢量图标：浅色深灰 / 深色浅灰
+			"Theme.EraserThumbFace"         // 橡皮清屏滑杆拇指圆盘：与图标颜色相反，保证竖线对比度
 		};
-
-		// 橡皮「滑动清屏」的拇指图标：深色主题改用 eraserthumbdark.png。
-		private const string EraserThumbKey = "Theme.EraserThumb";
 
 		private static ResourceDictionary _backgroundBrushes;
 		private static ResourceDictionary _contentBrushes;
@@ -200,8 +197,16 @@ namespace PPTServiceUltra
 					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
 					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				}
-				// 橡皮拇指图标：深色主题用深色版，避免浅色图标在深色滑杆轨道上突兀。
-				_contentBrushes[EraserThumbKey] = CreateEraserThumb(dark);
+				// 橡皮拇指圆盘：与竖线颜色相反。深色（高对比）图标配深灰圆盘；
+				// 低透明度 / 浅色主题配白色圆盘，避免深灰竖线在白底上消失。
+				if (lightContent)
+				{
+					SetContent("Theme.EraserThumbFace", 0x3C, 0x3C, 0x44);
+				}
+				else
+				{
+					SetContent("Theme.EraserThumbFace", 0xFF, 0xFF, 0xFF);
+				}
 
 				// 替换画刷对象后重挂字典，触发 ResourcesChanged（仅主题 / 高对比模式切换时）。
 				app.Resources.MergedDictionaries.Remove(_contentBrushes);
@@ -245,7 +250,6 @@ namespace PPTServiceUltra
 					_contentBrushes[key] = new SolidColorBrush(Colors.White);
 				}
 				_contentBrushes["Theme.IconColor"] = Color.FromRgb(0x66, 0x66, 0x66);
-				_contentBrushes[EraserThumbKey] = CreateEraserThumb(false);
 				app.Resources.MergedDictionaries.Add(_contentBrushes);
 			}
 		}
@@ -277,15 +281,6 @@ namespace PPTServiceUltra
 				? _backgroundBrushes
 				: _contentBrushes;
 			dict[key] = new SolidColorBrush(Color.FromArgb(a, r, g, b));
-		}
-
-		/// <summary>按明暗主题取橡皮清屏滑杆的拇指位图（资源随主程序一起打包）。</summary>
-		private static BitmapImage CreateEraserThumb(bool dark)
-		{
-			string file = dark ? "eraserthumbdark.png" : "eraserthumb.png";
-			return new BitmapImage(new Uri(
-				"pack://application:,,,/PPTServiceUltra;component/Images/" + file,
-				UriKind.Absolute));
 		}
 
 		/// <summary>当前生效的明暗（跟随系统时读注册表，读取失败按浅色处理）。</summary>

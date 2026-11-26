@@ -1998,6 +1998,29 @@
     </DrawingImage.Drawing>
   </DrawingImage>
 
-  <!-- 橡皮「滑动清屏」滑杆的拇指图标（1:1 移植自桌面批注 resources/eraserthumb.png）。 -->
-  <BitmapImage x:Key="Image.EraserThumb" UriSource="pack://application:,,,/PPTServiceUltra;component/Images/eraserthumb.png" />
+  <!-- 橡皮「滑动清屏」滑杆的拇指图标：与工具栏图标同源的 DrawingImage。
+       圆盘底色走 Theme.EraserThumbFace，竖线走 Theme.IconBrush，
+       明暗主题（含低透明度高对比模式）切换时由 ThemeManager 自动刷新。 -->
+  <DrawingImage x:Key="ImageSource.EraserThumb">
+    <DrawingImage.Drawing>
+      <DrawingGroup>
+        <DrawingGroup.Children>
+          <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbFace}">
+            <GeometryDrawing.Geometry>
+              <EllipseGeometry Center="50,50" RadiusX="49" RadiusY="49" />
+            </GeometryDrawing.Geometry>
+          </GeometryDrawing>
+          <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
+            <GeometryDrawing.Geometry>
+              <GeometryGroup>
+                <RectangleGeometry Rect="27,31,7,36" RadiusX="1.5" RadiusY="1.5" />
+                <RectangleGeometry Rect="46.5,31,7,36" RadiusX="1.5" RadiusY="1.5" />
+                <RectangleGeometry Rect="66,31,7,36" RadiusX="1.5" RadiusY="1.5" />
+              </GeometryGroup>
+            </GeometryDrawing.Geometry>
+          </GeometryDrawing>
+        </DrawingGroup.Children>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
 </ResourceDictionary>

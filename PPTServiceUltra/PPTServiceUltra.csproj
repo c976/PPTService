@@ -410,12 +410,6 @@
     <Resource Include="Images\pptservicetext.png">
       <LogicalName>images/pptservicetext.png</LogicalName>
     </Resource>
-    <Resource Include="Images\eraserthumb.png">
-      <LogicalName>images/eraserthumb.png</LogicalName>
-    </Resource>
-    <Resource Include="Images\eraserthumbdark.png">
-      <LogicalName>images/eraserthumbdark.png</LogicalName>
-    </Resource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

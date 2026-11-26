@@ -40,7 +40,7 @@
                       <Thumb Name="Thumb" Focusable="False">
                         <Control.Template>
                           <ControlTemplate TargetType="{x:Type Thumb}">
-                            <Image Name="Image" Height="50" Width="50" Stretch="UniformToFill" SnapsToDevicePixels="True" Source="{DynamicResource Theme.EraserThumb}" />
+                            <Image Name="Image" Height="50" Width="50" Stretch="UniformToFill" SnapsToDevicePixels="True" Source="{StaticResource ImageSource.EraserThumb}" />
                           </ControlTemplate>
                         </Control.Template>
                       </Thumb>
