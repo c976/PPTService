@@ -1998,24 +1998,29 @@
     </DrawingImage.Drawing>
   </DrawingImage>
 
-  <!-- 橡皮「滑动清屏」滑杆的拇指图标：与工具栏图标同源的 DrawingImage。
-       圆盘底色走 Theme.EraserThumbFace，竖线走 Theme.IconBrush，
-       明暗主题（含低透明度高对比模式）切换时由 ThemeManager 自动刷新。 -->
+  <!-- 橡皮「滑动清屏」滑杆的拇指图标：按浅色参考图重画的 DrawingImage。
+       圆盘描边/底色/竖线分别走 Theme.EraserThumbRing/Face/Bar，
+       深色主题只换配色不改几何形状；中间竖线比两侧长，与参考图一致。 -->
   <DrawingImage x:Key="ImageSource.EraserThumb">
     <DrawingImage.Drawing>
       <DrawingGroup>
         <DrawingGroup.Children>
-          <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbFace}">
+          <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbRing}">
             <GeometryDrawing.Geometry>
               <EllipseGeometry Center="50,50" RadiusX="49" RadiusY="49" />
             </GeometryDrawing.Geometry>
           </GeometryDrawing>
-          <GeometryDrawing Brush="{DynamicResource Theme.IconBrush}">
+          <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbFace}">
+            <GeometryDrawing.Geometry>
+              <EllipseGeometry Center="50,50" RadiusX="46" RadiusY="46" />
+            </GeometryDrawing.Geometry>
+          </GeometryDrawing>
+          <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbBar}">
             <GeometryDrawing.Geometry>
               <GeometryGroup>
-                <RectangleGeometry Rect="27,31,7,36" RadiusX="1.5" RadiusY="1.5" />
-                <RectangleGeometry Rect="46.5,31,7,36" RadiusX="1.5" RadiusY="1.5" />
-                <RectangleGeometry Rect="66,31,7,36" RadiusX="1.5" RadiusY="1.5" />
+                <RectangleGeometry Rect="32,38,4.6,26" RadiusX="1.2" RadiusY="1.2" />
+                <RectangleGeometry Rect="50,32,4.6,38" RadiusX="1.2" RadiusY="1.2" />
+                <RectangleGeometry Rect="68.5,38,4.6,26" RadiusX="1.2" RadiusY="1.2" />
               </GeometryGroup>
             </GeometryDrawing.Geometry>
           </GeometryDrawing>

@@ -56,7 +56,9 @@ namespace PPTServiceUltra
 			"Theme.ThumbnailText",          // 缩略图页码（压在不透明设置面板上，只随明暗主题）
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
 			"Theme.IconBrush",              // 工具栏矢量图标：浅色深灰 / 深色浅灰
-			"Theme.EraserThumbFace"         // 橡皮清屏滑杆拇指圆盘：与图标颜色相反，保证竖线对比度
+			"Theme.EraserThumbFace",        // 橡皮清屏滑杆拇指圆盘底色
+			"Theme.EraserThumbRing",        // 橡皮清屏滑杆拇指外圈描边
+			"Theme.EraserThumbBar"          // 橡皮清屏滑杆拇指三条竖线
 		};
 
 		private static ResourceDictionary _backgroundBrushes;
@@ -197,15 +199,27 @@ namespace PPTServiceUltra
 					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
 					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				}
-				// 橡皮拇指圆盘：与竖线颜色相反。深色（高对比）图标配深灰圆盘；
-				// 低透明度 / 浅色主题配白色圆盘，避免深灰竖线在白底上消失。
+				// 橡皮拇指：浅色按参考图（白圆盘 + 浅灰细竖线）；深色改为深灰圆盘 +
+				// 稍浅竖线（与底色明显不同即可）。低透明度高对比时退回白底深线，
+				// 避免幻灯片白底透出后浅色竖线消失。
 				if (lightContent)
 				{
-					SetContent("Theme.EraserThumbFace", 0x3C, 0x3C, 0x44);
+					SetContent("Theme.EraserThumbFace", 0x35, 0x35, 0x3C);
+					SetContent("Theme.EraserThumbRing", 0x50, 0x50, 0x58);
+					SetContent("Theme.EraserThumbBar", 0xB4, 0xB4, 0xBC);
 				}
 				else
 				{
 					SetContent("Theme.EraserThumbFace", 0xFF, 0xFF, 0xFF);
+					SetContent("Theme.EraserThumbRing", 0xEB, 0xEB, 0xED);
+					if (dark)
+					{
+						SetContent("Theme.EraserThumbBar", 0x66, 0x66, 0x66);
+					}
+					else
+					{
+						SetContent("Theme.EraserThumbBar", 0xD3, 0xD3, 0xD3);
+					}
 				}
 
 				// 替换画刷对象后重挂字典，触发 ResourcesChanged（仅主题 / 高对比模式切换时）。
