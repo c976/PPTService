@@ -9,9 +9,9 @@
 ```
 \
 ├── PPTServiceUltra.sln                  解决方案
-├── Version\                        公共文件（版本与程序集信息：Version.targets / build.ver / AssemblyInfo.Shared.cs 等）
+├── Version\                             版本与程序集信息公共文件
 ├── ReadMe.md
-├── lib\                            第三方依赖 DLL
+├── lib\                                 第三方依赖 DLL
 ├── PPTServiceUltra\                     主程序
 ├── PPTServiceUltra.Core\                核心库
 ├── PPTServiceUltra.Collection\          数据集合与访问
@@ -22,8 +22,8 @@
 ├── PPTServiceUltra.Ink.Hardware.Core\   触控插件依赖（可选）
 ├── PPTServiceUltra.Hardware\            USB/HID MCU 硬件插件（可选）
 ├── PPTServiceUltra.NetShared\           二维码分享插件（可选）
-├── setup\                          NSIS 安装程序
-└── .github\workflows\              Github Action build.yml（编译）/ release.yml（发布）
+├── setup\                               NSIS 安装程序
+└── .github\workflows\                   Github Action build.yml（编译）/ release.yml（发布）
 ```
 
 ## 功能与改进
@@ -39,6 +39,7 @@
 - **放大镜**：关灯 / 关闭按钮位于窗口底部居中横排并显示文字。
 - **界面设置**：隐藏功能栏、翻页按钮位置、自动淡化、主题、工具栏透明度、缩略图开关、触控拖动排序等均可实时设置。
 - **分辨率适配**：适配 1366×768、4K 100% 与 250% 缩放，工具栏列宽、图标与弹窗按分辨率自动调整。
+- **PPT调用**：实现了另外的ROT调用方式，在COM异常的情况下仍然可以调用，同时WPS和PowerPoint可以共存调用（例如WPS没有勾选兼容Office也可以被正常识别，同时避免WPS兼容损坏Office COM）（参考了InKeys项目的部分调用思路）
 
 ### 插件化
 
@@ -50,6 +51,7 @@
 
 - **开场动画资源名拼写错误**：`LoadingView` 中有三处把动画资源键写成 `StoryBoard.HiddenRootGridImmediatly`（`Immediately` 少了一个 `e`），而 XAML 中实际定义的键名为 `StoryBoard.HiddenRootGridImmediately`。原版因此找不到资源、开场加载界面的隐藏动画不会触发。现已将三处引用统一修正为正确拼写。
 - **开场进度条收尾逻辑**：原版进度跑到 100% 后会先把进度归零并清空数据（`Progress = 0` / `ClearData()`），界面会先闪一下 0% 再关闭；而消息循环依赖淡出动画的 `Completed` 回调或定时器来结束，叠加上面的拼写错误使淡出动画从未触发，导致加载界面概率性卡在 99% 不关闭。现改为跑满后直接淡出并隐藏，不再归零闪 0%，并同步结束消息循环（不再依赖动画回调 / 定时器），消除卡在 99% 的现象，同时补上消息循环的 `_frame` 空引用保护。
+- **COM繁忙导致异常问题**：原版实现了一套自己的鼠标翻页手势，在放映前或者放映后向Office COM发送每一页的启用或禁用Office 原生翻页操作，当Office页码比较多，就可能会短时间发送大量请求到Office COM导致出现“被呼叫方拒绝接收呼叫”的错误，然后后面的工具栏无法使用。目前默认禁用了这一套原版的逻辑，默认使用Office或者WPS原生翻页。
 
 ### 与SeewoIwbAssistant（SIA）相比的优势？
 
@@ -57,7 +59,9 @@
 - 完整的深色浅色主题，以及界面微调
 - 占用体积小，程序仅~2MB。
 - 基本上实现了SIA的所有功能（除了投屏）
-- 自实现批注比SIA的稳定
+- 自实现批注比SIA的稳定（SIA可能会误关闭批注窗口导致后面PPT都没有工具栏）
+- 自实现批注笔颜色改为使用希沃品课里面的色盘颜色，比SIA的颜色更加舒服。
+- 其他Office调用实现，支持Office/WPS共存使用
 - 一些功能实现插件化
 
 ## 许可协议
