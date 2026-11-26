@@ -1051,6 +1051,12 @@ namespace PPTServiceUltra
 				slide = GetIndexedProperty(_slidesObject, "Item", slideIndex);
 				if (slide == null)
 				{
+					// WPS 的集合接受具名 "Item"，但 Office 的 Slides 后期绑定有时
+					// 只认默认成员（匿名索引器）。再试一次默认成员取页。
+					slide = GetIndexedProperty(_slidesObject, "", slideIndex);
+				}
+				if (slide == null)
+				{
 					return false;
 				}
 				slide.GetType().InvokeMember("Export", BindingFlags.InvokeMethod, null, slide,

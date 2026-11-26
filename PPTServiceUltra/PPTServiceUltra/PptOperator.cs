@@ -327,11 +327,22 @@ namespace PPTServiceUltra
 			{
 				bool bindFailed = pptRunning && !_com.IsApplicationBound && DateTime.Now >= _comBindDeadline;
 				bool hwndMissing = _com.IsShowingWithoutWindow;
-				if (!bindFailed && !hwndMissing)
+				// WPS 与 Office 共存：GetActiveObject("PowerPoint.Application") 常绑到 Office，
+				// 收不到 WPS 的放映事件 → WPS 放映无工具栏。若 WPS 进程在跑、而 COM 绑到的
+				// 路径不是 WPS（且 COM 侧未放映），说明很可能绑错了应用，交给 ROT 通道识别。
+				string boundPath = _com.BoundAppPath;
+				bool boundOffice = boundPath.Length > 0 &&
+					boundPath.IndexOf("wps", StringComparison.OrdinalIgnoreCase) < 0 &&
+					boundPath.IndexOf("wpp", StringComparison.OrdinalIgnoreCase) < 0;
+				bool wpsShowing = boundOffice && !_com.IsShowing &&
+					ProcessHelper.HasWppProcess() && ProcessHelper.IsWppForeground();
+				if (!bindFailed && !hwndMissing && !wpsShowing)
 				{
 					return;
 				}
-				Log.WriteDebug("PPT COM unavailable (" + (hwndMissing ? "show HWND is zero" : "bind timeout") + "), switching to ROT channel.");
+				string reason = wpsShowing ? "WPS running but COM bound to Office" :
+					(hwndMissing ? "show HWND is zero" : "bind timeout");
+				Log.WriteDebug("PPT COM unavailable (" + reason + "), switching to ROT channel.");
 				SwitchChannel(UserConfig.InvokeModeRot);
 				return;
 			}

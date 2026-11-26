@@ -29,6 +29,11 @@ namespace PPTServiceUltra
 
 		private Microsoft.Office.Interop.PowerPoint.Application _app;
 
+		// COM 绑到的应用标识（取自 app.Path/Name）。Office 与 WPS 同时打开时，
+		// GetActiveObject("PowerPoint.Application") 可能绑到 Office 而非正在放映的 WPS，
+		// 调度层据此判断是否需要切 ROT 通道。
+		private string _boundAppPath;
+
 		private Stopwatch _stopwatch;
 
 		private bool _isShowTypeSpeaker;
@@ -367,6 +372,12 @@ namespace PPTServiceUltra
 			get { return _app != null; }
 		}
 
+		/// <summary>COM 当前绑定到的应用路径；未绑定返回空字符串。供调度层判断绑的是 Office 还是 WPS。</summary>
+		public string BoundAppPath
+		{
+			get { return _boundAppPath ?? string.Empty; }
+		}
+
 		/// <summary>
 		/// 已经进入放映却拿不到放映窗口句柄——这正是本机 COM 损坏时的表现。
 		/// 调度层据此在"自动"模式下切到 ROT 通道。
@@ -595,6 +606,7 @@ namespace PPTServiceUltra
 			// 之后放映事件再也收不到、且被空 catch 吞掉无任何日志。
 			Microsoft.Office.Interop.PowerPoint.Application app =
 				(Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+			_boundAppPath = app.Path ?? string.Empty;
 			PptVersionManager.UpdatePptApplicationInfo(app.Path, app.Version);
 			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(app, new EApplication_SlideShowBeginEventHandler(AppSlideShowBegin));
 			new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(app, new EApplication_SlideShowEndEventHandler(OnAppSlideShowEnd));
@@ -664,6 +676,7 @@ namespace PPTServiceUltra
 				// 无论退订/释放是否抛异常，都必须清空字段和放映态，
 				// 否则看门狗会一直认为 COM 已绑定，永不切 ROT。
 				_app = null;
+				_boundAppPath = null;
 				_slideShowWindow = null;
 				ConfigHelper.Instance.IsInitApplicationSuccessful = false;
 			}

@@ -29,7 +29,7 @@ namespace PPTServiceUltra
 			// WPS 下也允许打开缩略图面板（后期绑定导出，不依赖早期绑定 Slide 接口）。
 			FridayReporter.ReportEventImmediately(EventID.RightRegionThumbnail);
 			int count = ViewHelper.MainWindow.RightSlideListBox.Items.Count;
-			if (count <= 0 || count != PptOperator.Instance.SlidesCount)
+			if (count <= 0)
 			{
 				WindowsApi.SetForegroundWindow(PptOperator.Instance.SlideShowWindowIntPtr);
 				Log.WriteError($"ItemsCount  {count};  SlidesCount  {PptOperator.Instance.SlidesCount}");

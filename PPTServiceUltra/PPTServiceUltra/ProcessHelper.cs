@@ -89,6 +89,51 @@ namespace PPTServiceUltra
 			return result;
 		}
 
+		/// <summary>是否有 WPS 演示进程（wpp.exe）在运行。用于识别 Office 与 WPS 共存时绑错应用。</summary>
+		public static bool HasWppProcess()
+		{
+			try
+			{
+				return Process.GetProcessesByName(WppSimplifyName).Length > 0;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		/// <summary>前台窗口是否属于 WPS（wpp/wps）。比"进程存在"更精准，避免 WPS 后台常驻时误切通道。</summary>
+		public static bool IsWppForeground()
+		{
+			try
+			{
+				IntPtr front = WindowsApi.GetForegroundWindow();
+				if (front == IntPtr.Zero)
+				{
+					return false;
+				}
+				uint pid;
+				GetWindowThreadProcessId(front, out pid);
+				if (pid == 0)
+				{
+					return false;
+				}
+				using (Process proc = Process.GetProcessById((int)pid))
+				{
+					string name = proc.ProcessName.ToLowerInvariant();
+					return name.StartsWith("wpp", StringComparison.Ordinal) ||
+						name.StartsWith("wps", StringComparison.Ordinal);
+				}
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		[DllImport("user32.dll")]
+		private static extern uint GetWindowThreadProcessId(IntPtr handle, out uint processId);
+
 		public static void TryKillWppProcess()
 		{
 			Process[] processesByName = Process.GetProcessesByName("wpp");

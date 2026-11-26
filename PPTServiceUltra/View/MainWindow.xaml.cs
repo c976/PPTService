@@ -908,10 +908,22 @@ namespace PPTServiceUltra
 
 		private void InitListBoxItem()
 		{
-			string[] array = new string[PptOperator.Instance.SlidesCount];
+			int total = PptOperator.Instance.SlidesCount;
+			if (total <= 0)
+			{
+				return;
+			}
+			string[] array = new string[total];
 			foreach (KeyValuePair<int, string> item in PptAnalyzer.AnalyzedIndexAndThumbnailFilePathDictionary)
 			{
-				array[item.Key - 1] = item.Value;
+				// 字典里可能残留上一场放映（页数更多）的页码，或自定义放映范围的页号，
+				// 直接 array[item.Key-1] 会越界（IndexOutOfRangeException）。跳过超出范围的项。
+				int position = item.Key - 1;
+				if (position < 0 || position >= total)
+				{
+					continue;
+				}
+				array[position] = item.Value;
 			}
 			SetListBoxItem(array.ToList());
 		}
