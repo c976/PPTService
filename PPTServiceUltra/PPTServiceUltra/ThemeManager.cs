@@ -57,7 +57,6 @@ namespace PPTServiceUltra
 			"Theme.MaskBackground",         // 全屏窗口的半透明遮罩
 			"Theme.IconBrush",              // 工具栏矢量图标：浅色深灰 / 深色浅灰
 			"Theme.EraserThumbFace",        // 橡皮清屏滑杆拇指圆盘底色
-			"Theme.EraserThumbRing",        // 橡皮清屏滑杆拇指外圈描边
 			"Theme.EraserThumbBar"          // 橡皮清屏滑杆拇指三条竖线
 		};
 
@@ -199,19 +198,18 @@ namespace PPTServiceUltra
 					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
 					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				}
-				// 橡皮拇指只随明暗主题，不受「工具栏透明度」的低对比模式影响：
-				// 用户明确要求深色模式就是深色背景，20% 透明度下也不能退回白底。
-				// 浅色按参考图（白圆盘 + 浅灰细竖线）；深色为深灰圆盘 + 稍浅竖线。
+				// 橡皮拇指移植自原生 Style.Eraser.Slider：浅色严格用原生配色
+				// （白圆盘 + #D3D3D3 竖线）；深色只换配色不改几何——圆盘用
+				// #303036、竖线只比背景稍亮（#8A8A92），不追求高亮白条。
+				// 只随明暗主题，不受工具栏透明度的低对比模式影响。
 				if (dark)
 				{
-					SetContent("Theme.EraserThumbFace", 0x35, 0x35, 0x3C);
-					SetContent("Theme.EraserThumbRing", 0x50, 0x50, 0x58);
-					SetContent("Theme.EraserThumbBar", 0xB4, 0xB4, 0xBC);
+					SetContent("Theme.EraserThumbFace", 0x30, 0x30, 0x36);
+					SetContent("Theme.EraserThumbBar", 0x8A, 0x8A, 0x92);
 				}
 				else
 				{
 					SetContent("Theme.EraserThumbFace", 0xFF, 0xFF, 0xFF);
-					SetContent("Theme.EraserThumbRing", 0xEB, 0xEB, 0xED);
 					SetContent("Theme.EraserThumbBar", 0xD3, 0xD3, 0xD3);
 				}
 
