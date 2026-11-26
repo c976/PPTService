@@ -193,8 +193,13 @@ namespace PPTServiceUltra
 			Width = SystemParameters.PrimaryScreenWidth;
 			Height = SystemParameters.PrimaryScreenHeight;
 			SubscribeSelectionChangedEvent();
-			_gesture = new Gesture();
-			_gesture.ChangeGestureScope();
+			// 默认走 Office/WPS 原生翻页：不创建自定义手势（也不订阅鼠标消息）。
+			// 只有代码级开关 UseCustomGesturePageTurn=true 时才启用工具的鼠标手势翻页。
+			if (Gesture.UseCustomGesturePageTurn)
+			{
+				_gesture = new Gesture();
+				_gesture.ChangeGestureScope();
+			}
 			WindowsApi.SetPopupParameter();
 			PptOperator.Instance.ShowBegin += _pptOperatorShowBegin;
 			PptOperator.Instance.ShowEnd += _pptOperatorShowEnd;

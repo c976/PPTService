@@ -724,7 +724,13 @@ namespace PPTServiceUltra
 					// 放映终于初始化成功：清零瞬时错误重试计数、停掉重试定时器。
 					ResetShowBeginRetry();
 					OnShowBegin();
-					SetSlideAdvanceOnClickProperty(MsoTriState.msoFalse);
+					// 默认走原生翻页：不逐页写 AdvanceOnClick（该批量 COM 写入会撞上
+					// PowerPoint 结束/开始放映的忙窗口，触发 0x80010001 拒绝）。
+					// 只有代码级开关打开（用自定义手势）时才禁用原生单击换页。
+					if (Gesture.UseCustomGesturePageTurn)
+					{
+						SetSlideAdvanceOnClickProperty(MsoTriState.msoFalse);
+					}
 					ConfigHelper.Instance.IsShowing = IsShowing;
 					SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
 					{
@@ -804,7 +810,12 @@ namespace PPTServiceUltra
 
 		private void OnAppSlideShowEnd(Presentation pres)
 		{
-			SetSlideAdvanceOnClickProperty(MsoTriState.msoTrue);
+			// 默认走原生翻页：放映结束时不做 AdvanceOnClick 逐页批量写回（那是
+			// 每场结束刷 0x80010001 的主要来源）。仅用自定义手势时才需要恢复原生换页。
+			if (Gesture.UseCustomGesturePageTurn)
+			{
+				SetSlideAdvanceOnClickProperty(MsoTriState.msoTrue);
+			}
 			SyntacticSugar.TryCatchAction(() =>
 			{
 				// IsShowing 必须无条件复位：只按 _isShowTypeSpeaker 判断会在放映类型

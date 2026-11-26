@@ -8,6 +8,15 @@ namespace PPTServiceUltra
 {
 	public class Gesture
 	{
+		/// <summary>
+		/// 是否使用工具的自定义翻页手势，并在放映期间禁用 Office 原生单击换页（AdvanceOnClick）。
+		/// 代码级开关（不写入配置/json）：false = 走 Office/WPS 原生翻页，工具不做
+		/// AdvanceOnClick 逐页批量写入、不启用自定义鼠标手势——避开放映结束时逐页写 COM
+		/// 触发的 RPC_E_CALL_REJECTED。true = 恢复旧行为（禁用原生单击换页 + 自定义手势）。
+		/// 需要旧行为时把此值改为 true 即可。
+		/// </summary>
+		public static readonly bool UseCustomGesturePageTurn = false;
+
 		private Point _startPoint;
 
 		private Rect _gestureScope;
