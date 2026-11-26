@@ -281,9 +281,6 @@
       <Popup Name="EraserSliderPopup" Grid.Column="0" Grid.ColumnSpan="4" Width="230" Height="100" StaysOpen="True" Placement="Top" AllowsTransparency="True" Opened="EraserSliderPopup_OnOpened">
         <Border Name="EraserPopupRootBorder" Width="230" Height="100" Background="{DynamicResource Theme.PopupBackground}" CornerRadius="4">
           <Slider Name="EraserSlide" Maximum="1" Style="{StaticResource Style.Slider.Eraser}" Thumb.DragStarted="EraserSlide_DragStarted" Thumb.DragCompleted="EraserSlide_DragCompleted" />
-          <UIElement.Effect>
-            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.15" />
-          </UIElement.Effect>
         </Border>
       </Popup>
     </Grid>

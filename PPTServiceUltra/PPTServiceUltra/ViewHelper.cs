@@ -138,11 +138,14 @@ namespace PPTServiceUltra
 					{
 						SyntacticSugar.TryCatchAction(() =>
 						{
-							IntPtr handle = new WindowInteropHelper(settingsWindow).Handle;
+								IntPtr handle = new WindowInteropHelper(settingsWindow).Handle;
 							if (handle != IntPtr.Zero)
 							{
 								WindowsApi.SetForegroundWindow(handle);
 							}
+							// 设置窗口是全屏遮罩：PPT 可能刚把指针藏起来，这里立刻补一次，
+							// 避免用户打开设置后看不到指针位置；放映定时器后续也会持续兜底。
+							CursorVisibilityHelper.EnsureVisible();
 						});
 					};
 				}

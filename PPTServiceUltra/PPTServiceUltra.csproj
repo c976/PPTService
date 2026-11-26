@@ -205,6 +205,7 @@
     <Compile Include="PPTServiceUltra\McuService.cs" />
     <Compile Include="PPTServiceUltra\Md5SecurityUtility.cs" />
     <Compile Include="PPTServiceUltra\MouseHelper.cs" />
+    <Compile Include="PPTServiceUltra\CursorVisibilityHelper.cs" />
     <Compile Include="PPTServiceUltra\MouseHelperEventArgs.cs" />
     <Compile Include="PPTServiceUltra\MousePoint.cs" />
     <Compile Include="PPTServiceUltra\NetworkHelper.cs" />

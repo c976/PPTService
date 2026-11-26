@@ -2012,15 +2012,15 @@
           </GeometryDrawing>
           <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbFace}">
             <GeometryDrawing.Geometry>
-              <EllipseGeometry Center="50,50" RadiusX="46" RadiusY="46" />
+              <EllipseGeometry Center="50,50" RadiusX="44" RadiusY="44" />
             </GeometryDrawing.Geometry>
           </GeometryDrawing>
           <GeometryDrawing Brush="{DynamicResource Theme.EraserThumbBar}">
             <GeometryDrawing.Geometry>
               <GeometryGroup>
-                <RectangleGeometry Rect="32,38,4.6,26" RadiusX="1.2" RadiusY="1.2" />
-                <RectangleGeometry Rect="50,32,4.6,38" RadiusX="1.2" RadiusY="1.2" />
-                <RectangleGeometry Rect="68.5,38,4.6,26" RadiusX="1.2" RadiusY="1.2" />
+                <RectangleGeometry Rect="29.5,37,4.6,26" RadiusX="1.2" RadiusY="1.2" />
+                <RectangleGeometry Rect="47.5,31,4.6,38" RadiusX="1.2" RadiusY="1.2" />
+                <RectangleGeometry Rect="66,37,4.6,26" RadiusX="1.2" RadiusY="1.2" />
               </GeometryGroup>
             </GeometryDrawing.Geometry>
           </GeometryDrawing>

@@ -199,10 +199,10 @@ namespace PPTServiceUltra
 					SetContent("Theme.ThumbnailText", 0x66, 0x66, 0x66);
 					Set("Theme.MaskBackground", 0x66, 0x00, 0x00, 0x00);
 				}
-				// 橡皮拇指：浅色按参考图（白圆盘 + 浅灰细竖线）；深色改为深灰圆盘 +
-				// 稍浅竖线（与底色明显不同即可）。低透明度高对比时退回白底深线，
-				// 避免幻灯片白底透出后浅色竖线消失。
-				if (lightContent)
+				// 橡皮拇指只随明暗主题，不受「工具栏透明度」的低对比模式影响：
+				// 用户明确要求深色模式就是深色背景，20% 透明度下也不能退回白底。
+				// 浅色按参考图（白圆盘 + 浅灰细竖线）；深色为深灰圆盘 + 稍浅竖线。
+				if (dark)
 				{
 					SetContent("Theme.EraserThumbFace", 0x35, 0x35, 0x3C);
 					SetContent("Theme.EraserThumbRing", 0x50, 0x50, 0x58);
@@ -212,14 +212,7 @@ namespace PPTServiceUltra
 				{
 					SetContent("Theme.EraserThumbFace", 0xFF, 0xFF, 0xFF);
 					SetContent("Theme.EraserThumbRing", 0xEB, 0xEB, 0xED);
-					if (dark)
-					{
-						SetContent("Theme.EraserThumbBar", 0x66, 0x66, 0x66);
-					}
-					else
-					{
-						SetContent("Theme.EraserThumbBar", 0xD3, 0xD3, 0xD3);
-					}
+					SetContent("Theme.EraserThumbBar", 0xD3, 0xD3, 0xD3);
 				}
 
 				// 替换画刷对象后重挂字典，触发 ResourcesChanged（仅主题 / 高对比模式切换时）。

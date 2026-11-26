@@ -9,6 +9,10 @@ namespace PPTServiceUltra
 
 		private int _preMouseState;
 
+		// 右键状态单独记录：PowerPoint 放映时的原生右键菜单会把附着工具栏压到
+		// 放映窗口后面，需要全局监听右键做兜底恢复（左键轮询不受影响）。
+		private int _preRightMouseState;
+
 		private readonly DispatcherTimer _timer;
 
 		private static readonly int TimerSpan = 6;
@@ -22,6 +26,10 @@ namespace PPTServiceUltra
 		public event EventHandler<MouseHelperEventArgs> Move;
 
 		public event EventHandler<MouseHelperEventArgs> Up;
+
+		public event EventHandler<MouseHelperEventArgs> RightDown;
+
+		public event EventHandler<MouseHelperEventArgs> RightUp;
 
 		public MouseHelper()
 		{
@@ -70,6 +78,18 @@ namespace PPTServiceUltra
 				OnUp(new MouseHelperEventArgs(lpPoint.X, lpPoint.Y));
 				_preMouseState = num;
 			}
+
+			int right = Math.Abs(WindowsApi.GetKeyState(2));
+			if ((double)right > MouseStateBoundary && (double)_preRightMouseState < MouseStateBoundary)
+			{
+				OnRightDown(new MouseHelperEventArgs(lpPoint.X, lpPoint.Y));
+				_preRightMouseState = right;
+			}
+			if ((double)right < MouseStateBoundary && (double)_preRightMouseState > MouseStateBoundary)
+			{
+				OnRightUp(new MouseHelperEventArgs(lpPoint.X, lpPoint.Y));
+				_preRightMouseState = right;
+			}
 		}
 
 		protected virtual void OnDown(MouseHelperEventArgs e)
@@ -85,6 +105,16 @@ namespace PPTServiceUltra
 		protected virtual void OnUp(MouseHelperEventArgs e)
 		{
 			Up?.Invoke(this, e);
+		}
+
+		protected virtual void OnRightDown(MouseHelperEventArgs e)
+		{
+			RightDown?.Invoke(this, e);
+		}
+
+		protected virtual void OnRightUp(MouseHelperEventArgs e)
+		{
+			RightUp?.Invoke(this, e);
 		}
 	}
 }

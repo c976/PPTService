@@ -184,6 +184,10 @@ namespace PPTServiceUltra
 			if (MouseHelper.Instance != null)
 			{
 				MouseHelper.Instance.Down += GlobalMouseDownForOfficeAnnotation;
+				// PowerPoint 放映时右键会弹出原生菜单，菜单/焦点切换可能把附着的
+				// 工具栏压到放映窗口后面；这里用全局右键轮询做兜底恢复。
+				MouseHelper.Instance.RightDown += RecoverToolbarAfterPptContextMenu;
+				MouseHelper.Instance.RightUp += RecoverToolbarAfterPptContextMenu;
 			}
 			// 翻页按钮位置交由用户配置决定（默认沿用程序原逻辑），运行时切换也复用此方法。
 			ApplyPageTurningLayout();
@@ -676,7 +680,10 @@ namespace PPTServiceUltra
 		{
 			// 设置窗口打开期间：全屏半透明遮罩下用户仍可能左右滑动，必须持续停掉手势，
 			// 否则横滑被识别成翻页（无论自身 Gesture 还是 PowerPoint 原生手势）。
-			if (ViewHelper.SettingsWindowOpen || IsTransparent || ViewHelper.MainWindow.IsLeftSlideManagerViewShowed || ViewHelper.MainWindow.IsRightSlideManagerViewShowed || ViewHelper.BottomArea.IsNeedStopMouseLineTrack)
+			// 不再因 IsTransparent（Opacity 归零）停掉 MouseHelper：右键恢复工具栏
+			// 也依赖它的全局轮询，若在工具栏刚消失时停掉就永远收不到恢复事件。
+			// 放映结束时 ShowEnd() 会显式 Stop()，这里只管放映中的手势抑制。
+			if (ViewHelper.SettingsWindowOpen || ViewHelper.MainWindow.IsLeftSlideManagerViewShowed || ViewHelper.MainWindow.IsRightSlideManagerViewShowed || ViewHelper.BottomArea.IsNeedStopMouseLineTrack)
 			{
 				MouseHelper.Instance.Stop();
 			}
@@ -995,6 +1002,10 @@ namespace PPTServiceUltra
 			// Office COM（不会触发之前的「画第一笔卡死」），故定时器照常运行即可。
 			SyntacticSugar.TryCatchAction(() =>
 			{
+				// PowerPoint 自己会在长时间不操作时隐藏指针。批注窗口附着后，
+				// 指针在工具栏/设置界面上时 PPT 收不到移动消息，隐藏状态会一直保持；
+				// 放映期间只补一次 ShowCursor(true)，不改 PPT 全局设置。
+				CursorVisibilityHelper.EnsureVisible();
 				if (IsNeedUpdateTimer)
 				{
 					UpdateButtonState();
@@ -1023,6 +1034,32 @@ namespace PPTServiceUltra
 		/// 消息路由，这里据此收起弹窗；仍排除弹窗与工具栏区域以免误触。
 		/// 自实现批注由 PreviewMouseDown 的「落在 Board」判定处理，本方法不介入。
 		/// </summary>
+		/// <summary>
+		/// PowerPoint 放映中右键弹出原生菜单后，菜单窗口会让附着的批注工具栏
+		/// 掉到放映窗口后面（甚至把 Opacity 归零）。右键按下与抬起都做一次兜底：
+		/// 立刻恢复显示态并重新维持 z 序，不必重新放映；正常放映时此处理器只做
+		/// 幂等操作，不改变焦点，也不抢右键菜单。
+		/// </summary>
+		private void RecoverToolbarAfterPptContextMenu(object sender, MouseHelperEventArgs e)
+		{
+			if (!PptOperator.Instance.IsShowing)
+			{
+				return;
+			}
+			SyntacticSugar.CurrentDispatcherBeginInvoke(() =>
+			{
+				SyntacticSugar.TryCatchAction(() =>
+				{
+					if (Opacity < 0.1)
+					{
+						Opacity = 1.0;
+					}
+					Show();
+					WindowStateHelper.MakeAppAbovePpt(this);
+				});
+			});
+		}
+
 		private void GlobalMouseDownForOfficeAnnotation(object sender, MouseHelperEventArgs e)
 		{
 			if (UserConfigManager.Load().UseSelfAnnotation)
