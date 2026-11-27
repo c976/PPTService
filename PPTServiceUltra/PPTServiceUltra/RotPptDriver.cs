@@ -72,6 +72,9 @@ namespace PPTServiceUltra
 		private int _currentPage;
 		private string _pptFilePath;
 		private bool _isShowing;
+		// WPS 新版放映时 ROT 对象可能是空壳（ActivePresentation / SlideShowWindows 都为空），
+		// 此时只靠窗口标题维持一条「窗口态放映」：能显示工具栏，但页数/翻页用降级实现。
+		private bool _windowOnlyShowing;
 		private bool _started;
 		private bool _needRebind;
 		private DateTime _lastActivity = DateTime.MinValue;
@@ -229,6 +232,29 @@ namespace PPTServiceUltra
 				return;
 			}
 
+			// WPS 新版放映时 ROT 对象可能是空壳，ActivePresentation / SlideShowWindows
+			// 都为空；只要检测到放映窗口，就先按窗口态点亮工具栏，不再等 COM 绑定。
+			IntPtr wpsShowHwnd = ProcessHelper.FindWpsSlideShowWindow();
+			if (wpsShowHwnd != IntPtr.Zero)
+			{
+				_hwnd = wpsShowHwnd;
+				if (!_isShowing)
+				{
+					BeginWindowOnlyShow();
+				}
+				else
+				{
+					_lastActivity = DateTime.Now;
+				}
+				return;
+			}
+			if (_windowOnlyShowing)
+			{
+				RaiseShowEndIfNeeded();
+				_windowOnlyShowing = false;
+				_hwnd = IntPtr.Zero;
+			}
+
 			if (_app == null || _needRebind)
 			{
 				TryBindBestApplication();
@@ -313,6 +339,29 @@ namespace PPTServiceUltra
 			{
 				_lastActivity = DateTime.Now;
 			}
+		}
+
+		/// <summary>
+		/// WPS ROT 空壳对象下的降级放映：只凭放映窗口显示工具栏，页数用占位值。
+		/// 窗口消失时由 PollOnce 统一发 ShowEnd。
+		/// </summary>
+		private void BeginWindowOnlyShow()
+		{
+			// 窗口态没有 ROT 绑定流程，这里必须自己把版本信息标成 WPS；
+			// 否则上一场 Office 放映留下的 IsOffice2016OrLater 会让翻页按钮停在底部。
+			string wpsPath = ProcessHelper.GetWpsSlideShowProcessPath();
+			if (!string.IsNullOrWhiteSpace(wpsPath))
+			{
+				Collection.PptVersionManager.UpdatePptApplicationInfo(wpsPath, string.Empty);
+			}
+			_windowOnlyShowing = true;
+			_pptFilePath = string.Empty;
+			_slides = new List<Slide>();
+			_slidesCount = 1;
+			_currentPage = 1;
+			_isShowing = true;
+			_lastActivity = DateTime.Now;
+			ShowBegin?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void BeginShow()
@@ -933,12 +982,31 @@ namespace PPTServiceUltra
 
 		public void NextPage()
 		{
+			if (TryWindowOnlyKey(0x27)) // VK_RIGHT
+			{
+				return;
+			}
 			InvokeView("Next");
 		}
 
 		public void PreviousPage()
 		{
+			if (TryWindowOnlyKey(0x25)) // VK_LEFT
+			{
+				return;
+			}
 			InvokeView("Previous");
+		}
+
+		private bool TryWindowOnlyKey(uint virtualKey)
+		{
+			if (!_windowOnlyShowing || _hwnd == IntPtr.Zero)
+			{
+				return false;
+			}
+			WindowsApi.PostMessage(_hwnd, 0x0100, virtualKey, 0); // WM_KEYDOWN
+			WindowsApi.PostMessage(_hwnd, 0x0101, virtualKey, 0); // WM_KEYUP
+			return true;
 		}
 
 		public void Exit()

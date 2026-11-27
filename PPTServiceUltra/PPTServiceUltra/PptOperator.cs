@@ -32,6 +32,10 @@ namespace PPTServiceUltra
 		// 来得及绑定就被立刻误判失败切到 ROT。
 		private bool _lastPptRunning;
 
+		// WPS 放映窗口出现的时间：给兼容 COM 模式留出收到 ShowBegin 的机会，
+		// 观察期内不因「COM 还没放映」就抢切 ROT。
+		private DateTime _wpsShowWindowSince = DateTime.MinValue;
+
 		// /debug 下完全不启动任何 COM/ROT 通道，只维持模拟放映状态。
 		private int _debugPage = 1;
 		private bool _debugShowing;
@@ -313,6 +317,21 @@ namespace PPTServiceUltra
 				return;
 			}
 			bool pptRunning = ProcessHelper.HasPowerPointProcess();
+			bool wpsProcess = ProcessHelper.HasWppProcess();
+			bool wpsForeground = ProcessHelper.IsWppForeground();
+			bool wpsShowWindow = wpsProcess && ProcessHelper.HasWpsSlideShowWindow();
+			DateTime now = DateTime.Now;
+			if (wpsShowWindow)
+			{
+				if (_wpsShowWindowSince == DateTime.MinValue)
+				{
+					_wpsShowWindowSince = now;
+				}
+			}
+			else
+			{
+				_wpsShowWindowSince = DateTime.MinValue;
+			}
 			if (pptRunning && !_lastPptRunning)
 			{
 				// 放映进程刚出现：给 COM 一段新的绑定宽限期。
@@ -334,14 +353,21 @@ namespace PPTServiceUltra
 				bool boundOffice = boundPath.Length > 0 &&
 					boundPath.IndexOf("wps", StringComparison.OrdinalIgnoreCase) < 0 &&
 					boundPath.IndexOf("wpp", StringComparison.OrdinalIgnoreCase) < 0;
-				bool wpsShowing = boundOffice && !_com.IsShowing &&
-					ProcessHelper.HasWppProcess() && ProcessHelper.IsWppForeground();
-				if (!bindFailed && !hwndMissing && !wpsShowing)
+				// 检测到 WPS 放映窗口后先等 3 秒，让兼容 COM 模式有机会发出 ShowBegin；
+				// 超时仍没进入放映态才交给 ROT 接管，避免误伤 WPS 兼容 COM 正常工作的情况。
+				// 新版 WPS 可能自己注册 PowerPoint.Application，COM 看似绑定成功，
+				// 却收不到 ShowBegin，旧判据（绑错 Office / 绑定超时）都不会触发。
+				bool wpsShowButComIdle = !_com.IsShowing && wpsShowWindow &&
+					_wpsShowWindowSince != DateTime.MinValue &&
+					(now - _wpsShowWindowSince).TotalSeconds >= 3.0;
+				bool wpsShowing = boundOffice && !_com.IsShowing && wpsProcess && wpsForeground;
+				if (!bindFailed && !hwndMissing && !wpsShowing && !wpsShowButComIdle)
 				{
 					return;
 				}
-				string reason = wpsShowing ? "WPS running but COM bound to Office" :
-					(hwndMissing ? "show HWND is zero" : "bind timeout");
+				string reason = wpsShowButComIdle ? "WPS slide show window detected but COM not showing" :
+					(wpsShowing ? "WPS running but COM bound to Office" :
+					(hwndMissing ? "show HWND is zero" : "bind timeout"));
 				Log.WriteDebug("PPT COM unavailable (" + reason + "), switching to ROT channel.");
 				SwitchChannel(UserConfig.InvokeModeRot);
 				return;
