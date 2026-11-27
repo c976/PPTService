@@ -232,23 +232,10 @@ namespace PPTServiceUltra
 				return;
 			}
 
-			// WPS 新版放映时 ROT 对象可能是空壳，ActivePresentation / SlideShowWindows
-			// 都为空；只要检测到放映窗口，就先按窗口态点亮工具栏，不再等 COM 绑定。
+			// 先让正常 ROT 通道优先：831 及之前 WPS ROT 可绑定时，笔、橡皮、结束放映
+			// 都依赖这条通道。窗口态只是 ROT 拿不到放映信息时的兜底，不能反过来抢先。
 			IntPtr wpsShowHwnd = ProcessHelper.FindWpsSlideShowWindow();
-			if (wpsShowHwnd != IntPtr.Zero)
-			{
-				_hwnd = wpsShowHwnd;
-				if (!_isShowing)
-				{
-					BeginWindowOnlyShow();
-				}
-				else
-				{
-					_lastActivity = DateTime.Now;
-				}
-				return;
-			}
-			if (_windowOnlyShowing)
+			if (_windowOnlyShowing && wpsShowHwnd == IntPtr.Zero)
 			{
 				RaiseShowEndIfNeeded();
 				_windowOnlyShowing = false;
@@ -258,6 +245,10 @@ namespace PPTServiceUltra
 			if (_app == null || _needRebind)
 			{
 				TryBindBestApplication();
+				if (_app == null && TryWindowOnlyFallback(wpsShowHwnd))
+				{
+					return;
+				}
 				return;
 			}
 
@@ -270,6 +261,10 @@ namespace PPTServiceUltra
 					RaiseShowEndIfNeeded();
 					ReleaseBinding(false);
 					_needRebind = true;
+					if (TryWindowOnlyFallback(wpsShowHwnd))
+					{
+						return;
+					}
 					return;
 				}
 			}
@@ -281,6 +276,10 @@ namespace PPTServiceUltra
 			int count = GetSlideShowWindowCount(_app);
 			if (count <= 0)
 			{
+				if (TryWindowOnlyFallback(wpsShowHwnd))
+				{
+					return;
+				}
 				// 放映窗口消失：若之前观测到过窗口，记录一次边沿供调度层回切 COM。
 				if (_hadShowWindow)
 				{
@@ -292,6 +291,13 @@ namespace PPTServiceUltra
 				return;
 			}
 			_hadShowWindow = true;
+			// 正常 ROT 又能看到放映窗口时，静默结束窗口态并交回 COM 属性驱动。
+			// 这里不能发 ShowEnd：PptOperator 会在自动模式下借机把通道切回 COM。
+			if (_windowOnlyShowing)
+			{
+				_windowOnlyShowing = false;
+				_isShowing = false;
+			}
 
 			object window = GetProperty(_presentation, "SlideShowWindow");
 			if (window == null)
@@ -339,6 +345,27 @@ namespace PPTServiceUltra
 			{
 				_lastActivity = DateTime.Now;
 			}
+		}
+
+		/// <summary>
+		/// 只有正常 ROT 通道拿不到放映信息时才启用窗口态；可绑定的 ROT 放映不受影响。
+		/// </summary>
+		private bool TryWindowOnlyFallback(IntPtr hwnd)
+		{
+			if (hwnd == IntPtr.Zero || (_isShowing && !_windowOnlyShowing))
+			{
+				return false;
+			}
+			_hwnd = hwnd;
+			if (!_windowOnlyShowing)
+			{
+				BeginWindowOnlyShow();
+			}
+			else
+			{
+				_lastActivity = DateTime.Now;
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -1011,6 +1038,10 @@ namespace PPTServiceUltra
 
 		public void Exit()
 		{
+			if (TryWindowOnlyKey(0x1B)) // VK_ESCAPE
+			{
+				return;
+			}
 			InvokeView("Exit");
 		}
 
